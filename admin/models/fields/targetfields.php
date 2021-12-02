@@ -1,27 +1,13 @@
 <?php
-/*--------------------------------------------------------------------------------------------------------|  www.vdm.io  |------/
-    __      __       _     _____                 _                                  _     __  __      _   _               _
-    \ \    / /      | |   |  __ \               | |                                | |   |  \/  |    | | | |             | |
-     \ \  / /_ _ ___| |_  | |  | | _____   _____| | ___  _ __  _ __ ___   ___ _ __ | |_  | \  / | ___| |_| |__   ___   __| |
-      \ \/ / _` / __| __| | |  | |/ _ \ \ / / _ \ |/ _ \| '_ \| '_ ` _ \ / _ \ '_ \| __| | |\/| |/ _ \ __| '_ \ / _ \ / _` |
-       \  / (_| \__ \ |_  | |__| |  __/\ V /  __/ | (_) | |_) | | | | | |  __/ | | | |_  | |  | |  __/ |_| | | | (_) | (_| |
-        \/ \__,_|___/\__| |_____/ \___| \_/ \___|_|\___/| .__/|_| |_| |_|\___|_| |_|\__| |_|  |_|\___|\__|_| |_|\___/ \__,_|
-                                                        | |                                                                 
-                                                        |_| 				
-/-------------------------------------------------------------------------------------------------------------------------------/
-
-	@version		2.7.x
-	@created		30th April, 2015
-	@package		Component Builder
-	@subpackage		targetfields.php
-	@author			Llewellyn van der Merwe <http://joomlacomponentbuilder.com>	
-	@github			Joomla Component Builder <https://github.com/vdm-io/Joomla-Component-Builder>
-	@copyright		Copyright (C) 2015. All Rights Reserved
-	@license		GNU/GPL Version 2 or later - http://www.gnu.org/licenses/gpl-2.0.html 
-	
-	Builds Complex Joomla Components 
-                                                             
-/-----------------------------------------------------------------------------------------------------------------------------*/
+/**
+ * @package    Joomla.Component.Builder
+ *
+ * @created    30th April, 2015
+ * @author     Llewellyn van der Merwe <http://www.joomlacomponentbuilder.com>
+ * @github     Joomla Component Builder <https://github.com/vdm-io/Joomla-Component-Builder>
+ * @copyright  Copyright (C) 2015 - 2020 Vast Development Method. All rights reserved.
+ * @license    GNU General Public License version 2 or later; see LICENSE.txt
+ */
 
 // No direct access to this file
 defined('_JEXEC') or die('Restricted access');
@@ -45,9 +31,9 @@ class JFormFieldTargetfields extends JFormFieldList
 	/**
 	 * Method to get a list of options for a list input.
 	 *
-	 * @return	array		An array of JHtml options.
+	 * @return	array    An array of JHtml options.
 	 */
-	public function getOptions()
+	protected function getOptions()
 	{
 		// load the db opbject
 		$db = JFactory::getDBO();		
@@ -55,19 +41,26 @@ class JFormFieldTargetfields extends JFormFieldList
 		$jinput = JFactory::getApplication()->input;
 		// get the id
 		$ID = $jinput->getInt('id', 0);
+		// get the view name
+		$VIEW = $jinput->get('view', null, 'WORD');
 		// rest the fields ids
 		$fieldIds = array();
-		if (is_numeric($ID) && $ID >= 1)
+		// if this is an actual admin view then we are done
+		if ('admin_view'  === $VIEW && is_numeric($ID) && $ID >= 1)
+		{
+			$adminView = $ID;
+		}
+		elseif (is_numeric($ID) && $ID >= 1)
 		{
 			// get the admin view ID
 			$adminView = ComponentbuilderHelper::getVar('admin_fields_conditions', (int) $ID, 'id', 'admin_view');
 		}
-		else
+		elseif ('admin_view'  !== $VIEW)
 		{
 			// get the admin view ID
 			$adminView = $jinput->getInt('refid', 0);
 		}
-		if (is_numeric($adminView) && $adminView >= 1)
+		if (isset($adminView) && is_numeric($adminView) && $adminView >= 1)
 		{
 			// get all the fields linked to the admin view
 			if ($addFields = ComponentbuilderHelper::getVar('admin_fields', (int) $adminView, 'admin_view', 'addfields'))
@@ -89,8 +82,9 @@ class JFormFieldTargetfields extends JFormFieldList
 			}
 		}
 		$query = $db->getQuery(true);
-		$query->select($db->quoteName(array('a.id','a.name'),array('id','name')));
+		$query->select($db->quoteName(array('a.id','a.name','t.name'),array('id','name','type')));
 		$query->from($db->quoteName('#__componentbuilder_field', 'a'));
+		$query->join('LEFT', $db->quoteName('#__componentbuilder_fieldtype', 't') . ' ON (' . $db->quoteName('a.fieldtype') . ' = ' . $db->quoteName('t.id') . ')');
 		$query->where($db->quoteName('a.published') . ' >= 1');
 		// filter by fields linked
 		if (ComponentbuilderHelper::checkArray($fieldIds))
@@ -106,7 +100,7 @@ class JFormFieldTargetfields extends JFormFieldList
 		{
 			foreach($items as $item)
 			{
-				$options[] = JHtml::_('select.option', $item->id, $item->name);
+				$options[] = JHtml::_('select.option', $item->id, $item->name . ' [' . $item->type . ']');
 			}
 		}
 		

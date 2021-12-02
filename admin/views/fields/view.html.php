@@ -1,33 +1,16 @@
 <?php
-/*--------------------------------------------------------------------------------------------------------|  www.vdm.io  |------/
-    __      __       _     _____                 _                                  _     __  __      _   _               _
-    \ \    / /      | |   |  __ \               | |                                | |   |  \/  |    | | | |             | |
-     \ \  / /_ _ ___| |_  | |  | | _____   _____| | ___  _ __  _ __ ___   ___ _ __ | |_  | \  / | ___| |_| |__   ___   __| |
-      \ \/ / _` / __| __| | |  | |/ _ \ \ / / _ \ |/ _ \| '_ \| '_ ` _ \ / _ \ '_ \| __| | |\/| |/ _ \ __| '_ \ / _ \ / _` |
-       \  / (_| \__ \ |_  | |__| |  __/\ V /  __/ | (_) | |_) | | | | | |  __/ | | | |_  | |  | |  __/ |_| | | | (_) | (_| |
-        \/ \__,_|___/\__| |_____/ \___| \_/ \___|_|\___/| .__/|_| |_| |_|\___|_| |_|\__| |_|  |_|\___|\__|_| |_|\___/ \__,_|
-                                                        | |                                                                 
-                                                        |_| 				
-/-------------------------------------------------------------------------------------------------------------------------------/
-
-	@version		2.7.x
-	@created		30th April, 2015
-	@package		Component Builder
-	@subpackage		view.html.php
-	@author			Llewellyn van der Merwe <http://joomlacomponentbuilder.com>	
-	@github			Joomla Component Builder <https://github.com/vdm-io/Joomla-Component-Builder>
-	@copyright		Copyright (C) 2015. All Rights Reserved
-	@license		GNU/GPL Version 2 or later - http://www.gnu.org/licenses/gpl-2.0.html 
-	
-	Builds Complex Joomla Components 
-                                                             
-/-----------------------------------------------------------------------------------------------------------------------------*/
+/**
+ * @package    Joomla.Component.Builder
+ *
+ * @created    30th April, 2015
+ * @author     Llewellyn van der Merwe <http://www.joomlacomponentbuilder.com>
+ * @github     Joomla Component Builder <https://github.com/vdm-io/Joomla-Component-Builder>
+ * @copyright  Copyright (C) 2015 - 2020 Vast Development Method. All rights reserved.
+ * @license    GNU General Public License version 2 or later; see LICENSE.txt
+ */
 
 // No direct access to this file
 defined('_JEXEC') or die('Restricted access');
-
-// import Joomla view library
-jimport('joomla.application.component.view');
 
 /**
  * Componentbuilder View class for the Fields
@@ -51,9 +34,16 @@ class ComponentbuilderViewFields extends JViewLegacy
 		$this->pagination = $this->get('Pagination');
 		$this->state = $this->get('State');
 		$this->user = JFactory::getUser();
-		$this->listOrder = $this->escape($this->state->get('list.ordering'));
-		$this->listDirn = $this->escape($this->state->get('list.direction'));
-		$this->saveOrder = $this->listOrder == 'ordering';
+		// Load the filter form from xml.
+		$this->filterForm = $this->get('FilterForm');
+		// Load the active filters.
+		$this->activeFilters = $this->get('ActiveFilters');
+		// Add the list ordering clause.
+		$this->listOrder = $this->escape($this->state->get('list.ordering', 'a.id'));
+		$this->listDirn = $this->escape($this->state->get('list.direction', 'desc'));
+		$this->saveOrder = $this->listOrder == 'a.ordering';
+		// set the return here value
+		$this->return_here = urlencode(base64_encode((string) JUri::getInstance()));
 		// get global action permissions
 		$this->canDo = ComponentbuilderHelper::getActions('field');
 		$this->canEdit = $this->canDo->get('field.edit');
@@ -133,7 +123,7 @@ class ComponentbuilderViewFields extends JViewLegacy
 				// add the button to the page
 				$dhtml = $layout->render(array('title' => $title));
 				$bar->appendButton('Custom', $dhtml, 'batch');
-			} 
+			}
 
 			if ($this->state->get('filter.published') == -2 && ($this->canState && $this->canDelete))
 			{
@@ -148,7 +138,12 @@ class ComponentbuilderViewFields extends JViewLegacy
 			{
 				JToolBarHelper::custom('fields.exportData', 'download', '', 'COM_COMPONENTBUILDER_EXPORT_DATA', true);
 			}
-		} 
+		}
+		if ($this->user->authorise('field.run_expansion', 'com_componentbuilder'))
+		{
+			// add Run Expansion button.
+			JToolBarHelper::custom('fields.runExpansion', 'expand-2 custom-button-runexpansion', '', 'COM_COMPONENTBUILDER_RUN_EXPANSION', false);
+		}
 
 		if ($this->canDo->get('core.import') && $this->canDo->get('field.import'))
 		{
@@ -168,30 +163,17 @@ class ComponentbuilderViewFields extends JViewLegacy
 			JToolBarHelper::preferences('com_componentbuilder');
 		}
 
-		if ($this->canState)
+		// Only load published batch if state and batch is allowed
+		if ($this->canState && $this->canBatch)
 		{
-			JHtmlSidebar::addFilter(
-				JText::_('JOPTION_SELECT_PUBLISHED'),
-				'filter_published',
-				JHtml::_('select.options', JHtml::_('jgrid.publishedOptions'), 'value', 'text', $this->state->get('filter.published'), true)
+			JHtmlBatch_::addListSelection(
+				JText::_('COM_COMPONENTBUILDER_KEEP_ORIGINAL_STATE'),
+				'batch[published]',
+				JHtml::_('select.options', JHtml::_('jgrid.publishedOptions', array('all' => false)), 'value', 'text', '', true)
 			);
-			// only load if batch allowed
-			if ($this->canBatch)
-			{
-				JHtmlBatch_::addListSelection(
-					JText::_('COM_COMPONENTBUILDER_KEEP_ORIGINAL_STATE'),
-					'batch[published]',
-					JHtml::_('select.options', JHtml::_('jgrid.publishedOptions', array('all' => false)), 'value', 'text', '', true)
-				);
-			}
 		}
 
-		JHtmlSidebar::addFilter(
-			JText::_('JOPTION_SELECT_ACCESS'),
-			'filter_access',
-			JHtml::_('select.options', JHtml::_('access.assetgroups'), 'value', 'text', $this->state->get('filter.access'))
-		);
-
+		// Only load access batch if create, edit and batch is allowed
 		if ($this->canBatch && $this->canCreate && $this->canEdit)
 		{
 			JHtmlBatch_::addListSelection(
@@ -201,131 +183,114 @@ class ComponentbuilderViewFields extends JViewLegacy
 			);
 		}
 
-		// Category Filter.
-		JHtmlSidebar::addFilter(
-			JText::_('JOPTION_SELECT_CATEGORY'),
-			'filter_category_id',
-			JHtml::_('select.options', JHtml::_('category.options', 'com_componentbuilder.fields'), 'value', 'text', $this->state->get('filter.category_id'))
-		);
-
 		if ($this->canBatch && $this->canCreate && $this->canEdit)
 		{
 			// Category Batch selection.
 			JHtmlBatch_::addListSelection(
 				JText::_('COM_COMPONENTBUILDER_KEEP_ORIGINAL_CATEGORY'),
 				'batch[category]',
-				JHtml::_('select.options', JHtml::_('category.options', 'com_componentbuilder.fields'), 'value', 'text')
+				JHtml::_('select.options', JHtml::_('category.options', 'com_componentbuilder.field'), 'value', 'text')
 			);
-		} 
-
-		// Set Fieldtype Name Selection
-		$this->fieldtypeNameOptions = JFormHelper::loadFieldType('Fieldtypes')->getOptions();
-		if ($this->fieldtypeNameOptions)
-		{
-			// Fieldtype Name Filter
-			JHtmlSidebar::addFilter(
-				'- Select '.JText::_('COM_COMPONENTBUILDER_FIELD_FIELDTYPE_LABEL').' -',
-				'filter_fieldtype',
-				JHtml::_('select.options', $this->fieldtypeNameOptions, 'value', 'text', $this->state->get('filter.fieldtype'))
-			);
-
-			if ($this->canBatch && $this->canCreate && $this->canEdit)
-			{
-				// Fieldtype Name Batch Selection
-				JHtmlBatch_::addListSelection(
-					'- Keep Original '.JText::_('COM_COMPONENTBUILDER_FIELD_FIELDTYPE_LABEL').' -',
-					'batch[fieldtype]',
-					JHtml::_('select.options', $this->fieldtypeNameOptions, 'value', 'text')
-				);
-			}
 		}
 
-		// Set Datatype Selection
-		$this->datatypeOptions = $this->getTheDatatypeSelections();
-		if ($this->datatypeOptions)
+		// Only load Fieldtype Name batch if create, edit, and batch is allowed
+		if ($this->canBatch && $this->canCreate && $this->canEdit)
 		{
-			// Datatype Filter
-			JHtmlSidebar::addFilter(
-				'- Select '.JText::_('COM_COMPONENTBUILDER_FIELD_DATATYPE_LABEL').' -',
-				'filter_datatype',
-				JHtml::_('select.options', $this->datatypeOptions, 'value', 'text', $this->state->get('filter.datatype'))
-			);
-
-			if ($this->canBatch && $this->canCreate && $this->canEdit)
+			// Set Fieldtype Name Selection
+			$this->fieldtypeNameOptions = JFormHelper::loadFieldType('Fieldtypes')->options;
+			// We do some sanitation for Fieldtype Name filter
+			if (ComponentbuilderHelper::checkArray($this->fieldtypeNameOptions) &&
+				isset($this->fieldtypeNameOptions[0]->value) &&
+				!ComponentbuilderHelper::checkString($this->fieldtypeNameOptions[0]->value))
 			{
-				// Datatype Batch Selection
-				JHtmlBatch_::addListSelection(
-					'- Keep Original '.JText::_('COM_COMPONENTBUILDER_FIELD_DATATYPE_LABEL').' -',
-					'batch[datatype]',
-					JHtml::_('select.options', $this->datatypeOptions, 'value', 'text')
-				);
+				unset($this->fieldtypeNameOptions[0]);
 			}
+			// Fieldtype Name Batch Selection
+			JHtmlBatch_::addListSelection(
+				'- Keep Original '.JText::_('COM_COMPONENTBUILDER_FIELD_FIELDTYPE_LABEL').' -',
+				'batch[fieldtype]',
+				JHtml::_('select.options', $this->fieldtypeNameOptions, 'value', 'text')
+			);
 		}
 
-		// Set Indexes Selection
-		$this->indexesOptions = $this->getTheIndexesSelections();
-		if ($this->indexesOptions)
+		// Only load Datatype batch if create, edit, and batch is allowed
+		if ($this->canBatch && $this->canCreate && $this->canEdit)
 		{
-			// Indexes Filter
-			JHtmlSidebar::addFilter(
-				'- Select '.JText::_('COM_COMPONENTBUILDER_FIELD_INDEXES_LABEL').' -',
-				'filter_indexes',
-				JHtml::_('select.options', $this->indexesOptions, 'value', 'text', $this->state->get('filter.indexes'))
-			);
-
-			if ($this->canBatch && $this->canCreate && $this->canEdit)
+			// Set Datatype Selection
+			$this->datatypeOptions = JFormHelper::loadFieldType('fieldsfilterdatatype')->options;
+			// We do some sanitation for Datatype filter
+			if (ComponentbuilderHelper::checkArray($this->datatypeOptions) &&
+				isset($this->datatypeOptions[0]->value) &&
+				!ComponentbuilderHelper::checkString($this->datatypeOptions[0]->value))
 			{
-				// Indexes Batch Selection
-				JHtmlBatch_::addListSelection(
-					'- Keep Original '.JText::_('COM_COMPONENTBUILDER_FIELD_INDEXES_LABEL').' -',
-					'batch[indexes]',
-					JHtml::_('select.options', $this->indexesOptions, 'value', 'text')
-				);
+				unset($this->datatypeOptions[0]);
 			}
+			// Datatype Batch Selection
+			JHtmlBatch_::addListSelection(
+				'- Keep Original '.JText::_('COM_COMPONENTBUILDER_FIELD_DATATYPE_LABEL').' -',
+				'batch[datatype]',
+				JHtml::_('select.options', $this->datatypeOptions, 'value', 'text')
+			);
 		}
 
-		// Set Null Switch Selection
-		$this->null_switchOptions = $this->getTheNull_switchSelections();
-		if ($this->null_switchOptions)
+		// Only load Indexes batch if create, edit, and batch is allowed
+		if ($this->canBatch && $this->canCreate && $this->canEdit)
 		{
-			// Null Switch Filter
-			JHtmlSidebar::addFilter(
-				'- Select '.JText::_('COM_COMPONENTBUILDER_FIELD_NULL_SWITCH_LABEL').' -',
-				'filter_null_switch',
-				JHtml::_('select.options', $this->null_switchOptions, 'value', 'text', $this->state->get('filter.null_switch'))
-			);
-
-			if ($this->canBatch && $this->canCreate && $this->canEdit)
+			// Set Indexes Selection
+			$this->indexesOptions = JFormHelper::loadFieldType('fieldsfilterindexes')->options;
+			// We do some sanitation for Indexes filter
+			if (ComponentbuilderHelper::checkArray($this->indexesOptions) &&
+				isset($this->indexesOptions[0]->value) &&
+				!ComponentbuilderHelper::checkString($this->indexesOptions[0]->value))
 			{
-				// Null Switch Batch Selection
-				JHtmlBatch_::addListSelection(
-					'- Keep Original '.JText::_('COM_COMPONENTBUILDER_FIELD_NULL_SWITCH_LABEL').' -',
-					'batch[null_switch]',
-					JHtml::_('select.options', $this->null_switchOptions, 'value', 'text')
-				);
+				unset($this->indexesOptions[0]);
 			}
+			// Indexes Batch Selection
+			JHtmlBatch_::addListSelection(
+				'- Keep Original '.JText::_('COM_COMPONENTBUILDER_FIELD_INDEXES_LABEL').' -',
+				'batch[indexes]',
+				JHtml::_('select.options', $this->indexesOptions, 'value', 'text')
+			);
 		}
 
-		// Set Store Selection
-		$this->storeOptions = $this->getTheStoreSelections();
-		if ($this->storeOptions)
+		// Only load Null Switch batch if create, edit, and batch is allowed
+		if ($this->canBatch && $this->canCreate && $this->canEdit)
 		{
-			// Store Filter
-			JHtmlSidebar::addFilter(
-				'- Select '.JText::_('COM_COMPONENTBUILDER_FIELD_STORE_LABEL').' -',
-				'filter_store',
-				JHtml::_('select.options', $this->storeOptions, 'value', 'text', $this->state->get('filter.store'))
-			);
-
-			if ($this->canBatch && $this->canCreate && $this->canEdit)
+			// Set Null Switch Selection
+			$this->null_switchOptions = JFormHelper::loadFieldType('fieldsfilternullswitch')->options;
+			// We do some sanitation for Null Switch filter
+			if (ComponentbuilderHelper::checkArray($this->null_switchOptions) &&
+				isset($this->null_switchOptions[0]->value) &&
+				!ComponentbuilderHelper::checkString($this->null_switchOptions[0]->value))
 			{
-				// Store Batch Selection
-				JHtmlBatch_::addListSelection(
-					'- Keep Original '.JText::_('COM_COMPONENTBUILDER_FIELD_STORE_LABEL').' -',
-					'batch[store]',
-					JHtml::_('select.options', $this->storeOptions, 'value', 'text')
-				);
+				unset($this->null_switchOptions[0]);
 			}
+			// Null Switch Batch Selection
+			JHtmlBatch_::addListSelection(
+				'- Keep Original '.JText::_('COM_COMPONENTBUILDER_FIELD_NULL_SWITCH_LABEL').' -',
+				'batch[null_switch]',
+				JHtml::_('select.options', $this->null_switchOptions, 'value', 'text')
+			);
+		}
+
+		// Only load Store batch if create, edit, and batch is allowed
+		if ($this->canBatch && $this->canCreate && $this->canEdit)
+		{
+			// Set Store Selection
+			$this->storeOptions = JFormHelper::loadFieldType('fieldsfilterstore')->options;
+			// We do some sanitation for Store filter
+			if (ComponentbuilderHelper::checkArray($this->storeOptions) &&
+				isset($this->storeOptions[0]->value) &&
+				!ComponentbuilderHelper::checkString($this->storeOptions[0]->value))
+			{
+				unset($this->storeOptions[0]);
+			}
+			// Store Batch Selection
+			JHtmlBatch_::addListSelection(
+				'- Keep Original '.JText::_('COM_COMPONENTBUILDER_FIELD_STORE_LABEL').' -',
+				'batch[store]',
+				JHtml::_('select.options', $this->storeOptions, 'value', 'text')
+			);
 		}
 	}
 
@@ -370,7 +335,7 @@ class ComponentbuilderViewFields extends JViewLegacy
 	protected function getSortFields()
 	{
 		return array(
-			'a.sorting' => JText::_('JGRID_HEADING_ORDERING'),
+			'a.ordering' => JText::_('JGRID_HEADING_ORDERING'),
 			'a.published' => JText::_('JSTATUS'),
 			'a.name' => JText::_('COM_COMPONENTBUILDER_FIELD_NAME_LABEL'),
 			'g.name' => JText::_('COM_COMPONENTBUILDER_FIELD_FIELDTYPE_LABEL'),
@@ -378,152 +343,8 @@ class ComponentbuilderViewFields extends JViewLegacy
 			'a.indexes' => JText::_('COM_COMPONENTBUILDER_FIELD_INDEXES_LABEL'),
 			'a.null_switch' => JText::_('COM_COMPONENTBUILDER_FIELD_NULL_SWITCH_LABEL'),
 			'a.store' => JText::_('COM_COMPONENTBUILDER_FIELD_STORE_LABEL'),
-			'c.category_title' => JText::_('COM_COMPONENTBUILDER_FIELD_FIELD_CATEGORY'),
+			'category_title' => JText::_('COM_COMPONENTBUILDER_FIELD_FIELDS_CATEGORIES'),
 			'a.id' => JText::_('JGRID_HEADING_ID')
 		);
-	}
-
-	protected function getTheDatatypeSelections()
-	{
-		// Get a db connection.
-		$db = JFactory::getDbo();
-
-		// Create a new query object.
-		$query = $db->getQuery(true);
-
-		// Select the text.
-		$query->select($db->quoteName('datatype'));
-		$query->from($db->quoteName('#__componentbuilder_field'));
-		$query->order($db->quoteName('datatype') . ' ASC');
-
-		// Reset the query using our newly populated query object.
-		$db->setQuery($query);
-
-		$results = $db->loadColumn();
-
-		if ($results)
-		{
-			// get model
-			$model = $this->getModel();
-			$results = array_unique($results);
-			$_filter = array();
-			foreach ($results as $datatype)
-			{
-				// Translate the datatype selection
-				$text = $model->selectionTranslation($datatype,'datatype');
-				// Now add the datatype and its text to the options array
-				$_filter[] = JHtml::_('select.option', $datatype, JText::_($text));
-			}
-			return $_filter;
-		}
-		return false;
-	}
-
-	protected function getTheIndexesSelections()
-	{
-		// Get a db connection.
-		$db = JFactory::getDbo();
-
-		// Create a new query object.
-		$query = $db->getQuery(true);
-
-		// Select the text.
-		$query->select($db->quoteName('indexes'));
-		$query->from($db->quoteName('#__componentbuilder_field'));
-		$query->order($db->quoteName('indexes') . ' ASC');
-
-		// Reset the query using our newly populated query object.
-		$db->setQuery($query);
-
-		$results = $db->loadColumn();
-
-		if ($results)
-		{
-			// get model
-			$model = $this->getModel();
-			$results = array_unique($results);
-			$_filter = array();
-			foreach ($results as $indexes)
-			{
-				// Translate the indexes selection
-				$text = $model->selectionTranslation($indexes,'indexes');
-				// Now add the indexes and its text to the options array
-				$_filter[] = JHtml::_('select.option', $indexes, JText::_($text));
-			}
-			return $_filter;
-		}
-		return false;
-	}
-
-	protected function getTheNull_switchSelections()
-	{
-		// Get a db connection.
-		$db = JFactory::getDbo();
-
-		// Create a new query object.
-		$query = $db->getQuery(true);
-
-		// Select the text.
-		$query->select($db->quoteName('null_switch'));
-		$query->from($db->quoteName('#__componentbuilder_field'));
-		$query->order($db->quoteName('null_switch') . ' ASC');
-
-		// Reset the query using our newly populated query object.
-		$db->setQuery($query);
-
-		$results = $db->loadColumn();
-
-		if ($results)
-		{
-			// get model
-			$model = $this->getModel();
-			$results = array_unique($results);
-			$_filter = array();
-			foreach ($results as $null_switch)
-			{
-				// Translate the null_switch selection
-				$text = $model->selectionTranslation($null_switch,'null_switch');
-				// Now add the null_switch and its text to the options array
-				$_filter[] = JHtml::_('select.option', $null_switch, JText::_($text));
-			}
-			return $_filter;
-		}
-		return false;
-	}
-
-	protected function getTheStoreSelections()
-	{
-		// Get a db connection.
-		$db = JFactory::getDbo();
-
-		// Create a new query object.
-		$query = $db->getQuery(true);
-
-		// Select the text.
-		$query->select($db->quoteName('store'));
-		$query->from($db->quoteName('#__componentbuilder_field'));
-		$query->order($db->quoteName('store') . ' ASC');
-
-		// Reset the query using our newly populated query object.
-		$db->setQuery($query);
-
-		$results = $db->loadColumn();
-
-		if ($results)
-		{
-			// get model
-			$model = $this->getModel();
-			$results = array_unique($results);
-			$_filter = array();
-			foreach ($results as $store)
-			{
-				// Translate the store selection
-				$text = $model->selectionTranslation($store,'store');
-				// Now add the store and its text to the options array
-				$_filter[] = JHtml::_('select.option', $store, JText::_($text));
-			}
-			return $_filter;
-		}
-		return false;
 	}
 }

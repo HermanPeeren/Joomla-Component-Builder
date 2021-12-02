@@ -1,33 +1,16 @@
 <?php
-/*--------------------------------------------------------------------------------------------------------|  www.vdm.io  |------/
-    __      __       _     _____                 _                                  _     __  __      _   _               _
-    \ \    / /      | |   |  __ \               | |                                | |   |  \/  |    | | | |             | |
-     \ \  / /_ _ ___| |_  | |  | | _____   _____| | ___  _ __  _ __ ___   ___ _ __ | |_  | \  / | ___| |_| |__   ___   __| |
-      \ \/ / _` / __| __| | |  | |/ _ \ \ / / _ \ |/ _ \| '_ \| '_ ` _ \ / _ \ '_ \| __| | |\/| |/ _ \ __| '_ \ / _ \ / _` |
-       \  / (_| \__ \ |_  | |__| |  __/\ V /  __/ | (_) | |_) | | | | | |  __/ | | | |_  | |  | |  __/ |_| | | | (_) | (_| |
-        \/ \__,_|___/\__| |_____/ \___| \_/ \___|_|\___/| .__/|_| |_| |_|\___|_| |_|\__| |_|  |_|\___|\__|_| |_|\___/ \__,_|
-                                                        | |                                                                 
-                                                        |_| 				
-/-------------------------------------------------------------------------------------------------------------------------------/
-
-	@version		2.7.x
-	@created		30th April, 2015
-	@package		Component Builder
-	@subpackage		view.html.php
-	@author			Llewellyn van der Merwe <http://joomlacomponentbuilder.com>	
-	@github			Joomla Component Builder <https://github.com/vdm-io/Joomla-Component-Builder>
-	@copyright		Copyright (C) 2015. All Rights Reserved
-	@license		GNU/GPL Version 2 or later - http://www.gnu.org/licenses/gpl-2.0.html 
-	
-	Builds Complex Joomla Components 
-                                                             
-/-----------------------------------------------------------------------------------------------------------------------------*/
+/**
+ * @package    Joomla.Component.Builder
+ *
+ * @created    30th April, 2015
+ * @author     Llewellyn van der Merwe <http://www.joomlacomponentbuilder.com>
+ * @github     Joomla Component Builder <https://github.com/vdm-io/Joomla-Component-Builder>
+ * @copyright  Copyright (C) 2015 - 2020 Vast Development Method. All rights reserved.
+ * @license    GNU General Public License version 2 or later; see LICENSE.txt
+ */
 
 // No direct access to this file
 defined('_JEXEC') or die('Restricted access');
-
-// import Joomla view library
-jimport('joomla.application.component.view');
 
 /**
  * Componentbuilder Import_joomla_components View
@@ -73,7 +56,7 @@ class ComponentbuilderViewImport_joomla_components extends JViewLegacy
 			// add title to the page
 			JToolbarHelper::title(JText::_('COM_COMPONENTBUILDER_JCB_PACKAGE_IMPORT'),'upload');
 			// add refesh button.
-			JToolBarHelper::custom('refresh', 'refresh', '', 'COM_COMPONENTBUILDER_REFRESH', false);
+			JToolBarHelper::custom('joomla_component.refresh', 'refresh', '', 'COM_COMPONENTBUILDER_REFRESH', false);
 		}
 		// get the session object
 		$session = JFactory::getSession();
@@ -173,12 +156,15 @@ class ComponentbuilderViewImport_joomla_components extends JViewLegacy
 		// add a token on the page for javascript
 		$this->document->addScriptDeclaration("var token = '".JSession::getFormToken()."';"); 
 
+
 		// add the Uikit v2 style sheets
 		$this->document->addStyleSheet( JURI::root(true) .'/media/com_componentbuilder/uikit-v2/css/uikit.gradient.min.css' , (ComponentbuilderHelper::jVersion()->isCompatible('3.8.0')) ? array('version' => 'auto') : 'text/css');
-		$this->document->addStyleSheet( JURI::root(true) .'/media/com_componentbuilder/uikit-v2/css/components/notify.gradient.min.css' , (ComponentbuilderHelper::jVersion()->isCompatible('3.8.0')) ? array('version' => 'auto') : 'text/css');
-
 		// add Uikit v2 JavaScripts
 		$this->document->addScript( JURI::root(true) .'/media/com_componentbuilder/uikit-v2/js/uikit.min.js' , (ComponentbuilderHelper::jVersion()->isCompatible('3.8.0')) ? array('version' => 'auto') : 'text/javascript');
+
+		// add the Uikit v2 extra style sheets
+		$this->document->addStyleSheet( JURI::root(true) .'/media/com_componentbuilder/uikit-v2/css/components/notify.gradient.min.css' , (ComponentbuilderHelper::jVersion()->isCompatible('3.8.0')) ? array('version' => 'auto') : 'text/css');
+		// add Uikit v2 extra JavaScripts
 		$this->document->addScript( JURI::root(true) .'/media/com_componentbuilder/uikit-v2/js/components/lightbox.min.js', (ComponentbuilderHelper::jVersion()->isCompatible('3.8.0')) ? array('version' => 'auto') : 'text/javascript', (ComponentbuilderHelper::jVersion()->isCompatible('3.8.0')) ? array('type' => 'text/javascript', 'async' => 'async') : true);
 		$this->document->addScript( JURI::root(true) .'/media/com_componentbuilder/uikit-v2/js/components/notify.min.js', (ComponentbuilderHelper::jVersion()->isCompatible('3.8.0')) ? array('version' => 'auto') : 'text/javascript', (ComponentbuilderHelper::jVersion()->isCompatible('3.8.0')) ? array('type' => 'text/javascript', 'async' => 'async') : true);
 	}
@@ -248,7 +234,7 @@ class ComponentbuilderViewImport_joomla_components extends JViewLegacy
 				'name' => 'canmerge',
 				'label' => 'COM_COMPONENTBUILDER_MERGE',
 				'class' => 'btn-group btn-group-yesno',
-				'description' => 'COM_COMPONENTBUILDER_SHOULD_WE_MERGE_THE_COMPONENTS_WITH_SIMILAR_LOCAL_COMPONENTS_MERGING_THE_COMPONENTS_USE_TO_BE_THE_DEFAULT_BEHAVIOUR_BUT_NOW_YOU_CAN_IMPORT_THE_COMPONENTS_AND_FORCE_IT_NOT_TO_MERGE_THE_FOLLOWING_AREAS_VALIDATION_RULE_FIELDTYPE_SNIPPET_LANGUAGE_LANGUAGE_TRANSLATION_BMUST_AND_WILL_STILLB_MERGE_EVEN_OF_YOUR_SELECTION_IS_BNOB_BECAUSE_OF_THE_SINGULAR_NATURE_OF_THOSE_AREAS',
+				'description' => 'COM_COMPONENTBUILDER_SHOULD_WE_MERGE_THE_COMPONENTS_WITH_SIMILAR_LOCAL_COMPONENTS_MERGING_THE_COMPONENTS_USE_TO_BE_THE_DEFAULT_BEHAVIOUR_BUT_NOW_YOU_CAN_IMPORT_THE_COMPONENTS_AND_FORCE_IT_NOT_TO_MERGE_THE_FOLLOWING_AREAS_VALIDATION_RULE_FIELDTYPE_SNIPPET_LANGUAGE_LANGUAGE_TRANSLATION_JOOMLA_PLUGIN_GROUP_CLASS_EXTENDS_CLASS_PROPERTY_CLASS_METHOD_BMUST_AND_WILL_STILLB_MERGE_EVEN_OF_YOUR_SELECTION_IS_BNOB_BECAUSE_OF_THE_SINGULAR_NATURE_OF_THOSE_AREAS',
 				'default' => '1');
 			// load the merge attributes
 			ComponentbuilderHelper::xmlAddAttributes($mergeXML, $mergeAttributes);
@@ -327,7 +313,7 @@ class ComponentbuilderViewImport_joomla_components extends JViewLegacy
 				$form[] = $sleutle;
 			}
 		}
-		elseif ('vdm_package' === $type && in_array('vdm', $this->directories) && $vdmListObjects = ComponentbuilderHelper::getGithubRepoFileList('vdmGithubPackages', ComponentbuilderHelper::$vdmGithubPackagesUrl.ComponentbuilderHelper::$accessToken))
+		elseif ('vdm_package' === $type && in_array('vdm', $this->directories) && $vdmListObjects = ComponentbuilderHelper::getGithubRepoFileList('vdmGithubPackages', ComponentbuilderHelper::$vdmGithubPackagesUrl))
 		{
 			if (ComponentbuilderHelper::checkArray($vdmListObjects))
 			{
@@ -371,7 +357,7 @@ class ComponentbuilderViewImport_joomla_components extends JViewLegacy
 				}
 			}
 		}
-		elseif ('jcb_package' === $type && in_array('jcb', $this->directories)  && $jcbListObjects = ComponentbuilderHelper::getGithubRepoFileList('communityGithubPackages', ComponentbuilderHelper::$jcbGithubPackagesUrl.ComponentbuilderHelper::$accessToken))
+		elseif ('jcb_package' === $type && in_array('jcb', $this->directories)  && $jcbListObjects = ComponentbuilderHelper::getGithubRepoFileList('communityGithubPackages', ComponentbuilderHelper::$jcbGithubPackagesUrl))
 		{
 			if (ComponentbuilderHelper::checkArray($jcbListObjects))
 			{

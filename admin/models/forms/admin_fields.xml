@@ -93,6 +93,7 @@
 			description="COM_COMPONENTBUILDER_ADMIN_FIELDS_ADMIN_VIEW_DESCRIPTION"
 			class="list_class"
 			multiple="false"
+			default=""
 			required="true"
 			readonly="true"
 			button="false"
@@ -102,9 +103,10 @@
 			type="subform"
 			name="addfields"
 			label="COM_COMPONENTBUILDER_ADMIN_FIELDS_ADDFIELDS_LABEL"
-			layout="joomla.form.field.subform.repeatable-table"
+			layout="repeatablejcb"
 			multiple="true"
 			description="COM_COMPONENTBUILDER_ADMIN_FIELDS_ADDFIELDS_DESCRIPTION"
+			default=""
 			icon="list"
 			min="1">
 			<form hidden="true" name="list_addfields_modal" repeat="true">
@@ -114,9 +116,9 @@
 					name="field"
 					label="COM_COMPONENTBUILDER_ADMIN_FIELDS_FIELD_LABEL"
 					description="COM_COMPONENTBUILDER_ADMIN_FIELDS_FIELD_DESCRIPTION"
-					class="list_class"
+					class="list_class fieldFull"
 					multiple="false"
-					required="false"
+					required="true"
 					button="false"
 				/>
 				<!-- List Field. Type: List. (joomla) -->
@@ -127,13 +129,16 @@
 					description="COM_COMPONENTBUILDER_ADMIN_FIELDS_LIST_DESCRIPTION"
 					class="fieldMedium count-the-items1235"
 					multiple="false"
-					required="false"
 					onchange="checkAdminBehaviour(this)">
 					<!-- Option Set. -->
 					<option value="">
 						COM_COMPONENTBUILDER_ADMIN_FIELDS_DEFAULT</option>
 					<option value="1">
-						COM_COMPONENTBUILDER_ADMIN_FIELDS_SHOW_IN_LIST_VIEW</option>
+						COM_COMPONENTBUILDER_ADMIN_FIELDS_SHOW_IN_ALL_LIST_VIEWS</option>
+					<option value="3">
+						COM_COMPONENTBUILDER_ADMIN_FIELDS_ONLY_IN_ADMIN_LIST_VIEW</option>
+					<option value="4">
+						COM_COMPONENTBUILDER_ADMIN_FIELDS_ONLY_IN_LINKED_LIST_VIEWS</option>
 					<option value="2">
 						COM_COMPONENTBUILDER_ADMIN_FIELDS_NONE_DB</option>
 				</field>
@@ -144,7 +149,6 @@
 					label="COM_COMPONENTBUILDER_ADMIN_FIELDS_ORDER_LIST_LABEL"
 					description="COM_COMPONENTBUILDER_ADMIN_FIELDS_ORDER_LIST_DESCRIPTION"
 					class="fieldSmall"
-					required="false"
 					first="0"
 					last="20"
 					step="1"
@@ -156,7 +160,7 @@
 					name="title"
 					label="COM_COMPONENTBUILDER_ADMIN_FIELDS_TITLE_LABEL"
 					value="1"
-					required="false"
+					default=""
 					description="COM_COMPONENTBUILDER_ADMIN_FIELDS_TITLE_DESCRIPTION"
 					class="inputbox"
 					onchange="checkTitle(this)"
@@ -167,7 +171,7 @@
 					name="alias"
 					label="COM_COMPONENTBUILDER_ADMIN_FIELDS_ALIAS_LABEL"
 					value="1"
-					required="false"
+					default=""
 					description="COM_COMPONENTBUILDER_ADMIN_FIELDS_ALIAS_DESCRIPTION"
 					class="inputbox"
 					onchange="checkAlias(this)"
@@ -178,7 +182,7 @@
 					name="sort"
 					label="COM_COMPONENTBUILDER_ADMIN_FIELDS_SORT_LABEL"
 					value="1"
-					required="false"
+					default=""
 					description="COM_COMPONENTBUILDER_ADMIN_FIELDS_SORT_DESCRIPTION"
 					class="inputbox"
 				/>
@@ -188,27 +192,35 @@
 					name="search"
 					label="COM_COMPONENTBUILDER_ADMIN_FIELDS_SEARCH_LABEL"
 					value="1"
-					required="false"
+					default=""
 					description="COM_COMPONENTBUILDER_ADMIN_FIELDS_SEARCH_DESCRIPTION"
 					class="inputbox"
 				/>
-				<!-- Filter Field. Type: Checkbox. (joomla) -->
+				<!-- Filter Field. Type: List. (joomla) -->
 				<field
-					type="checkbox"
+					type="list"
 					name="filter"
 					label="COM_COMPONENTBUILDER_ADMIN_FIELDS_FILTER_LABEL"
-					value="1"
-					required="false"
 					description="COM_COMPONENTBUILDER_ADMIN_FIELDS_FILTER_DESCRIPTION"
-					class="inputbox"
-				/>
+					class="fieldSmall"
+					multiple="false"
+					default=""
+					onchange="explainFilterBehaviour(this)">
+					<!-- Option Set. -->
+					<option value="">
+						COM_COMPONENTBUILDER_ADMIN_FIELDS_NO</option>
+					<option value="1">
+						COM_COMPONENTBUILDER_ADMIN_FIELDS_YES_SINGLE</option>
+					<option value="2">
+						COM_COMPONENTBUILDER_ADMIN_FIELDS_YES_MULTI</option>
+				</field>
 				<!-- Link Field. Type: Checkbox. (joomla) -->
 				<field
 					type="checkbox"
 					name="link"
 					label="COM_COMPONENTBUILDER_ADMIN_FIELDS_LINK_LABEL"
 					value="1"
-					required="false"
+					default=""
 					description="COM_COMPONENTBUILDER_ADMIN_FIELDS_LINK_DESCRIPTION"
 					class="inputbox"
 				/>
@@ -221,7 +233,6 @@
 					class="fieldMedium"
 					multiple="false"
 					default="1"
-					required="false"
 					button="false"
 				/>
 				<!-- Alignment Field. Type: List. (joomla) -->
@@ -233,7 +244,6 @@
 					class="fieldMedium"
 					multiple="false"
 					filter="INT"
-					required="false"
 					default="1">
 					<!-- Option Set. -->
 					<option value="1">
@@ -259,7 +269,6 @@
 					default="0"
 					description="COM_COMPONENTBUILDER_ADMIN_FIELDS_ORDER_EDIT_DESCRIPTION"
 					class="fieldSmall"
-					required="false"
 					first="0"
 					last="100"
 					step="1"
@@ -270,14 +279,15 @@
 					name="permission"
 					label="COM_COMPONENTBUILDER_ADMIN_FIELDS_PERMISSION_LABEL"
 					description="COM_COMPONENTBUILDER_ADMIN_FIELDS_PERMISSION_DESCRIPTION"
-					class="fieldMid"
-					multiple="false"
-					required="false">
+					class="fieldMedium"
+					multiple="true">
 					<!-- Option Set. -->
-					<option value="0">
-						COM_COMPONENTBUILDER_ADMIN_FIELDS_NONE</option>
-					<option value=" 1">
+					<option value="1">
 						COM_COMPONENTBUILDER_ADMIN_FIELDS_EDITING</option>
+					<option value="2">
+						COM_COMPONENTBUILDER_ADMIN_FIELDS_ACCESS</option>
+					<option value="3">
+						COM_COMPONENTBUILDER_ADMIN_FIELDS_VIEW</option>
 				</field>
 			</form>
 		</field>

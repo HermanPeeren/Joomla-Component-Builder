@@ -93,6 +93,7 @@
 			description="COM_COMPONENTBUILDER_COMPONENT_FILES_FOLDERS_JOOMLA_COMPONENT_DESCRIPTION"
 			class="list_class"
 			multiple="false"
+			default=""
 			required="true"
 			readonly="true"
 			button="false"
@@ -107,6 +108,7 @@
 			layout="joomla.form.field.subform.repeatable-table"
 			multiple="true"
 			description="COM_COMPONENTBUILDER_COMPONENT_FILES_FOLDERS_ADDFOLDERSFULLPATH_DESCRIPTION"
+			default=""
 			icon="list">
 			<form hidden="true" name="list_addfoldersfullpath_modal" repeat="true">
 				<!-- Folderpath Field. Type: Text. (joomla) -->
@@ -116,6 +118,7 @@
 					label="COM_COMPONENTBUILDER_COMPONENT_FILES_FOLDERS_FOLDERPATH_LABEL"
 					size="70"
 					maxlength="300"
+					default=""
 					description="COM_COMPONENTBUILDER_COMPONENT_FILES_FOLDERS_FOLDERPATH_DESCRIPTION"
 					class="text_area"
 					required="false"
@@ -134,7 +137,7 @@
 					class="text_area"
 					readonly="false"
 					disabled="false"
-					required="false"
+					required="true"
 					filter="PATH"
 					message="COM_COMPONENTBUILDER_COMPONENT_FILES_FOLDERS_PATH_MESSAGE"
 					hint="COM_COMPONENTBUILDER_COMPONENT_FILES_FOLDERS_PATH_HINT"
@@ -145,7 +148,7 @@
 					name="rename"
 					label="COM_COMPONENTBUILDER_COMPONENT_FILES_FOLDERS_RENAME_LABEL"
 					value="1"
-					required="false"
+					default=""
 					class="inputbox"
 				/>
 			</form>
@@ -160,6 +163,7 @@
 			layout="joomla.form.field.subform.repeatable-table"
 			multiple="true"
 			description="COM_COMPONENTBUILDER_COMPONENT_FILES_FOLDERS_ADDFILESFULLPATH_DESCRIPTION"
+			default=""
 			icon="list">
 			<form hidden="true" name="list_addfilesfullpath_modal" repeat="true">
 				<!-- Filepath Field. Type: Text. (joomla) -->
@@ -169,6 +173,7 @@
 					label="COM_COMPONENTBUILDER_COMPONENT_FILES_FOLDERS_FILEPATH_LABEL"
 					size="70"
 					maxlength="300"
+					default=""
 					description="COM_COMPONENTBUILDER_COMPONENT_FILES_FOLDERS_FILEPATH_DESCRIPTION"
 					class="text_area"
 					required="false"
@@ -187,7 +192,7 @@
 					class="text_area"
 					readonly="false"
 					disabled="false"
-					required="false"
+					required="true"
 					filter="PATH"
 					message="COM_COMPONENTBUILDER_COMPONENT_FILES_FOLDERS_PATH_MESSAGE"
 					hint="COM_COMPONENTBUILDER_COMPONENT_FILES_FOLDERS_PATH_HINT"
@@ -198,7 +203,7 @@
 					name="notnew"
 					label="COM_COMPONENTBUILDER_COMPONENT_FILES_FOLDERS_NOTNEW_LABEL"
 					value="1"
-					required="false"
+					default=""
 					description="COM_COMPONENTBUILDER_COMPONENT_FILES_FOLDERS_NOTNEW_DESCRIPTION"
 					class="inputbox"
 				/>
@@ -214,6 +219,7 @@
 			layout="joomla.form.field.subform.repeatable-table"
 			multiple="true"
 			description="COM_COMPONENTBUILDER_COMPONENT_FILES_FOLDERS_ADDFOLDERS_DESCRIPTION"
+			default=""
 			icon="list">
 			<form hidden="true" name="list_addfolders_modal" repeat="true">
 				<!-- Folder Field. Type: Customfolderlist. (custom) -->
@@ -225,7 +231,7 @@
 					class="list_class"
 					multiple="false"
 					default="0"
-					required="false"
+					required="true"
 					button="false"
 				/>
 				<!-- Path Field. Type: Text. (joomla) -->
@@ -239,7 +245,7 @@
 					class="text_area"
 					readonly="false"
 					disabled="false"
-					required="false"
+					required="true"
 					filter="PATH"
 					message="COM_COMPONENTBUILDER_COMPONENT_FILES_FOLDERS_PATH_MESSAGE"
 					hint="COM_COMPONENTBUILDER_COMPONENT_FILES_FOLDERS_PATH_HINT"
@@ -250,7 +256,7 @@
 					name="rename"
 					label="COM_COMPONENTBUILDER_COMPONENT_FILES_FOLDERS_RENAME_LABEL"
 					value="1"
-					required="false"
+					default=""
 					class="inputbox"
 				/>
 			</form>
@@ -265,6 +271,7 @@
 			layout="joomla.form.field.subform.repeatable-table"
 			multiple="true"
 			description="COM_COMPONENTBUILDER_COMPONENT_FILES_FOLDERS_ADDFILES_DESCRIPTION"
+			default=""
 			icon="list">
 			<form hidden="true" name="list_addfiles_modal" repeat="true">
 				<!-- File Field. Type: Customfilelist. (custom) -->
@@ -276,7 +283,7 @@
 					class="list_class"
 					multiple="false"
 					default="0"
-					required="false"
+					required="true"
 					button="false"
 				/>
 				<!-- Path Field. Type: Text. (joomla) -->
@@ -290,7 +297,7 @@
 					class="text_area"
 					readonly="false"
 					disabled="false"
-					required="false"
+					required="true"
 					filter="PATH"
 					message="COM_COMPONENTBUILDER_COMPONENT_FILES_FOLDERS_PATH_MESSAGE"
 					hint="COM_COMPONENTBUILDER_COMPONENT_FILES_FOLDERS_PATH_HINT"
@@ -301,7 +308,7 @@
 					name="notnew"
 					label="COM_COMPONENTBUILDER_COMPONENT_FILES_FOLDERS_NOTNEW_LABEL"
 					value="1"
-					required="false"
+					default=""
 					description="COM_COMPONENTBUILDER_COMPONENT_FILES_FOLDERS_NOTNEW_DESCRIPTION"
 					class="inputbox"
 				/>

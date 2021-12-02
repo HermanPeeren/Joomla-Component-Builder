@@ -1,28 +1,15 @@
-/*--------------------------------------------------------------------------------------------------------|  www.vdm.io  |------/
-    __      __       _     _____                 _                                  _     __  __      _   _               _
-    \ \    / /      | |   |  __ \               | |                                | |   |  \/  |    | | | |             | |
-     \ \  / /_ _ ___| |_  | |  | | _____   _____| | ___  _ __  _ __ ___   ___ _ __ | |_  | \  / | ___| |_| |__   ___   __| |
-      \ \/ / _` / __| __| | |  | |/ _ \ \ / / _ \ |/ _ \| '_ \| '_ ` _ \ / _ \ '_ \| __| | |\/| |/ _ \ __| '_ \ / _ \ / _` |
-       \  / (_| \__ \ |_  | |__| |  __/\ V /  __/ | (_) | |_) | | | | | |  __/ | | | |_  | |  | |  __/ |_| | | | (_) | (_| |
-        \/ \__,_|___/\__| |_____/ \___| \_/ \___|_|\___/| .__/|_| |_| |_|\___|_| |_|\__| |_|  |_|\___|\__|_| |_|\___/ \__,_|
-                                                        | |                                                                 
-                                                        |_| 				
-/-------------------------------------------------------------------------------------------------------------------------------/
-
-	@version		2.7.x
-	@created		30th April, 2015
-	@package		Component Builder
-	@subpackage		get_snippets.js
-	@author			Llewellyn van der Merwe <http://joomlacomponentbuilder.com>	
-	@github			Joomla Component Builder <https://github.com/vdm-io/Joomla-Component-Builder>
-	@copyright		Copyright (C) 2015. All Rights Reserved
-	@license		GNU/GPL Version 2 or later - http://www.gnu.org/licenses/gpl-2.0.html 
-	
-	Builds Complex Joomla Components 
-                                                             
-/-----------------------------------------------------------------------------------------------------------------------------*/
+/**
+ * @package    Joomla.Component.Builder
+ *
+ * @created    30th April, 2015
+ * @author     Llewellyn van der Merwe <http://www.joomlacomponentbuilder.com>
+ * @github     Joomla Component Builder <https://github.com/vdm-io/Joomla-Component-Builder>
+ * @copyright  Copyright (C) 2015 - 2020 Vast Development Method. All rights reserved.
+ * @license    GNU General Public License version 2 or later; see LICENSE.txt
+ */
 
 /* JS Document */
+
 // start the moment the document is ready
 jQuery(document).ready(function () {
 	// just get the available libraries
@@ -111,9 +98,9 @@ function buildLibraries(paths) {
 		var temp = {};
 		jQuery.each(paths.tree, function(key,value) {
 			if (value.path.match(".json$")) {
-				var libName = value.path.split(/ -(.+)/)[0];
-				libName = libName.trim()
-				temp[libName] = libName;
+				var libraryName = value.path.split(/ -(.+)/)[0];
+				libraryName = libraryName.trim()
+				temp[libraryName] = libraryName;
 			}
 		});
 		// load only this library paths
@@ -124,7 +111,7 @@ function buildLibraries(paths) {
 
 // set the libraries
 function setLibraries(names) {
-	// now load the lib buttons
+	// now load the library buttons
 	jQuery.each(names, function(value) {
 		setLibrary(value);
 	});
@@ -145,7 +132,7 @@ function setLibrary(name) {
 	html += '<h3 class="uk-panel-title">' + name + '</h3>';
 	html += '<hr />';
 	// set the data buttons
-	html += setLibButtons(name);
+	html += setLibraryButtons(name);
 	// close the box panel
 	html += '</div>';
 	html += '</div>';
@@ -153,7 +140,7 @@ function setLibrary(name) {
 	jQuery('#libraries-grid').append(html);
 }
 
-function setLibButtons(name) {
+function setLibraryButtons(name) {
 	return  '<button class="uk-button uk-button-small uk-button-success uk-width-1-1 getreaction" data-name="'+name+'" data-type="getSnippets" title="'+Joomla.JText._('COM_COMPONENTBUILDER_VIEW_DESCRIPTION_OF_COMMUNITY_VERSION')+'"><i class="uk-icon-thumb-tack"></i><span class="uk-hidden-small"> '+Joomla.JText._('COM_COMPONENTBUILDER_OPEN_LIBRARY_SNIPPETS')+'</span></button>';
 }
 
@@ -400,16 +387,16 @@ function bulkSnippetGithub(status) {
 function doBulkUpdate_server(path, status) {
 	// set the ajax scope
 	ajaxcall = null;
-	var getUrl = "index.php?option=com_componentbuilder&task=ajax.setSnippetGithub&format=json";
+	var getUrl = JRouter("index.php?option=com_componentbuilder&task=ajax.setSnippetGithub&format=json&raw=true");
 	if (token.length > 0 && path.length > 0 && status.length > 0) {
-		var request = 'token='+token+'&path='+path+'&status='+status;
+		var request = token+'=1&path='+path+'&status='+status;
 	}
 	return jQuery.ajax({
 		type: 'POST',
 		url: getUrl,
-		dataType: 'jsonp',
+		dataType: 'json',
 		data: request,
-		jsonp: 'callback'
+		jsonp: false
 	});
 }
 
@@ -437,16 +424,16 @@ function setSnippetGithub(key, status) {
 function setSnippetGithub_server(path, status) {
 	// set the ajax scope
 	ajaxcall = null;
-	var getUrl = "index.php?option=com_componentbuilder&task=ajax.setSnippetGithub&format=json";
+	var getUrl = JRouter("index.php?option=com_componentbuilder&task=ajax.setSnippetGithub&format=json&raw=true");
 	if (token.length > 0 && path.length > 0 && status.length > 0) {
-		var request = 'token='+token+'&path='+path+'&status='+status;
+		var request = token+'=1&path='+path+'&status='+status;
 	}
 	return jQuery.ajax({
 		type: 'POST',
 		url: getUrl,
-		dataType: 'jsonp',
+		dataType: 'json',
 		data: request,
-		jsonp: 'callback'
+		jsonp: false
 	});
 }
 
@@ -527,6 +514,18 @@ function showSnippetModal(snippet, type) {
 	});
 	// show modal
 	modal.show();
+}
+
+// get key ID
+function getKeyID(key) {
+	// get useful ID
+	var keyID = key.replace('-', '');
+	keyID = keyID.replace('.json', '');
+	keyID = keyID.replace(/\s+/ig, '-');
+	keyID = keyID.replace(/\(/g, '');
+	keyID = keyID.replace(/\)/g, '');
+	// return the id build
+	return keyID;
 }
 
 // get key ID

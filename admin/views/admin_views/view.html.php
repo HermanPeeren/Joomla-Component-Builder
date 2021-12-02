@@ -1,33 +1,16 @@
 <?php
-/*--------------------------------------------------------------------------------------------------------|  www.vdm.io  |------/
-    __      __       _     _____                 _                                  _     __  __      _   _               _
-    \ \    / /      | |   |  __ \               | |                                | |   |  \/  |    | | | |             | |
-     \ \  / /_ _ ___| |_  | |  | | _____   _____| | ___  _ __  _ __ ___   ___ _ __ | |_  | \  / | ___| |_| |__   ___   __| |
-      \ \/ / _` / __| __| | |  | |/ _ \ \ / / _ \ |/ _ \| '_ \| '_ ` _ \ / _ \ '_ \| __| | |\/| |/ _ \ __| '_ \ / _ \ / _` |
-       \  / (_| \__ \ |_  | |__| |  __/\ V /  __/ | (_) | |_) | | | | | |  __/ | | | |_  | |  | |  __/ |_| | | | (_) | (_| |
-        \/ \__,_|___/\__| |_____/ \___| \_/ \___|_|\___/| .__/|_| |_| |_|\___|_| |_|\__| |_|  |_|\___|\__|_| |_|\___/ \__,_|
-                                                        | |                                                                 
-                                                        |_| 				
-/-------------------------------------------------------------------------------------------------------------------------------/
-
-	@version		2.7.x
-	@created		30th April, 2015
-	@package		Component Builder
-	@subpackage		view.html.php
-	@author			Llewellyn van der Merwe <http://joomlacomponentbuilder.com>	
-	@github			Joomla Component Builder <https://github.com/vdm-io/Joomla-Component-Builder>
-	@copyright		Copyright (C) 2015. All Rights Reserved
-	@license		GNU/GPL Version 2 or later - http://www.gnu.org/licenses/gpl-2.0.html 
-	
-	Builds Complex Joomla Components 
-                                                             
-/-----------------------------------------------------------------------------------------------------------------------------*/
+/**
+ * @package    Joomla.Component.Builder
+ *
+ * @created    30th April, 2015
+ * @author     Llewellyn van der Merwe <http://www.joomlacomponentbuilder.com>
+ * @github     Joomla Component Builder <https://github.com/vdm-io/Joomla-Component-Builder>
+ * @copyright  Copyright (C) 2015 - 2020 Vast Development Method. All rights reserved.
+ * @license    GNU General Public License version 2 or later; see LICENSE.txt
+ */
 
 // No direct access to this file
 defined('_JEXEC') or die('Restricted access');
-
-// import Joomla view library
-jimport('joomla.application.component.view');
 
 /**
  * Componentbuilder View class for the Admin_views
@@ -51,9 +34,16 @@ class ComponentbuilderViewAdmin_views extends JViewLegacy
 		$this->pagination = $this->get('Pagination');
 		$this->state = $this->get('State');
 		$this->user = JFactory::getUser();
-		$this->listOrder = $this->escape($this->state->get('list.ordering'));
-		$this->listDirn = $this->escape($this->state->get('list.direction'));
-		$this->saveOrder = $this->listOrder == 'ordering';
+		// Load the filter form from xml.
+		$this->filterForm = $this->get('FilterForm');
+		// Load the active filters.
+		$this->activeFilters = $this->get('ActiveFilters');
+		// Add the list ordering clause.
+		$this->listOrder = $this->escape($this->state->get('list.ordering', 'a.id'));
+		$this->listDirn = $this->escape($this->state->get('list.direction', 'desc'));
+		$this->saveOrder = $this->listOrder == 'a.ordering';
+		// set the return here value
+		$this->return_here = urlencode(base64_encode((string) JUri::getInstance()));
 		// get global action permissions
 		$this->canDo = ComponentbuilderHelper::getActions('admin_view');
 		$this->canEdit = $this->canDo->get('admin_view.edit');
@@ -133,7 +123,7 @@ class ComponentbuilderViewAdmin_views extends JViewLegacy
 				// add the button to the page
 				$dhtml = $layout->render(array('title' => $title));
 				$bar->appendButton('Custom', $dhtml, 'batch');
-			} 
+			}
 
 			if ($this->state->get('filter.published') == -2 && ($this->canState && $this->canDelete))
 			{
@@ -148,7 +138,12 @@ class ComponentbuilderViewAdmin_views extends JViewLegacy
 			{
 				JToolBarHelper::custom('admin_views.exportData', 'download', '', 'COM_COMPONENTBUILDER_EXPORT_DATA', true);
 			}
-		} 
+		}
+		if ($this->user->authorise('admin_view.run_expansion', 'com_componentbuilder'))
+		{
+			// add Run Expansion button.
+			JToolBarHelper::custom('admin_views.runExpansion', 'expand-2 custom-button-runexpansion', '', 'COM_COMPONENTBUILDER_RUN_EXPANSION', false);
+		}
 
 		if ($this->canDo->get('core.import') && $this->canDo->get('admin_view.import'))
 		{
@@ -168,30 +163,17 @@ class ComponentbuilderViewAdmin_views extends JViewLegacy
 			JToolBarHelper::preferences('com_componentbuilder');
 		}
 
-		if ($this->canState)
+		// Only load published batch if state and batch is allowed
+		if ($this->canState && $this->canBatch)
 		{
-			JHtmlSidebar::addFilter(
-				JText::_('JOPTION_SELECT_PUBLISHED'),
-				'filter_published',
-				JHtml::_('select.options', JHtml::_('jgrid.publishedOptions'), 'value', 'text', $this->state->get('filter.published'), true)
+			JHtmlBatch_::addListSelection(
+				JText::_('COM_COMPONENTBUILDER_KEEP_ORIGINAL_STATE'),
+				'batch[published]',
+				JHtml::_('select.options', JHtml::_('jgrid.publishedOptions', array('all' => false)), 'value', 'text', '', true)
 			);
-			// only load if batch allowed
-			if ($this->canBatch)
-			{
-				JHtmlBatch_::addListSelection(
-					JText::_('COM_COMPONENTBUILDER_KEEP_ORIGINAL_STATE'),
-					'batch[published]',
-					JHtml::_('select.options', JHtml::_('jgrid.publishedOptions', array('all' => false)), 'value', 'text', '', true)
-				);
-			}
 		}
 
-		JHtmlSidebar::addFilter(
-			JText::_('JOPTION_SELECT_ACCESS'),
-			'filter_access',
-			JHtml::_('select.options', JHtml::_('access.assetgroups'), 'value', 'text', $this->state->get('filter.access'))
-		);
-
+		// Only load access batch if create, edit and batch is allowed
 		if ($this->canBatch && $this->canCreate && $this->canEdit)
 		{
 			JHtmlBatch_::addListSelection(
@@ -199,7 +181,107 @@ class ComponentbuilderViewAdmin_views extends JViewLegacy
 				'batch[access]',
 				JHtml::_('select.options', JHtml::_('access.assetgroups'), 'value', 'text')
 			);
-		} 
+		}
+
+		// Only load Add Fadein batch if create, edit, and batch is allowed
+		if ($this->canBatch && $this->canCreate && $this->canEdit)
+		{
+			// Set Add Fadein Selection
+			$this->add_fadeinOptions = JFormHelper::loadFieldType('adminviewsfilteraddfadein')->options;
+			// We do some sanitation for Add Fadein filter
+			if (ComponentbuilderHelper::checkArray($this->add_fadeinOptions) &&
+				isset($this->add_fadeinOptions[0]->value) &&
+				!ComponentbuilderHelper::checkString($this->add_fadeinOptions[0]->value))
+			{
+				unset($this->add_fadeinOptions[0]);
+			}
+			// Add Fadein Batch Selection
+			JHtmlBatch_::addListSelection(
+				'- Keep Original '.JText::_('COM_COMPONENTBUILDER_ADMIN_VIEW_ADD_FADEIN_LABEL').' -',
+				'batch[add_fadein]',
+				JHtml::_('select.options', $this->add_fadeinOptions, 'value', 'text')
+			);
+		}
+
+		// Only load Type batch if create, edit, and batch is allowed
+		if ($this->canBatch && $this->canCreate && $this->canEdit)
+		{
+			// Set Type Selection
+			$this->typeOptions = JFormHelper::loadFieldType('adminviewsfiltertype')->options;
+			// We do some sanitation for Type filter
+			if (ComponentbuilderHelper::checkArray($this->typeOptions) &&
+				isset($this->typeOptions[0]->value) &&
+				!ComponentbuilderHelper::checkString($this->typeOptions[0]->value))
+			{
+				unset($this->typeOptions[0]);
+			}
+			// Type Batch Selection
+			JHtmlBatch_::addListSelection(
+				'- Keep Original '.JText::_('COM_COMPONENTBUILDER_ADMIN_VIEW_TYPE_LABEL').' -',
+				'batch[type]',
+				JHtml::_('select.options', $this->typeOptions, 'value', 'text')
+			);
+		}
+
+		// Only load Add Custom Button batch if create, edit, and batch is allowed
+		if ($this->canBatch && $this->canCreate && $this->canEdit)
+		{
+			// Set Add Custom Button Selection
+			$this->add_custom_buttonOptions = JFormHelper::loadFieldType('adminviewsfilteraddcustombutton')->options;
+			// We do some sanitation for Add Custom Button filter
+			if (ComponentbuilderHelper::checkArray($this->add_custom_buttonOptions) &&
+				isset($this->add_custom_buttonOptions[0]->value) &&
+				!ComponentbuilderHelper::checkString($this->add_custom_buttonOptions[0]->value))
+			{
+				unset($this->add_custom_buttonOptions[0]);
+			}
+			// Add Custom Button Batch Selection
+			JHtmlBatch_::addListSelection(
+				'- Keep Original '.JText::_('COM_COMPONENTBUILDER_ADMIN_VIEW_ADD_CUSTOM_BUTTON_LABEL').' -',
+				'batch[add_custom_button]',
+				JHtml::_('select.options', $this->add_custom_buttonOptions, 'value', 'text')
+			);
+		}
+
+		// Only load Add Php Ajax batch if create, edit, and batch is allowed
+		if ($this->canBatch && $this->canCreate && $this->canEdit)
+		{
+			// Set Add Php Ajax Selection
+			$this->add_php_ajaxOptions = JFormHelper::loadFieldType('adminviewsfilteraddphpajax')->options;
+			// We do some sanitation for Add Php Ajax filter
+			if (ComponentbuilderHelper::checkArray($this->add_php_ajaxOptions) &&
+				isset($this->add_php_ajaxOptions[0]->value) &&
+				!ComponentbuilderHelper::checkString($this->add_php_ajaxOptions[0]->value))
+			{
+				unset($this->add_php_ajaxOptions[0]);
+			}
+			// Add Php Ajax Batch Selection
+			JHtmlBatch_::addListSelection(
+				'- Keep Original '.JText::_('COM_COMPONENTBUILDER_ADMIN_VIEW_ADD_PHP_AJAX_LABEL').' -',
+				'batch[add_php_ajax]',
+				JHtml::_('select.options', $this->add_php_ajaxOptions, 'value', 'text')
+			);
+		}
+
+		// Only load Add Custom Import batch if create, edit, and batch is allowed
+		if ($this->canBatch && $this->canCreate && $this->canEdit)
+		{
+			// Set Add Custom Import Selection
+			$this->add_custom_importOptions = JFormHelper::loadFieldType('adminviewsfilteraddcustomimport')->options;
+			// We do some sanitation for Add Custom Import filter
+			if (ComponentbuilderHelper::checkArray($this->add_custom_importOptions) &&
+				isset($this->add_custom_importOptions[0]->value) &&
+				!ComponentbuilderHelper::checkString($this->add_custom_importOptions[0]->value))
+			{
+				unset($this->add_custom_importOptions[0]);
+			}
+			// Add Custom Import Batch Selection
+			JHtmlBatch_::addListSelection(
+				'- Keep Original '.JText::_('COM_COMPONENTBUILDER_ADMIN_VIEW_ADD_CUSTOM_IMPORT_LABEL').' -',
+				'batch[add_custom_import]',
+				JHtml::_('select.options', $this->add_custom_importOptions, 'value', 'text')
+			);
+		}
 	}
 
 	/**
@@ -243,11 +325,10 @@ class ComponentbuilderViewAdmin_views extends JViewLegacy
 	protected function getSortFields()
 	{
 		return array(
-			'a.sorting' => JText::_('JGRID_HEADING_ORDERING'),
+			'a.ordering' => JText::_('JGRID_HEADING_ORDERING'),
 			'a.published' => JText::_('JSTATUS'),
 			'a.system_name' => JText::_('COM_COMPONENTBUILDER_ADMIN_VIEW_SYSTEM_NAME_LABEL'),
 			'a.name_single' => JText::_('COM_COMPONENTBUILDER_ADMIN_VIEW_NAME_SINGLE_LABEL'),
-			'a.name_list' => JText::_('COM_COMPONENTBUILDER_ADMIN_VIEW_NAME_LIST_LABEL'),
 			'a.short_description' => JText::_('COM_COMPONENTBUILDER_ADMIN_VIEW_SHORT_DESCRIPTION_LABEL'),
 			'a.id' => JText::_('JGRID_HEADING_ID')
 		);

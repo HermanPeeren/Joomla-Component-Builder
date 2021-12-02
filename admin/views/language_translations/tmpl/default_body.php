@@ -1,27 +1,13 @@
 <?php
-/*--------------------------------------------------------------------------------------------------------|  www.vdm.io  |------/
-    __      __       _     _____                 _                                  _     __  __      _   _               _
-    \ \    / /      | |   |  __ \               | |                                | |   |  \/  |    | | | |             | |
-     \ \  / /_ _ ___| |_  | |  | | _____   _____| | ___  _ __  _ __ ___   ___ _ __ | |_  | \  / | ___| |_| |__   ___   __| |
-      \ \/ / _` / __| __| | |  | |/ _ \ \ / / _ \ |/ _ \| '_ \| '_ ` _ \ / _ \ '_ \| __| | |\/| |/ _ \ __| '_ \ / _ \ / _` |
-       \  / (_| \__ \ |_  | |__| |  __/\ V /  __/ | (_) | |_) | | | | | |  __/ | | | |_  | |  | |  __/ |_| | | | (_) | (_| |
-        \/ \__,_|___/\__| |_____/ \___| \_/ \___|_|\___/| .__/|_| |_| |_|\___|_| |_|\__| |_|  |_|\___|\__|_| |_|\___/ \__,_|
-                                                        | |                                                                 
-                                                        |_| 				
-/-------------------------------------------------------------------------------------------------------------------------------/
-
-	@version		2.7.x
-	@created		30th April, 2015
-	@package		Component Builder
-	@subpackage		default_body.php
-	@author			Llewellyn van der Merwe <http://joomlacomponentbuilder.com>	
-	@github			Joomla Component Builder <https://github.com/vdm-io/Joomla-Component-Builder>
-	@copyright		Copyright (C) 2015. All Rights Reserved
-	@license		GNU/GPL Version 2 or later - http://www.gnu.org/licenses/gpl-2.0.html 
-	
-	Builds Complex Joomla Components 
-                                                             
-/-----------------------------------------------------------------------------------------------------------------------------*/
+/**
+ * @package    Joomla.Component.Builder
+ *
+ * @created    30th April, 2015
+ * @author     Llewellyn van der Merwe <http://www.joomlacomponentbuilder.com>
+ * @github     Joomla Component Builder <https://github.com/vdm-io/Joomla-Component-Builder>
+ * @copyright  Copyright (C) 2015 - 2020 Vast Development Method. All rights reserved.
+ * @license    GNU General Public License version 2 or later; see LICENSE.txt
+ */
 
 // No direct access to this file
 defined('_JEXEC') or die('Restricted access'); 
@@ -39,11 +25,8 @@ $edit = "index.php?option=com_componentbuilder&view=language_translations&task=l
 		<td class="order nowrap center hidden-phone">
 		<?php if ($canDo->get('language_translation.edit.state')): ?>
 			<?php
-				if ($this->saveOrder)
-				{
-					$iconClass = ' inactive';
-				}
-				else
+				$iconClass = '';
+				if (!$this->saveOrder)
 				{
 					$iconClass = ' inactive tip-top" hasTooltip" title="' . JHtml::tooltipText('JORDERINGDISABLED');
 				}
@@ -75,16 +58,99 @@ $edit = "index.php?option=com_componentbuilder&view=language_translations&task=l
 		<?php endif; ?>
 		</td>
 		<td class="nowrap">
+			<div>
 			<?php if ($canDo->get('language_translation.edit')): ?>
-				<div class="name">
-					<a href="<?php echo $edit; ?>&id=<?php echo $item->id; ?>"><?php echo $item->source; ?></a>
-					<?php if ($item->checked_out): ?>
-						<?php echo JHtml::_('jgrid.checkedout', $i, $userChkOut->name, $item->checked_out_time, 'language_translations.', $canCheckin); ?>
-					<?php endif; ?>
-				</div>
+				<a href="<?php echo $edit; ?>&id=<?php echo $item->id; ?>"><?php echo $item->source; ?></a>
+				<?php if ($item->checked_out): ?>
+					<?php echo JHtml::_('jgrid.checkedout', $i, $userChkOut->name, $item->checked_out_time, 'language_translations.', $canCheckin); ?>
+				<?php endif; ?>
 			<?php else: ?>
-				<div class="name"><?php echo $item->source; ?></div>
+				<?php echo $item->source; ?>
 			<?php endif; ?>
+			<?php
+			$langBucket = array();
+			if (ComponentbuilderHelper::checkJson($item->translation))
+			{
+				$translations = json_decode($item->translation, true);
+				if (ComponentbuilderHelper::checkArray($translations))
+				{
+					foreach ($translations as $language)
+					{
+						if (isset($language['translation']) && ComponentbuilderHelper::checkString($language['translation'])
+						&& isset($language['language']) && ComponentbuilderHelper::checkString($language['language']))
+						{
+							$langBucket[$language['language']] = $language['language'];
+						}
+					}
+				}
+			}
+			// start how many usedin's
+			$counterUsedin = array();
+			// set how many components use this string
+			if (ComponentbuilderHelper::checkJson($item->components))
+			{
+				$item->components = json_decode($item->components, true);
+			}
+			if (($number = ComponentbuilderHelper::checkArray($item->components)) !== false)
+			{
+				if ($number == 1)
+				{
+					$counterUsedin[] = $number . ' ' . JText::_('COM_COMPONENTBUILDER_COMPONENT');
+				}
+				else
+				{
+					$counterUsedin[] = $number . ' ' . JText::_('COM_COMPONENTBUILDER_COMPONENTS');
+				}
+			}
+			// set how many modules use this string
+			if (ComponentbuilderHelper::checkJson($item->modules))
+			{
+				$item->modules = json_decode($item->modules, true);
+			}
+			if (($number = ComponentbuilderHelper::checkArray($item->modules)) !== false)
+			{
+				if ($number == 1)
+				{
+					$counterUsedin[] = $number . ' ' . JText::_('COM_COMPONENTBUILDER_MODULE');
+				}
+				else
+				{
+					$counterUsedin[] = $number . ' ' . JText::_('COM_COMPONENTBUILDER_MODULES');
+				}
+			}
+			// set how many plugins use this string
+			if (ComponentbuilderHelper::checkJson($item->plugins))
+			{
+				$item->plugins = json_decode($item->plugins, true);
+			}
+			if (($number = ComponentbuilderHelper::checkArray($item->plugins)) !== false)
+			{
+				if ($number == 1)
+				{
+					$counterUsedin[] = $number . ' ' . JText::_('COM_COMPONENTBUILDER_PLUGIN');
+				}
+				else
+				{
+					$counterUsedin[] = $number . ' ' . JText::_('COM_COMPONENTBUILDER_PLUGINS');
+				}
+			}
+			// build the numbers
+			$numbersUsedin = '';
+			if (ComponentbuilderHelper::checkArray($counterUsedin))
+			{
+				$numbersUsedin = '<br />' . JText::_('COM_COMPONENTBUILDER_USED_IN') . ' ' . implode('<br />', $counterUsedin);
+			}
+			// load the languages to the string
+			if (ComponentbuilderHelper::checkArray($langBucket))
+			{
+				echo '<br /><small>' . JText::_('COM_COMPONENTBUILDER_ALREADY_TRANSLATED_INTO') . ' <em>(' . implode(', ', $langBucket) . ')</em>' . $numbersUsedin . '</small>';
+			}
+			else
+			{
+				echo '<br /><small><em>(' . JText::_('COM_COMPONENTBUILDER_NOTRANSLATION') . ')</em>' . $numbersUsedin . '</small>';
+			}
+			?>
+			</div>
 		</td>
 		<td class="center">
 		<?php if ($canDo->get('language_translation.edit.state')) : ?>

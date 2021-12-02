@@ -1,47 +1,65 @@
 <?php
-/*--------------------------------------------------------------------------------------------------------|  www.vdm.io  |------/
-    __      __       _     _____                 _                                  _     __  __      _   _               _
-    \ \    / /      | |   |  __ \               | |                                | |   |  \/  |    | | | |             | |
-     \ \  / /_ _ ___| |_  | |  | | _____   _____| | ___  _ __  _ __ ___   ___ _ __ | |_  | \  / | ___| |_| |__   ___   __| |
-      \ \/ / _` / __| __| | |  | |/ _ \ \ / / _ \ |/ _ \| '_ \| '_ ` _ \ / _ \ '_ \| __| | |\/| |/ _ \ __| '_ \ / _ \ / _` |
-       \  / (_| \__ \ |_  | |__| |  __/\ V /  __/ | (_) | |_) | | | | | |  __/ | | | |_  | |  | |  __/ |_| | | | (_) | (_| |
-        \/ \__,_|___/\__| |_____/ \___| \_/ \___|_|\___/| .__/|_| |_| |_|\___|_| |_|\__| |_|  |_|\___|\__|_| |_|\___/ \__,_|
-                                                        | |                                                                 
-                                                        |_| 				
-/-------------------------------------------------------------------------------------------------------------------------------/
-
-	@version		2.7.x
-	@created		30th April, 2015
-	@package		Component Builder
-	@subpackage		server.php
-	@author			Llewellyn van der Merwe <http://joomlacomponentbuilder.com>	
-	@github			Joomla Component Builder <https://github.com/vdm-io/Joomla-Component-Builder>
-	@copyright		Copyright (C) 2015. All Rights Reserved
-	@license		GNU/GPL Version 2 or later - http://www.gnu.org/licenses/gpl-2.0.html 
-	
-	Builds Complex Joomla Components 
-                                                             
-/-----------------------------------------------------------------------------------------------------------------------------*/
+/**
+ * @package    Joomla.Component.Builder
+ *
+ * @created    30th April, 2015
+ * @author     Llewellyn van der Merwe <http://www.joomlacomponentbuilder.com>
+ * @github     Joomla Component Builder <https://github.com/vdm-io/Joomla-Component-Builder>
+ * @copyright  Copyright (C) 2015 - 2020 Vast Development Method. All rights reserved.
+ * @license    GNU General Public License version 2 or later; see LICENSE.txt
+ */
 
 // No direct access to this file
 defined('_JEXEC') or die('Restricted access');
 
 use Joomla\Registry\Registry;
-
-// import Joomla modelform library
-jimport('joomla.application.component.modeladmin');
+use Joomla\String\StringHelper;
+use Joomla\Utilities\ArrayHelper;
 
 /**
  * Componentbuilder Server Model
  */
 class ComponentbuilderModelServer extends JModelAdmin
-{    
+{
+	/**
+	 * The tab layout fields array.
+	 *
+	 * @var      array
+	 */
+	protected $tabLayoutFields = array(
+		'details' => array(
+			'left' => array(
+				'username',
+				'host',
+				'port',
+				'path'
+			),
+			'right' => array(
+				'authentication',
+				'password',
+				'private',
+				'private_key',
+				'secret'
+			),
+			'fullwidth' => array(
+				'note_ftp_signature',
+				'signature',
+				'note_ssh_security',
+				'not_required'
+			),
+			'above' => array(
+				'name',
+				'protocol'
+			)
+		)
+	);
+
 	/**
 	 * @var        string    The prefix to use with controller messages.
 	 * @since   1.6
 	 */
 	protected $text_prefix = 'COM_COMPONENTBUILDER';
-    
+
 	/**
 	 * The type alias for this content type.
 	 *
@@ -63,6 +81,9 @@ class ComponentbuilderModelServer extends JModelAdmin
 	 */
 	public function getTable($type = 'server', $prefix = 'ComponentbuilderTable', $config = array())
 	{
+		// add table path for when model gets used from other component
+		$this->addTablePath(JPATH_ADMINISTRATOR . '/components/com_componentbuilder/tables');
+		// get instance of the table
 		return JTable::getInstance($type, $prefix, $config);
 	}
     
@@ -166,11 +187,11 @@ class ComponentbuilderModelServer extends JModelAdmin
 	}
 
 	/**
-	* Method to get list data.
-	*
-	* @return mixed  An array of data items on success, false on failure.
-	*/
-	public function getWamlinked_components()
+	 * Method to get list data.
+	 *
+	 * @return mixed  An array of data items on success, false on failure.
+	 */
+	public function getVymlinked_components()
 	{
 		// Get the user object.
 		$user = JFactory::getUser();
@@ -203,9 +224,17 @@ class ComponentbuilderModelServer extends JModelAdmin
 		$query->select('ag.title AS access_level');
 		$query->join('LEFT', '#__viewlevels AS ag ON ag.id = a.access');
 		// Filter by access level.
-		if ($access = $this->getState('filter.access'))
+		$_access = $this->getState('filter.access');
+		if ($_access && is_numeric($_access))
 		{
-			$query->where('a.access = ' . (int) $access);
+			$query->where('a.access = ' . (int) $_access);
+		}
+		elseif (ComponentbuilderHelper::checkArray($_access))
+		{
+			// Secure the array for the query
+			$_access = ArrayHelper::toInteger($_access);
+			// Filter by the Access Array.
+			$query->where('a.access IN (' . implode(',', $_access) . ')');
 		}
 		// Implement View Level Access
 		if (!$user->authorise('core.options', 'com_componentbuilder'))
@@ -225,13 +254,17 @@ class ComponentbuilderModelServer extends JModelAdmin
 		{
 			$items = $db->loadObjectList();
 
-			// set values to display correctly.
+			// Set values to display correctly.
 			if (ComponentbuilderHelper::checkArray($items))
 			{
-				// get user object.
-				$user = JFactory::getUser();
+				// Get the user object if not set.
+				if (!isset($user) || !ComponentbuilderHelper::checkObject($user))
+				{
+					$user = JFactory::getUser();
+				}
 				foreach ($items as $nr => &$item)
 				{
+					// Remove items the user can't access.
 					$access = ($user->authorise('joomla_component.access', 'com_componentbuilder.joomla_component.' . (int) $item->id) && $user->authorise('joomla_component.access', 'com_componentbuilder'));
 					if (!$access)
 					{
@@ -244,22 +277,40 @@ class ComponentbuilderModelServer extends JModelAdmin
 			return $items;
 		}
 		return false;
-	} 
+	}
 
 	/**
 	 * Method to get the record form.
 	 *
 	 * @param   array    $data      Data for the form.
 	 * @param   boolean  $loadData  True if the form is to load its own data (default case), false if not.
+	 * @param   array    $options   Optional array of options for the form creation.
 	 *
 	 * @return  mixed  A JForm object on success, false on failure
 	 *
 	 * @since   1.6
 	 */
-	public function getForm($data = array(), $loadData = true)
+	public function getForm($data = array(), $loadData = true, $options = array('control' => 'jform'))
 	{
+		// set load data option
+		$options['load_data'] = $loadData;
+		// check if xpath was set in options
+		$xpath = false;
+		if (isset($options['xpath']))
+		{
+			$xpath = $options['xpath'];
+			unset($options['xpath']);
+		}
+		// check if clear form was set in options
+		$clear = false;
+		if (isset($options['clear']))
+		{
+			$clear = $options['clear'];
+			unset($options['clear']);
+		}
+
 		// Get the form.
-		$form = $this->loadForm('com_componentbuilder.server', 'server', array('control' => 'jform', 'load_data' => $loadData));
+		$form = $this->loadForm('com_componentbuilder.server', 'server', $options, $clear, $xpath);
 
 		if (empty($form))
 		{
@@ -322,17 +373,20 @@ class ComponentbuilderModelServer extends JModelAdmin
 		// Only load these values if no id is found
 		if (0 == $id)
 		{
-			// Set redirected field name
-			$redirectedField = $jinput->get('ref', null, 'STRING');
-			// Set redirected field value
-			$redirectedValue = $jinput->get('refid', 0, 'INT');
+			// Set redirected view name
+			$redirectedView = $jinput->get('ref', null, 'STRING');
+			// Set field name (or fall back to view name)
+			$redirectedField = $jinput->get('field', $redirectedView, 'STRING');
+			// Set redirected view id
+			$redirectedId = $jinput->get('refid', 0, 'INT');
+			// Set field id (or fall back to redirected view id)
+			$redirectedValue = $jinput->get('field_id', $redirectedId, 'INT');
 			if (0 != $redirectedValue && $redirectedField)
 			{
 				// Now set the local-redirected field default value
 				$form->setValue($redirectedField, null, $redirectedValue);
 			}
 		}
-
 		return $form;
 	}
 
@@ -383,7 +437,7 @@ class ComponentbuilderModelServer extends JModelAdmin
 	protected function canEditState($record)
 	{
 		$user = JFactory::getUser();
-		$recordId	= (!empty($record->id)) ? $record->id : 0;
+		$recordId = (!empty($record->id)) ? $record->id : 0;
 
 		if ($recordId)
 		{
@@ -488,28 +542,30 @@ class ComponentbuilderModelServer extends JModelAdmin
 		if (empty($data))
 		{
 			$data = $this->getItem();
+			// run the perprocess of the data
+			$this->preprocessData('com_componentbuilder.server', $data);
 		}
 
 		return $data;
 	}
 
 	/**
-	* Method to validate the form data.
-	*
-	* @param   JForm   $form   The form to validate against.
-	* @param   array   $data   The data to validate.
-	* @param   string  $group  The name of the field group to validate.
-	*
-	* @return  mixed  Array of filtered data if valid, false otherwise.
-	*
-	* @see     JFormRule
-	* @see     JFilterInput
-	* @since   12.2
-	*/
+	 * Method to validate the form data.
+	 *
+	 * @param   JForm   $form   The form to validate against.
+	 * @param   array   $data   The data to validate.
+	 * @param   string  $group  The name of the field group to validate.
+	 *
+	 * @return  mixed  Array of filtered data if valid, false otherwise.
+	 *
+	 * @see     JFormRule
+	 * @see     JFilterInput
+	 * @since   12.2
+	 */
 	public function validate($form, $data, $group = null)
 	{
 		// check if the not_required field is set
-		if (ComponentbuilderHelper::checkString($data['not_required']))
+		if (isset($data['not_required']) && ComponentbuilderHelper::checkString($data['not_required']))
 		{
 			$requiredFields = (array) explode(',',(string) $data['not_required']);
 			$requiredFields = array_unique($requiredFields);
@@ -527,7 +583,7 @@ class ComponentbuilderModelServer extends JModelAdmin
 			}
 		}
 		return parent::validate($form, $data, $group);
-	} 
+	}
 
 	/**
 	 * Method to get the unique fields of this table.
@@ -536,7 +592,7 @@ class ComponentbuilderModelServer extends JModelAdmin
 	 *
 	 * @since   3.0
 	 */
-	protected function getUniqeFields()
+	protected function getUniqueFields()
 	{
 		return false;
 	}
@@ -595,7 +651,7 @@ class ComponentbuilderModelServer extends JModelAdmin
 	{
 		// Sanitize ids.
 		$pks = array_unique($pks);
-		JArrayHelper::toInteger($pks);
+		ArrayHelper::toInteger($pks);
 
 		// Remove any values of zero.
 		if (array_search(0, $pks, true))
@@ -636,7 +692,7 @@ class ComponentbuilderModelServer extends JModelAdmin
 
 		if (!empty($commands['move_copy']))
 		{
-			$cmd = JArrayHelper::getValue($commands, 'move_copy', 'c');
+			$cmd = ArrayHelper::getValue($commands, 'move_copy', 'c');
 
 			if ($cmd == 'c')
 			{
@@ -685,7 +741,7 @@ class ComponentbuilderModelServer extends JModelAdmin
 	 *
 	 * @return  mixed  An array of new IDs on success, boolean false on failure.
 	 *
-	 * @since	12.2
+	 * @since 12.2
 	 */
 	protected function batchCopy($values, $pks, $contexts)
 	{
@@ -703,8 +759,8 @@ class ComponentbuilderModelServer extends JModelAdmin
 			return false;
 		}
 
-		// get list of uniqe fields
-		$uniqeFields = $this->getUniqeFields();
+		// get list of unique fields
+		$uniqueFields = $this->getUniqueFields();
 		// remove move_copy from array
 		unset($values['move_copy']);
 
@@ -755,7 +811,7 @@ class ComponentbuilderModelServer extends JModelAdmin
 			// Only for strings
 			if (ComponentbuilderHelper::checkString($this->table->name) && !is_numeric($this->table->name))
 			{
-				$this->table->name = $this->generateUniqe('name',$this->table->name);
+				$this->table->name = $this->generateUnique('name',$this->table->name);
 			}
 
 			// insert all set values
@@ -770,12 +826,12 @@ class ComponentbuilderModelServer extends JModelAdmin
 				}
 			}
 
-			// update all uniqe fields
-			if (ComponentbuilderHelper::checkArray($uniqeFields))
+			// update all unique fields
+			if (ComponentbuilderHelper::checkArray($uniqueFields))
 			{
-				foreach ($uniqeFields as $uniqeField)
+				foreach ($uniqueFields as $uniqueField)
 				{
-					$this->table->$uniqeField = $this->generateUniqe($uniqeField,$this->table->$uniqeField);
+					$this->table->$uniqueField = $this->generateUnique($uniqueField,$this->table->$uniqueField);
 				}
 			}
 
@@ -783,7 +839,7 @@ class ComponentbuilderModelServer extends JModelAdmin
 			$this->table->id = 0;
 
 			// TODO: Deal with ordering?
-			// $this->table->ordering	= 1;
+			// $this->table->ordering = 1;
 
 			// Check the row.
 			if (!$this->table->check())
@@ -817,7 +873,7 @@ class ComponentbuilderModelServer extends JModelAdmin
 		$this->cleanCache();
 
 		return $newIds;
-	} 
+	}
 
 	/**
 	 * Batch move items to a new category
@@ -828,7 +884,7 @@ class ComponentbuilderModelServer extends JModelAdmin
 	 *
 	 * @return  boolean  True if successful, false otherwise and internal error is set.
 	 *
-	 * @since	12.2
+	 * @since 12.2
 	 */
 	protected function batchMove($values, $pks, $contexts)
 	{
@@ -949,7 +1005,7 @@ class ComponentbuilderModelServer extends JModelAdmin
 			$metadata = new JRegistry;
 			$metadata->loadArray($data['metadata']);
 			$data['metadata'] = (string) $metadata;
-		} 
+		}
 
 		// Get the basic encryption key.
 		$basickey = ComponentbuilderHelper::getCryptKey('basic');
@@ -1018,16 +1074,16 @@ class ComponentbuilderModelServer extends JModelAdmin
 			$data['params'] = (string) $params;
 		}
 
-		// Alter the uniqe field for save as copy
+		// Alter the unique field for save as copy
 		if ($input->get('task') === 'save2copy')
 		{
-			// Automatic handling of other uniqe fields
-			$uniqeFields = $this->getUniqeFields();
-			if (ComponentbuilderHelper::checkArray($uniqeFields))
+			// Automatic handling of other unique fields
+			$uniqueFields = $this->getUniqueFields();
+			if (ComponentbuilderHelper::checkArray($uniqueFields))
 			{
-				foreach ($uniqeFields as $uniqeField)
+				foreach ($uniqueFields as $uniqueField)
 				{
-					$data[$uniqeField] = $this->generateUniqe($uniqeField,$data[$uniqeField]);
+					$data[$uniqueField] = $this->generateUnique($uniqueField,$data[$uniqueField]);
 				}
 			}
 		}
@@ -1040,7 +1096,7 @@ class ComponentbuilderModelServer extends JModelAdmin
 	}
 	
 	/**
-	 * Method to generate a uniqe value.
+	 * Method to generate a unique value.
 	 *
 	 * @param   string  $field name.
 	 * @param   string  $value data.
@@ -1049,28 +1105,28 @@ class ComponentbuilderModelServer extends JModelAdmin
 	 *
 	 * @since   3.0
 	 */
-	protected function generateUniqe($field,$value)
+	protected function generateUnique($field,$value)
 	{
 
-		// set field value uniqe 
+		// set field value unique
 		$table = $this->getTable();
 
 		while ($table->load(array($field => $value)))
 		{
-			$value = JString::increment($value);
+			$value = StringHelper::increment($value);
 		}
 
 		return $value;
 	}
 
 	/**
-	* Method to change the title
-	*
-	* @param   string   $title   The title.
-	*
-	* @return	array  Contains the modified title and alias.
-	*
-	*/
+	 * Method to change the title
+	 *
+	 * @param   string   $title   The title.
+	 *
+	 * @return	array  Contains the modified title and alias.
+	 *
+	 */
 	protected function _generateNewTitle($title)
 	{
 
@@ -1079,7 +1135,7 @@ class ComponentbuilderModelServer extends JModelAdmin
 
 		while ($table->load(array('title' => $title)))
 		{
-			$title = JString::increment($title);
+			$title = StringHelper::increment($title);
 		}
 
 		return $title;

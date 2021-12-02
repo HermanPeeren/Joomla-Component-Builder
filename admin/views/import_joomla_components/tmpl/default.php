@@ -1,27 +1,13 @@
 <?php
-/*--------------------------------------------------------------------------------------------------------|  www.vdm.io  |------/
-    __      __       _     _____                 _                                  _     __  __      _   _               _
-    \ \    / /      | |   |  __ \               | |                                | |   |  \/  |    | | | |             | |
-     \ \  / /_ _ ___| |_  | |  | | _____   _____| | ___  _ __  _ __ ___   ___ _ __ | |_  | \  / | ___| |_| |__   ___   __| |
-      \ \/ / _` / __| __| | |  | |/ _ \ \ / / _ \ |/ _ \| '_ \| '_ ` _ \ / _ \ '_ \| __| | |\/| |/ _ \ __| '_ \ / _ \ / _` |
-       \  / (_| \__ \ |_  | |__| |  __/\ V /  __/ | (_) | |_) | | | | | |  __/ | | | |_  | |  | |  __/ |_| | | | (_) | (_| |
-        \/ \__,_|___/\__| |_____/ \___| \_/ \___|_|\___/| .__/|_| |_| |_|\___|_| |_|\__| |_|  |_|\___|\__|_| |_|\___/ \__,_|
-                                                        | |                                                                 
-                                                        |_| 				
-/-------------------------------------------------------------------------------------------------------------------------------/
-
-	@version		2.7.x
-	@created		30th April, 2015
-	@package		Component Builder
-	@subpackage		default.php
-	@author			Llewellyn van der Merwe <http://joomlacomponentbuilder.com>	
-	@github			Joomla Component Builder <https://github.com/vdm-io/Joomla-Component-Builder>
-	@copyright		Copyright (C) 2015. All Rights Reserved
-	@license		GNU/GPL Version 2 or later - http://www.gnu.org/licenses/gpl-2.0.html 
-	
-	Builds Complex Joomla Components 
-                                                             
-/-----------------------------------------------------------------------------------------------------------------------------*/
+/**
+ * @package    Joomla.Component.Builder
+ *
+ * @created    30th April, 2015
+ * @author     Llewellyn van der Merwe <http://www.joomlacomponentbuilder.com>
+ * @github     Joomla Component Builder <https://github.com/vdm-io/Joomla-Component-Builder>
+ * @copyright  Copyright (C) 2015 - 2020 Vast Development Method. All rights reserved.
+ * @license    GNU General Public License version 2 or later; see LICENSE.txt
+ */
 
 // No direct access to this file
 defined('_JEXEC') or die('Restricted access');
@@ -32,7 +18,7 @@ JHtml::_('script', 'system/core.js', false, true);
 JHtml::_('behavior.keepalive');
 ?>
 <script type="text/javascript">
-<?php if ($this->hasPackage && $this->dataType === 'smart_package'): ?>
+<?php if (isset($this->hasPackage) && $this->hasPackage && $this->dataType === 'smart_package'): ?>
 	Joomla.continueExtImport = function()
 	{
 		var form = document.getElementById('adminForm');
@@ -50,13 +36,14 @@ JHtml::_('behavior.keepalive');
 <?php else: ?>
 	Joomla.submitbutton = function(task)
 	{
-		if ('refresh' === task){
+		if ('joomla_component.refresh' === task){
 			jQuery('#loading').css('display', 'block');
 			// clear the history
 			jQuery.jStorage.flush();
 			// now start the update
 			autoJCBpackageInfo();
-			jQuery('#loading').hide();
+			// also clear the session memory around the component list
+			Joomla.submitform(task);
 		} else {
 			var form = document.getElementById('adminForm');
 			// do field validation
@@ -181,7 +168,7 @@ jQuery(document).ready(function($) {
 		<div style="text-align:right;"><small><a href="https://github.com/Llewellynvdm" target="_blank" style="color:gray">&lt;&lt;ewe&gt;&gt;yn</a></small></div>
 	</div>
 	<div id="installer-import">
-	<?php if ($this->hasPackage && $this->dataType === 'smart_package') : ?>
+	<?php if (isset($this->hasPackage) && $this->hasPackage && $this->dataType === 'smart_package') : ?>
 		<?php
 			if (isset($this->packageInfo['name']) && ComponentbuilderHelper::checkArray($this->packageInfo['name'])) 
 			{
@@ -290,11 +277,11 @@ jQuery(document).ready(function($) {
 			</fieldset>
 		<?php echo JHtml::_('bootstrap.endTab'); ?>
 
-		<?php if ($this->vdmPackages && ComponentbuilderHelper::checkArray($this->vdmPackages)): ?>
+		<?php if (isset($this->vdmPackages) && ComponentbuilderHelper::checkArray($this->vdmPackages)): ?>
 			<?php echo JHtml::_('bootstrap.addTab', 'jcbImportTab', 'url_vdm', JText::_('COM_COMPONENTBUILDER_VDM_PACKAGES', true)); ?>
 				<div class="span12" id="vdm_packages_installer">
 					<div class="alert alert-success">
-						<p><?php echo JText::sprintf('COM_COMPONENTBUILDER_ALL_OF_THESE_PACKAGES_ARE_A_FULLY_DEVELOPEDMAPPED_COMPONENTS_FOR_JCB_THEY_CAN_BE_SEEN_AS_DEMO_CONTENT_OR_BASE_IMAGES_FROM_WHICH_TO_START_YOUR_PROJECTBR_ALWAYS_MAKE_SURE_YOU_ARE_ON_THE_LATEST_VERSION_OF_JCB_BEFORE_IMPORTING_ANY_OF_THESE_PACKAGES_SHOULD_ANY_OF_THEM_FAIL_TO_IMPORT_A_S_PLEASE_LET_US_KNOWA', 'href="https://vdm.bz/jcb-package-support" target="_blank" title="Should any of these packages fail to import please let us know, some need a key of course."'); ?></p>
+						<p><?php echo JText::sprintf('COM_COMPONENTBUILDER_ALL_OF_THESE_PACKAGES_ARE_A_FULLY_DEVELOPEDMAPPED_COMPONENTS_FOR_JCB_THEY_CAN_BE_SEEN_AS_DEMO_CONTENT_OR_BASE_IMAGES_FROM_WHICH_TO_START_YOUR_PROJECTBR_ALWAYS_MAKE_SURE_YOU_ARE_ON_THE_LATEST_VERSION_OF_JCB_BEFORE_IMPORTING_ANY_OF_THESE_PACKAGES_SHOULD_ANY_OF_THEM_FAIL_TO_IMPORT_A_S_PLEASE_LET_US_KNOWA', 'href="https://www.joomlacomponentbuilder.com/package-support" target="_blank" title="Should any of these packages fail to import please let us know, some need a key of course."'); ?></p>
 						<p><?php echo JText::sprintf('COM_COMPONENTBUILDER_THESE_ARE_THE_SAME_PACKAGES_FOUND_ON_A_S_GITHUBA_AND_CAN_BE_IMPORTED_BY_SIMPLY_MAKING_A_SELECTION_AND_THEN_CLICKING_THE_BGET_PACKAGEB_BUTTONBR_SOME_OF_THESE_PACKAGES_WOULD_REQUIRE_A_KEY_SINCE_THEY_ARE_NOT_FREE_A_S_GET_A_KEY_TODAYA', 'href="https://github.com/vdm-io/JCB-Packages" target="_blank" title="gitHub Reposetory"', 'href="http://vdm.bz/jcb-packages" target="_blank" title="get a key to import the paid packages."'); ?></p>
 						<p><?php echo JText::sprintf('COM_COMPONENTBUILDER_HOW_TO_GET_A_S_FREE_KEYSA_FROM_VDM', 'href="https://vdm.bz/how-to-get-free-vdm-package-keys" target="_blank" title="see how easy it is to get access keys from VDM"'); ?></p>
 					</div>
@@ -309,7 +296,7 @@ jQuery(document).ready(function($) {
 						<div class="form-actions">
 							<input type="button" class="btn btn-primary" value="<?php echo JText::_('COM_COMPONENTBUILDER_GET_PACKAGE'); ?>" onclick="Joomla.submitbuttonVDM()" />&nbsp;&nbsp;&nbsp;<small><span class="icon-shield"> </span><?php echo JText::_('COM_COMPONENTBUILDER_OFFICIAL_VDM_PACKAGES'); ?></small>
 						</div>
-						<div class="control-group"><small><?php echo JText::sprintf('COM_COMPONENTBUILDER_A_S_SPAN_CLASSICONFLAG_SPANREPORT_BROKEN_PACKAGEA', 'href="https://vdm.bz/jcb-package-support" target="_blank" title="Should any of these packages fail to import please let us know"'); ?></small></div>
+						<div class="control-group"><small><?php echo JText::sprintf('COM_COMPONENTBUILDER_A_S_SPAN_CLASSICONFLAG_SPANREPORT_BROKEN_PACKAGEA', 'href="https://www.joomlacomponentbuilder.com/package-support" target="_blank" title="Should any of these packages fail to import please let us know"'); ?></small></div>
 					</fieldset>
 				</div>
 				<div id="vdm_packages_display">
@@ -321,11 +308,11 @@ jQuery(document).ready(function($) {
 			<?php echo JHtml::_('bootstrap.endTab'); ?>
 		<?php endif; ?>
 
-		<?php if ($this->jcbPackages && ComponentbuilderHelper::checkArray($this->jcbPackages)) : ?>
+		<?php if (isset($this->jcbPackages) && ComponentbuilderHelper::checkArray($this->jcbPackages)) : ?>
 			<?php echo JHtml::_('bootstrap.addTab', 'jcbImportTab', 'url_jcb', JText::_('COM_COMPONENTBUILDER_JCB_COMMUNITY_PACKAGES', true)); ?>
 				<div class="span12" id="jcb_packages_installer">
 					<div class="alert alert-success">
-						<p><?php echo JText::sprintf('COM_COMPONENTBUILDER_ALL_OF_THESE_PACKAGES_ARE_A_FULLY_DEVELOPEDMAPPED_COMPONENTS_FOR_JCB_THEY_CAN_BE_SEEN_AS_DEMO_CONTENT_OR_BASE_IMAGES_FROM_WHICH_TO_START_YOUR_PROJECTBR_ALWAYS_MAKE_SURE_YOU_ARE_ON_THE_LATEST_VERSION_OF_JCB_BEFORE_IMPORTING_ANY_OF_THESE_PACKAGES_SHOULD_ANY_OF_THEM_FAIL_TO_IMPORT_A_S_PLEASE_LET_US_KNOWA', 'href="https://vdm.bz/jcb-package-support" target="_blank" title="Should any of these packages fail to import please let us know, some need a key of course."'); ?></p>
+						<p><?php echo JText::sprintf('COM_COMPONENTBUILDER_ALL_OF_THESE_PACKAGES_ARE_A_FULLY_DEVELOPEDMAPPED_COMPONENTS_FOR_JCB_THEY_CAN_BE_SEEN_AS_DEMO_CONTENT_OR_BASE_IMAGES_FROM_WHICH_TO_START_YOUR_PROJECTBR_ALWAYS_MAKE_SURE_YOU_ARE_ON_THE_LATEST_VERSION_OF_JCB_BEFORE_IMPORTING_ANY_OF_THESE_PACKAGES_SHOULD_ANY_OF_THEM_FAIL_TO_IMPORT_A_S_PLEASE_LET_US_KNOWA', 'href="https://www.joomlacomponentbuilder.com/package-support" target="_blank" title="Should any of these packages fail to import please let us know, some need a key of course."'); ?></p>
 						<p><?php echo JText::sprintf('COM_COMPONENTBUILDER_THESE_ARE_THE_SAME_PACKAGES_FOUND_ON_A_S_GITHUBA_AND_CAN_BE_IMPORTED_BY_SIMPLY_MAKING_A_SELECTION_AND_THEN_CLICKING_THE_BGET_PACKAGEB_BUTTONBR_SOME_OF_THESE_PACKAGES_WOULD_REQUIRE_A_KEY_SINCE_THEY_ARE_NOT_FREE', 'href="https://github.com/vdm-io/JCB-Community-Packages" target="_blank" title="gitHub Reposetory"'); ?></p>
 						<p><?php echo JText::sprintf('COM_COMPONENTBUILDER_ADD_YOUR_OWN_JCB_PACKAGES_TO_THE_COMMUNITY_A_S_GITHUBA_REPOSITORYBR_WATCH_THIS_A_S_TUTORIALA_TO_SEE_HOW', 'href="https://github.com/vdm-io/JCB-Community-Packages" target="_blank" title="gitHub Reposetory"',  'href="https://vdm.bz/add-jcb-community-package" target="_blank" title="watch the quick tutorial on how to add your own packages to this list of community packages"'); ?></p>
 					</div>
@@ -340,7 +327,7 @@ jQuery(document).ready(function($) {
 						<div class="form-actions">
 							<input type="button" class="btn btn-primary" value="<?php echo JText::_('COM_COMPONENTBUILDER_GET_PACKAGE'); ?>" onclick="Joomla.submitbuttonJCB()" />&nbsp;&nbsp;&nbsp;<small><span class="icon-shield"> </span><?php echo JText::_('COM_COMPONENTBUILDER_COMMUNITY_PACKAGES'); ?></small>
 						</div>
-						<div class="control-group"><small><?php echo JText::sprintf('COM_COMPONENTBUILDER_A_S_SPAN_CLASSICONFLAG_SPANREPORT_BROKEN_PACKAGEA', 'href="https://vdm.bz/jcb-package-support" target="_blank" title="Should any of these packages fail to import please let us know"'); ?></small></div>
+						<div class="control-group"><small><?php echo JText::sprintf('COM_COMPONENTBUILDER_A_S_SPAN_CLASSICONFLAG_SPANREPORT_BROKEN_PACKAGEA', 'href="https://www.joomlacomponentbuilder.com/package-support" target="_blank" title="Should any of these packages fail to import please let us know"'); ?></small></div>
 					</fieldset>
 				</div>
 				<div id="jcb_packages_display">
@@ -362,12 +349,12 @@ jQuery(document).ready(function($) {
 </form>
 </div>
 <script type="text/javascript">
-<?php if (($this->vdmPackages && ComponentbuilderHelper::checkArray($this->vdmPackages)) || ($this->jcbPackages && ComponentbuilderHelper::checkArray($this->jcbPackages))): ?>
+<?php if ((isset($this->vdmPackages) && $this->vdmPackages && ComponentbuilderHelper::checkArray($this->vdmPackages)) || (isset($this->jcbPackages) && $this->jcbPackages && ComponentbuilderHelper::checkArray($this->jcbPackages))): ?>
 // set packages that are on the page
 var packages = {};
 jQuery(document).ready(function($)
 {
-<?php if ($this->jcbPackages && ComponentbuilderHelper::checkArray($this->jcbPackages)): ?>
+<?php if (isset($this->jcbPackages) && $this->jcbPackages && ComponentbuilderHelper::checkArray($this->jcbPackages)): ?>
 	// get all jcb packages
 	jQuery("#jcb_package option").each(function()
 	{
@@ -375,7 +362,7 @@ jQuery(document).ready(function($)
 		packages[key] = 'jcb';
 	});
 <?php endif; ?>
-<?php if ($this->vdmPackages && ComponentbuilderHelper::checkArray($this->vdmPackages)): ?>
+<?php if (isset($this->vdmPackages) && $this->vdmPackages && ComponentbuilderHelper::checkArray($this->vdmPackages)): ?>
 	// get all vdm packages
 	jQuery("#vdm_package option").each(function()
 	{
@@ -548,7 +535,7 @@ jQuery(document).ready( function($) {
 ?>
 function JRouter(link) {
 <?php
-	if ($app->isSite())
+	if ($app->isClient('site'))
 	{
 		echo 'var url = "'.JURI::root().'";';
 	}

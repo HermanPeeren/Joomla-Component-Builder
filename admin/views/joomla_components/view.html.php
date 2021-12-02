@@ -1,33 +1,16 @@
 <?php
-/*--------------------------------------------------------------------------------------------------------|  www.vdm.io  |------/
-    __      __       _     _____                 _                                  _     __  __      _   _               _
-    \ \    / /      | |   |  __ \               | |                                | |   |  \/  |    | | | |             | |
-     \ \  / /_ _ ___| |_  | |  | | _____   _____| | ___  _ __  _ __ ___   ___ _ __ | |_  | \  / | ___| |_| |__   ___   __| |
-      \ \/ / _` / __| __| | |  | |/ _ \ \ / / _ \ |/ _ \| '_ \| '_ ` _ \ / _ \ '_ \| __| | |\/| |/ _ \ __| '_ \ / _ \ / _` |
-       \  / (_| \__ \ |_  | |__| |  __/\ V /  __/ | (_) | |_) | | | | | |  __/ | | | |_  | |  | |  __/ |_| | | | (_) | (_| |
-        \/ \__,_|___/\__| |_____/ \___| \_/ \___|_|\___/| .__/|_| |_| |_|\___|_| |_|\__| |_|  |_|\___|\__|_| |_|\___/ \__,_|
-                                                        | |                                                                 
-                                                        |_| 				
-/-------------------------------------------------------------------------------------------------------------------------------/
-
-	@version		2.7.x
-	@created		30th April, 2015
-	@package		Component Builder
-	@subpackage		view.html.php
-	@author			Llewellyn van der Merwe <http://joomlacomponentbuilder.com>	
-	@github			Joomla Component Builder <https://github.com/vdm-io/Joomla-Component-Builder>
-	@copyright		Copyright (C) 2015. All Rights Reserved
-	@license		GNU/GPL Version 2 or later - http://www.gnu.org/licenses/gpl-2.0.html 
-	
-	Builds Complex Joomla Components 
-                                                             
-/-----------------------------------------------------------------------------------------------------------------------------*/
+/**
+ * @package    Joomla.Component.Builder
+ *
+ * @created    30th April, 2015
+ * @author     Llewellyn van der Merwe <http://www.joomlacomponentbuilder.com>
+ * @github     Joomla Component Builder <https://github.com/vdm-io/Joomla-Component-Builder>
+ * @copyright  Copyright (C) 2015 - 2020 Vast Development Method. All rights reserved.
+ * @license    GNU General Public License version 2 or later; see LICENSE.txt
+ */
 
 // No direct access to this file
 defined('_JEXEC') or die('Restricted access');
-
-// import Joomla view library
-jimport('joomla.application.component.view');
 
 /**
  * Componentbuilder View class for the Joomla_components
@@ -51,9 +34,16 @@ class ComponentbuilderViewJoomla_components extends JViewLegacy
 		$this->pagination = $this->get('Pagination');
 		$this->state = $this->get('State');
 		$this->user = JFactory::getUser();
-		$this->listOrder = $this->escape($this->state->get('list.ordering'));
-		$this->listDirn = $this->escape($this->state->get('list.direction'));
-		$this->saveOrder = $this->listOrder == 'ordering';
+		// Load the filter form from xml.
+		$this->filterForm = $this->get('FilterForm');
+		// Load the active filters.
+		$this->activeFilters = $this->get('ActiveFilters');
+		// Add the list ordering clause.
+		$this->listOrder = $this->escape($this->state->get('list.ordering', 'a.id'));
+		$this->listDirn = $this->escape($this->state->get('list.direction', 'desc'));
+		$this->saveOrder = $this->listOrder == 'a.ordering';
+		// set the return here value
+		$this->return_here = urlencode(base64_encode((string) JUri::getInstance()));
 		// get global action permissions
 		$this->canDo = ComponentbuilderHelper::getActions('joomla_component');
 		$this->canEdit = $this->canDo->get('joomla_component.edit');
@@ -133,21 +123,16 @@ class ComponentbuilderViewJoomla_components extends JViewLegacy
 				// add the button to the page
 				$dhtml = $layout->render(array('title' => $title));
 				$bar->appendButton('Custom', $dhtml, 'batch');
-			} 
-			if ($this->user->authorise('joomla_component.export_jcb_packages', 'com_componentbuilder'))
-			{
-				// add Export JCB Packages button.
-				JToolBarHelper::custom('joomla_components.smartExport', 'download', '', 'COM_COMPONENTBUILDER_EXPORT_JCB_PACKAGES', false);
-			}
-			if ($this->user->authorise('joomla_component.backup', 'com_componentbuilder'))
-			{
-				// add Backup button.
-				JToolBarHelper::custom('joomla_components.backup', 'archive', '', 'COM_COMPONENTBUILDER_BACKUP', false);
 			}
 			if ($this->user->authorise('joomla_component.clone', 'com_componentbuilder'))
 			{
 				// add Clone button.
-				JToolBarHelper::custom('joomla_components.cloner', 'save-copy', '', 'COM_COMPONENTBUILDER_CLONE', false);
+				JToolBarHelper::custom('joomla_components.cloner', 'save-copy custom-button-cloner', '', 'COM_COMPONENTBUILDER_CLONE', 'true');
+			}
+			if ($this->user->authorise('joomla_component.export_jcb_packages', 'com_componentbuilder'))
+			{
+				// add Export JCB Packages button.
+				JToolBarHelper::custom('joomla_components.smartExport', 'download custom-button-smartexport', '', 'COM_COMPONENTBUILDER_EXPORT_JCB_PACKAGES', 'true');
 			}
 
 			if ($this->state->get('filter.published') == -2 && ($this->canState && $this->canDelete))
@@ -167,8 +152,23 @@ class ComponentbuilderViewJoomla_components extends JViewLegacy
 		if ($this->user->authorise('joomla_component.import_jcb_packages', 'com_componentbuilder'))
 		{
 			// add Import JCB Packages button.
-			JToolBarHelper::custom('joomla_components.smartImport', 'upload', '', 'COM_COMPONENTBUILDER_IMPORT_JCB_PACKAGES', false);
-		} 
+			JToolBarHelper::custom('joomla_components.smartImport', 'upload custom-button-smartimport', '', 'COM_COMPONENTBUILDER_IMPORT_JCB_PACKAGES', false);
+		}
+		if ($this->user->authorise('joomla_component.run_expansion', 'com_componentbuilder'))
+		{
+			// add Run Expansion button.
+			JToolBarHelper::custom('joomla_components.runExpansion', 'expand-2 custom-button-runexpansion', '', 'COM_COMPONENTBUILDER_RUN_EXPANSION', false);
+		}
+		if ($this->user->authorise('joomla_component.backup', 'com_componentbuilder'))
+		{
+			// add Backup button.
+			JToolBarHelper::custom('joomla_components.backup', 'archive custom-button-backup', '', 'COM_COMPONENTBUILDER_BACKUP', false);
+		}
+		if ($this->user->authorise('joomla_component.clear_tmp', 'com_componentbuilder'))
+		{
+			// add Clear tmp button.
+			JToolBarHelper::custom('joomla_components.clearTmp', 'purge custom-button-cleartmp', '', 'COM_COMPONENTBUILDER_CLEAR_TMP', false);
+		}
 
 		if ($this->canDo->get('core.import') && $this->canDo->get('joomla_component.import'))
 		{
@@ -188,30 +188,17 @@ class ComponentbuilderViewJoomla_components extends JViewLegacy
 			JToolBarHelper::preferences('com_componentbuilder');
 		}
 
-		if ($this->canState)
+		// Only load published batch if state and batch is allowed
+		if ($this->canState && $this->canBatch)
 		{
-			JHtmlSidebar::addFilter(
-				JText::_('JOPTION_SELECT_PUBLISHED'),
-				'filter_published',
-				JHtml::_('select.options', JHtml::_('jgrid.publishedOptions'), 'value', 'text', $this->state->get('filter.published'), true)
+			JHtmlBatch_::addListSelection(
+				JText::_('COM_COMPONENTBUILDER_KEEP_ORIGINAL_STATE'),
+				'batch[published]',
+				JHtml::_('select.options', JHtml::_('jgrid.publishedOptions', array('all' => false)), 'value', 'text', '', true)
 			);
-			// only load if batch allowed
-			if ($this->canBatch)
-			{
-				JHtmlBatch_::addListSelection(
-					JText::_('COM_COMPONENTBUILDER_KEEP_ORIGINAL_STATE'),
-					'batch[published]',
-					JHtml::_('select.options', JHtml::_('jgrid.publishedOptions', array('all' => false)), 'value', 'text', '', true)
-				);
-			}
 		}
 
-		JHtmlSidebar::addFilter(
-			JText::_('JOPTION_SELECT_ACCESS'),
-			'filter_access',
-			JHtml::_('select.options', JHtml::_('access.assetgroups'), 'value', 'text', $this->state->get('filter.access'))
-		);
-
+		// Only load access batch if create, edit and batch is allowed
 		if ($this->canBatch && $this->canCreate && $this->canEdit)
 		{
 			JHtmlBatch_::addListSelection(
@@ -219,50 +206,46 @@ class ComponentbuilderViewJoomla_components extends JViewLegacy
 				'batch[access]',
 				JHtml::_('select.options', JHtml::_('access.assetgroups'), 'value', 'text')
 			);
-		} 
-
-		// Set Companyname Selection
-		$this->companynameOptions = $this->getTheCompanynameSelections();
-		if ($this->companynameOptions)
-		{
-			// Companyname Filter
-			JHtmlSidebar::addFilter(
-				'- Select '.JText::_('COM_COMPONENTBUILDER_JOOMLA_COMPONENT_COMPANYNAME_LABEL').' -',
-				'filter_companyname',
-				JHtml::_('select.options', $this->companynameOptions, 'value', 'text', $this->state->get('filter.companyname'))
-			);
-
-			if ($this->canBatch && $this->canCreate && $this->canEdit)
-			{
-				// Companyname Batch Selection
-				JHtmlBatch_::addListSelection(
-					'- Keep Original '.JText::_('COM_COMPONENTBUILDER_JOOMLA_COMPONENT_COMPANYNAME_LABEL').' -',
-					'batch[companyname]',
-					JHtml::_('select.options', $this->companynameOptions, 'value', 'text')
-				);
-			}
 		}
 
-		// Set Author Selection
-		$this->authorOptions = $this->getTheAuthorSelections();
-		if ($this->authorOptions)
+		// Only load Companyname batch if create, edit, and batch is allowed
+		if ($this->canBatch && $this->canCreate && $this->canEdit)
 		{
-			// Author Filter
-			JHtmlSidebar::addFilter(
-				'- Select '.JText::_('COM_COMPONENTBUILDER_JOOMLA_COMPONENT_AUTHOR_LABEL').' -',
-				'filter_author',
-				JHtml::_('select.options', $this->authorOptions, 'value', 'text', $this->state->get('filter.author'))
-			);
-
-			if ($this->canBatch && $this->canCreate && $this->canEdit)
+			// Set Companyname Selection
+			$this->companynameOptions = JFormHelper::loadFieldType('joomlacomponentsfiltercompanyname')->options;
+			// We do some sanitation for Companyname filter
+			if (ComponentbuilderHelper::checkArray($this->companynameOptions) &&
+				isset($this->companynameOptions[0]->value) &&
+				!ComponentbuilderHelper::checkString($this->companynameOptions[0]->value))
 			{
-				// Author Batch Selection
-				JHtmlBatch_::addListSelection(
-					'- Keep Original '.JText::_('COM_COMPONENTBUILDER_JOOMLA_COMPONENT_AUTHOR_LABEL').' -',
-					'batch[author]',
-					JHtml::_('select.options', $this->authorOptions, 'value', 'text')
-				);
+				unset($this->companynameOptions[0]);
 			}
+			// Companyname Batch Selection
+			JHtmlBatch_::addListSelection(
+				'- Keep Original '.JText::_('COM_COMPONENTBUILDER_JOOMLA_COMPONENT_COMPANYNAME_LABEL').' -',
+				'batch[companyname]',
+				JHtml::_('select.options', $this->companynameOptions, 'value', 'text')
+			);
+		}
+
+		// Only load Author batch if create, edit, and batch is allowed
+		if ($this->canBatch && $this->canCreate && $this->canEdit)
+		{
+			// Set Author Selection
+			$this->authorOptions = JFormHelper::loadFieldType('joomlacomponentsfilterauthor')->options;
+			// We do some sanitation for Author filter
+			if (ComponentbuilderHelper::checkArray($this->authorOptions) &&
+				isset($this->authorOptions[0]->value) &&
+				!ComponentbuilderHelper::checkString($this->authorOptions[0]->value))
+			{
+				unset($this->authorOptions[0]);
+			}
+			// Author Batch Selection
+			JHtmlBatch_::addListSelection(
+				'- Keep Original '.JText::_('COM_COMPONENTBUILDER_JOOMLA_COMPONENT_AUTHOR_LABEL').' -',
+				'batch[author]',
+				JHtml::_('select.options', $this->authorOptions, 'value', 'text')
+			);
 		}
 	}
 
@@ -307,79 +290,13 @@ class ComponentbuilderViewJoomla_components extends JViewLegacy
 	protected function getSortFields()
 	{
 		return array(
-			'a.sorting' => JText::_('JGRID_HEADING_ORDERING'),
+			'a.ordering' => JText::_('JGRID_HEADING_ORDERING'),
 			'a.published' => JText::_('JSTATUS'),
 			'a.system_name' => JText::_('COM_COMPONENTBUILDER_JOOMLA_COMPONENT_SYSTEM_NAME_LABEL'),
 			'a.name_code' => JText::_('COM_COMPONENTBUILDER_JOOMLA_COMPONENT_NAME_CODE_LABEL'),
-			'a.component_version' => JText::_('COM_COMPONENTBUILDER_JOOMLA_COMPONENT_COMPONENT_VERSION_LABEL'),
 			'a.short_description' => JText::_('COM_COMPONENTBUILDER_JOOMLA_COMPONENT_SHORT_DESCRIPTION_LABEL'),
 			'a.companyname' => JText::_('COM_COMPONENTBUILDER_JOOMLA_COMPONENT_COMPANYNAME_LABEL'),
-			'a.author' => JText::_('COM_COMPONENTBUILDER_JOOMLA_COMPONENT_AUTHOR_LABEL'),
 			'a.id' => JText::_('JGRID_HEADING_ID')
 		);
-	}
-
-	protected function getTheCompanynameSelections()
-	{
-		// Get a db connection.
-		$db = JFactory::getDbo();
-
-		// Create a new query object.
-		$query = $db->getQuery(true);
-
-		// Select the text.
-		$query->select($db->quoteName('companyname'));
-		$query->from($db->quoteName('#__componentbuilder_joomla_component'));
-		$query->order($db->quoteName('companyname') . ' ASC');
-
-		// Reset the query using our newly populated query object.
-		$db->setQuery($query);
-
-		$results = $db->loadColumn();
-
-		if ($results)
-		{
-			$results = array_unique($results);
-			$_filter = array();
-			foreach ($results as $companyname)
-			{
-				// Now add the companyname and its text to the options array
-				$_filter[] = JHtml::_('select.option', $companyname, $companyname);
-			}
-			return $_filter;
-		}
-		return false;
-	}
-
-	protected function getTheAuthorSelections()
-	{
-		// Get a db connection.
-		$db = JFactory::getDbo();
-
-		// Create a new query object.
-		$query = $db->getQuery(true);
-
-		// Select the text.
-		$query->select($db->quoteName('author'));
-		$query->from($db->quoteName('#__componentbuilder_joomla_component'));
-		$query->order($db->quoteName('author') . ' ASC');
-
-		// Reset the query using our newly populated query object.
-		$db->setQuery($query);
-
-		$results = $db->loadColumn();
-
-		if ($results)
-		{
-			$results = array_unique($results);
-			$_filter = array();
-			foreach ($results as $author)
-			{
-				// Now add the author and its text to the options array
-				$_filter[] = JHtml::_('select.option', $author, $author);
-			}
-			return $_filter;
-		}
-		return false;
 	}
 }

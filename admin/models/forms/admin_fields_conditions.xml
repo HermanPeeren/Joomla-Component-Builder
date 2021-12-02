@@ -93,6 +93,7 @@
 			description="COM_COMPONENTBUILDER_ADMIN_FIELDS_CONDITIONS_ADMIN_VIEW_DESCRIPTION"
 			class="list_class"
 			multiple="false"
+			default=""
 			required="true"
 			readonly="true"
 			button="false"
@@ -102,9 +103,10 @@
 			type="subform"
 			name="addconditions"
 			label="COM_COMPONENTBUILDER_ADMIN_FIELDS_CONDITIONS_ADDCONDITIONS_LABEL"
-			layout="joomla.form.field.subform.repeatable-table"
+			layout="repeatablejcb"
 			multiple="true"
 			description="COM_COMPONENTBUILDER_ADMIN_FIELDS_CONDITIONS_ADDCONDITIONS_DESCRIPTION"
+			default=""
 			icon="list">
 			<form hidden="true" name="list_addconditions_modal" repeat="true">
 				<!-- Target_field Field. Type: Targetfields. (custom) -->
@@ -113,9 +115,10 @@
 					name="target_field"
 					label="COM_COMPONENTBUILDER_ADMIN_FIELDS_CONDITIONS_TARGET_FIELD_LABEL"
 					description="COM_COMPONENTBUILDER_ADMIN_FIELDS_CONDITIONS_TARGET_FIELD_DESCRIPTION"
-					class="fieldMedium"
+					class="fieldLarge"
 					multiple="true"
-					required="false"
+					default=""
+					required="true"
 					button="false"
 				/>
 				<!-- Target_behavior Field. Type: List. (joomla) -->
@@ -124,16 +127,20 @@
 					name="target_behavior"
 					label="COM_COMPONENTBUILDER_ADMIN_FIELDS_CONDITIONS_TARGET_BEHAVIOR_LABEL"
 					description="COM_COMPONENTBUILDER_ADMIN_FIELDS_CONDITIONS_TARGET_BEHAVIOR_DESCRIPTION"
-					class="list_class"
+					class="list_class fieldLarge"
 					multiple="false"
 					filter="INT"
-					required="false"
+					required="true"
 					default="1">
 					<!-- Option Set. -->
 					<option value="1">
-						COM_COMPONENTBUILDER_ADMIN_FIELDS_CONDITIONS_SHOW</option>
+						COM_COMPONENTBUILDER_ADMIN_FIELDS_CONDITIONS_SHOW_TOGGLE</option>
 					<option value="2">
-						COM_COMPONENTBUILDER_ADMIN_FIELDS_CONDITIONS_HIDE</option>
+						COM_COMPONENTBUILDER_ADMIN_FIELDS_CONDITIONS_HIDE_TOGGLE</option>
+					<option value="3">
+						COM_COMPONENTBUILDER_ADMIN_FIELDS_CONDITIONS_SHOW_ONLY</option>
+					<option value="4">
+						COM_COMPONENTBUILDER_ADMIN_FIELDS_CONDITIONS_HIDE_ONLY</option>
 				</field>
 				<!-- Target_relation Field. Type: List. (joomla) -->
 				<field
@@ -141,10 +148,10 @@
 					name="target_relation"
 					label="COM_COMPONENTBUILDER_ADMIN_FIELDS_CONDITIONS_TARGET_RELATION_LABEL"
 					description="COM_COMPONENTBUILDER_ADMIN_FIELDS_CONDITIONS_TARGET_RELATION_DESCRIPTION"
-					class="list_class"
+					class="list_class fieldLarge"
 					multiple="false"
 					filter="INT"
-					required="false"
+					required="true"
 					default="0">
 					<!-- Option Set. -->
 					<option value="0">
@@ -158,8 +165,9 @@
 					name="match_field"
 					label="COM_COMPONENTBUILDER_ADMIN_FIELDS_CONDITIONS_MATCH_FIELD_LABEL"
 					description="COM_COMPONENTBUILDER_ADMIN_FIELDS_CONDITIONS_MATCH_FIELD_DESCRIPTION"
+					class="fieldLarge"
 					multiple="false"
-					required="false"
+					required="true"
 					button="false"
 				/>
 				<!-- Match_behavior Field. Type: List. (joomla) -->
@@ -168,10 +176,10 @@
 					name="match_behavior"
 					label="COM_COMPONENTBUILDER_ADMIN_FIELDS_CONDITIONS_MATCH_BEHAVIOR_LABEL"
 					description="COM_COMPONENTBUILDER_ADMIN_FIELDS_CONDITIONS_MATCH_BEHAVIOR_DESCRIPTION"
-					class="list_class"
+					class="list_class fieldLarge"
 					multiple="false"
 					filter="INT"
-					required="false"
+					required="true"
 					default="1">
 					<!-- Option Set. -->
 					<option value="1">
@@ -209,7 +217,7 @@
 					class="text_area"
 					filter="STRING"
 					hint="COM_COMPONENTBUILDER_ADMIN_FIELDS_CONDITIONS_MATCH_OPTIONS_HINT"
-					required="false"
+					required="true"
 				/>
 			</form>
 		</field>

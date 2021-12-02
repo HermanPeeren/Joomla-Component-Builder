@@ -212,6 +212,12 @@
 				"path": "c0mp0n3nt/site/helpers",
 				"rename": false,
 				"type": "file"
+			},
+			"import.gif": {
+				"naam": "import.gif",
+				"path": "c0mp0n3nt/admin/assets/images",
+				"rename": false,
+				"type": "file"
 			}
 		},
 		"dynamic": {
@@ -262,6 +268,11 @@
 					"path": "c0mp0n3nt/admin/assets/css",
 					"rename": false,
 					"type": "dashboard"
+				},
+				"filter_forms.xml": {
+					"path": "c0mp0n3nt/admin/models/forms",
+					"rename": "filter_forms",
+					"type": "filter"
 				},
 				"module_forms.xml": {
 					"path": "c0mp0n3nt/admin/models/forms",
@@ -370,6 +381,11 @@
 					"rename": "JFormRule",
 					"type": "rule"
 				},
+				"layout_admin.php": {
+					"path": "c0mp0n3nt/admin/layouts",
+					"rename": "layout_admin",
+					"type": "layout"
+				},
 				"layoutitems.php": {
 					"path": "c0mp0n3nt/admin/layouts/VIEW",
 					"rename": "layoutitems",
@@ -399,6 +415,11 @@
 					"path": "c0mp0n3nt/admin/layouts/VIEW",
 					"rename": "layoutmetadata",
 					"type": "layoutmetadata"
+				},
+				"JFormFieldCustom.php": {
+					"path": "c0mp0n3nt/admin/models/fields",
+					"rename": "JFormFieldCustom",
+					"type": "fieldcustom"
 				},
 				"JFormFieldList.php": {
 					"path": "c0mp0n3nt/admin/models/fields",
@@ -456,11 +477,6 @@
 					"newName": "default.php",
 					"type": "import"
 				},
-				"import.gif": {
-					"path": "c0mp0n3nt/admin/assets/images",
-					"rename": false,
-					"type": "import"
-				},
 				"JControllerLegacy_import_custom.php": {
 					"path": "c0mp0n3nt/admin/controllers",
 					"rename": "JControllerLegacy_import_custom",
@@ -498,6 +514,11 @@
 					"path": "c0mp0n3nt/",
 					"rename": "update_server",
 					"type": "update_server"
+				},
+				"viewFile.js": {
+					"path": "c0mp0n3nt/admin/assets/js",
+					"rename": "viewFile",
+					"type": "javascript_file"
 				}
 			},
 			"site": {
@@ -589,6 +610,11 @@
 					"path": "c0mp0n3nt/site/views/VIEW/tmpl",
 					"rename": false,
 					"type": "menu"
+				},
+				"edit.xml": {
+					"path": "c0mp0n3nt/site/views/VIEW/tmpl",
+					"rename": false,
+					"type": "admin_menu"
 				},
 				"module_forms.xml": {
 					"path": "c0mp0n3nt/site/models/forms",

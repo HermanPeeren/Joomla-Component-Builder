@@ -1,25 +1,13 @@
 <?php
-/*--------------------------------------------------------------------------------------------------------|  www.vdm.io  |------/
-    __      __       _     _____                 _                                  _     __  __      _   _               _
-    \ \    / /      | |   |  __ \               | |                                | |   |  \/  |    | | | |             | |
-     \ \  / /_ _ ___| |_  | |  | | _____   _____| | ___  _ __  _ __ ___   ___ _ __ | |_  | \  / | ___| |_| |__   ___   __| |
-      \ \/ / _` / __| __| | |  | |/ _ \ \ / / _ \ |/ _ \| '_ \| '_ ` _ \ / _ \ '_ \| __| | |\/| |/ _ \ __| '_ \ / _ \ / _` |
-       \  / (_| \__ \ |_  | |__| |  __/\ V /  __/ | (_) | |_) | | | | | |  __/ | | | |_  | |  | |  __/ |_| | | | (_) | (_| |
-        \/ \__,_|___/\__| |_____/ \___| \_/ \___|_|\___/| .__/|_| |_| |_|\___|_| |_|\__| |_|  |_|\___|\__|_| |_|\___/ \__,_|
-                                                        | |                                                                 
-                                                        |_| 				
-/-------------------------------------------------------------------------------------------------------------------------------/
-
-	@package		Component Builder
-	@subpackage		componentbuilder.php
-	@author			Llewellyn van der Merwe <https://www.vdm.io/joomla-component-builder>
-	@my wife		Roline van der Merwe <http://www.vdm.io/>	
-	@copyright		Copyright (C) 2015. All Rights Reserved
-	@license		GNU/GPL Version 2 or later - http://www.gnu.org/licenses/gpl-2.0.html 
-	
-	Builds Complex Joomla Components 
-                                                             
-/-----------------------------------------------------------------------------------------------------------------------------*/
+/**
+ * @package    Joomla.Component.Builder
+ *
+ * @created    30th April, 2015
+ * @author     Llewellyn van der Merwe <http://www.joomlacomponentbuilder.com>
+ * @github     Joomla Component Builder <https://github.com/vdm-io/Joomla-Component-Builder>
+ * @copyright  Copyright (C) 2015 - 2018 Vast Development Method. All rights reserved.
+ * @license    GNU General Public License version 2 or later; see LICENSE.txt
+ */
 
 // No direct access to this file
 defined('_JEXEC') or die('Restricted access');
@@ -28,10 +16,6 @@ defined('_JEXEC') or die('Restricted access');
 
 // No direct access to this file
 defined('_JEXEC') or die('Restricted access');
-
-// import the Joomla modellist library
-jimport('joomla.application.component.modellist');
-jimport('joomla.application.component.helper');
 
 /**
  * ###Component### Model
@@ -67,8 +51,8 @@ class ###Component###Model###Component### extends JModelList
 							$viewName 	= $name;
 							$alt 		= $name;
 							$url 		= $url;
-							$image 		= $name.'.'.$type;
-							$name 		= 'COM_###COMPONENT###_DASHBOARD_'.###Component###Helper::safeString($name,'U');
+							$image 		= $name . '.' . $type;
+							$name 		= 'COM_###COMPONENT###_DASHBOARD_' . ###Component###Helper::safeString($name,'U');
 						}
 					}
 					// internal views
@@ -90,17 +74,27 @@ class ###Component###Model###Component### extends JModelList
 							switch($action)
 							{
 								case 'add':
-									$url 	= 'index.php?option=com_###component###&view='.$name.'&layout=edit';
-									$image 	= $name.'_'.$action.'.'.$type;
-									$alt 	= $name.'&nbsp;'.$action;
+									$url	= 'index.php?option=com_###component###&view=' . $name . '&layout=edit';
+									$image	= $name . '_' . $action.  '.' . $type;
+									$alt	= $name . '&nbsp;' . $action;
 									$name	= 'COM_###COMPONENT###_DASHBOARD_'.###Component###Helper::safeString($name,'U').'_ADD';
 									$add	= true;
 								break;
 								default:
-									$url 	= 'index.php?option=com_categories&view=categories&extension=com_###component###.'.$name;
-									$image 	= $name.'_'.$action.'.'.$type;
-									$alt 	= $name.'&nbsp;'.$action;
-									$name	= 'COM_###COMPONENT###_DASHBOARD_'.###Component###Helper::safeString($name,'U').'_'.###Component###Helper::safeString($action,'U');
+									// check for new convention (more stable)
+									if (strpos($action, '_qpo0O0oqp_') !== false)
+									{
+										list($action, $extension) = (array) explode('_qpo0O0oqp_', $action);
+										$extension = str_replace('_po0O0oq_', '.', $extension);
+									}
+									else
+									{
+										$extension = 'com_###component###.' . $name;
+									}
+									$url	= 'index.php?option=com_categories&view=categories&extension=' . $extension;
+									$image	= $name . '_' . $action . '.' . $type;
+									$alt	= $viewName . '&nbsp;' . $action;
+									$name	= 'COM_###COMPONENT###_DASHBOARD_' . ###Component###Helper::safeString($name,'U') . '_' . ###Component###Helper::safeString($action,'U');
 								break;
 							}
 						}
@@ -108,9 +102,9 @@ class ###Component###Model###Component### extends JModelList
 						{
 							$viewName 	= $name;
 							$alt 		= $name;
-							$url 		= 'index.php?option=com_###component###&view='.$name;
-							$image 		= $name.'.'.$type;
-							$name 		= 'COM_###COMPONENT###_DASHBOARD_'.###Component###Helper::safeString($name,'U');
+							$url 		= 'index.php?option=com_###component###&view=' . $name;
+							$image 		= $name . '.' . $type;
+							$name 		= 'COM_###COMPONENT###_DASHBOARD_' . ###Component###Helper::safeString($name,'U');
 							$hover		= false;
 						}
 					}
@@ -118,8 +112,8 @@ class ###Component###Model###Component### extends JModelList
 					{
 						$viewName 	= $view;
 						$alt 		= $view;
-						$url 		= 'index.php?option=com_###component###&view='.$view;
-						$image 		= $view.'.png';
+						$url 		= 'index.php?option=com_###component###&view=' . $view;
+						$image 		= $view . '.png';
 						$name 		= ucwords($view).'<br /><br />';
 						$hover		= false;
 					}
@@ -131,7 +125,7 @@ class ###Component###Model###Component### extends JModelList
 						$dashboard_list = false;
 						$accessTo = '';
 						$accessAdd = '';
-						// acces checking start
+						// access checking start
 						$accessCreate = (isset($viewAccess[$viewName.'.create'])) ? ###Component###Helper::checkString($viewAccess[$viewName.'.create']):false;
 						$accessAccess = (isset($viewAccess[$viewName.'.access'])) ? ###Component###Helper::checkString($viewAccess[$viewName.'.access']):false;
 						// set main controllers
@@ -146,7 +140,7 @@ class ###Component###Model###Component### extends JModelList
 						{
 							$accessAdd = 'core.create';
 						}
-						// check if acces to view is set
+						// check if access to view is set
 						if ($accessAccess)
 						{
 							$accessTo = $viewAccess[$viewName.'.access'];

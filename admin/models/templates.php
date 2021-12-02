@@ -1,33 +1,18 @@
 <?php
-/*--------------------------------------------------------------------------------------------------------|  www.vdm.io  |------/
-    __      __       _     _____                 _                                  _     __  __      _   _               _
-    \ \    / /      | |   |  __ \               | |                                | |   |  \/  |    | | | |             | |
-     \ \  / /_ _ ___| |_  | |  | | _____   _____| | ___  _ __  _ __ ___   ___ _ __ | |_  | \  / | ___| |_| |__   ___   __| |
-      \ \/ / _` / __| __| | |  | |/ _ \ \ / / _ \ |/ _ \| '_ \| '_ ` _ \ / _ \ '_ \| __| | |\/| |/ _ \ __| '_ \ / _ \ / _` |
-       \  / (_| \__ \ |_  | |__| |  __/\ V /  __/ | (_) | |_) | | | | | |  __/ | | | |_  | |  | |  __/ |_| | | | (_) | (_| |
-        \/ \__,_|___/\__| |_____/ \___| \_/ \___|_|\___/| .__/|_| |_| |_|\___|_| |_|\__| |_|  |_|\___|\__|_| |_|\___/ \__,_|
-                                                        | |                                                                 
-                                                        |_| 				
-/-------------------------------------------------------------------------------------------------------------------------------/
-
-	@version		2.7.x
-	@created		30th April, 2015
-	@package		Component Builder
-	@subpackage		templates.php
-	@author			Llewellyn van der Merwe <http://joomlacomponentbuilder.com>	
-	@github			Joomla Component Builder <https://github.com/vdm-io/Joomla-Component-Builder>
-	@copyright		Copyright (C) 2015. All Rights Reserved
-	@license		GNU/GPL Version 2 or later - http://www.gnu.org/licenses/gpl-2.0.html 
-	
-	Builds Complex Joomla Components 
-                                                             
-/-----------------------------------------------------------------------------------------------------------------------------*/
+/**
+ * @package    Joomla.Component.Builder
+ *
+ * @created    30th April, 2015
+ * @author     Llewellyn van der Merwe <http://www.joomlacomponentbuilder.com>
+ * @github     Joomla Component Builder <https://github.com/vdm-io/Joomla-Component-Builder>
+ * @copyright  Copyright (C) 2015 - 2020 Vast Development Method. All rights reserved.
+ * @license    GNU General Public License version 2 or later; see LICENSE.txt
+ */
 
 // No direct access to this file
 defined('_JEXEC') or die('Restricted access');
 
-// import the Joomla modellist library
-jimport('joomla.application.component.modellist');
+use Joomla\Utilities\ArrayHelper;
 
 /**
  * Templates Model
@@ -41,22 +26,30 @@ class ComponentbuilderModelTemplates extends JModelList
 			$config['filter_fields'] = array(
 				'a.id','id',
 				'a.published','published',
+				'a.access','access',
 				'a.ordering','ordering',
 				'a.created_by','created_by',
 				'a.modified_by','modified_by',
+				'g.name','dynamic_get',
+				'a.add_php_view','add_php_view',
 				'a.name','name',
-				'a.alias','alias',
 				'a.description','description'
 			);
 		}
 
 		parent::__construct($config);
 	}
-	
+
 	/**
 	 * Method to auto-populate the model state.
 	 *
+	 * Note. Calling getState in this method will result in recursion.
+	 *
+	 * @param   string  $ordering   An optional ordering field.
+	 * @param   string  $direction  An optional direction (asc|desc).
+	 *
 	 * @return  void
+	 *
 	 */
 	protected function populateState($ordering = null, $direction = null)
 	{
@@ -67,32 +60,59 @@ class ComponentbuilderModelTemplates extends JModelList
 		{
 			$this->context .= '.' . $layout;
 		}
-		$name = $this->getUserStateFromRequest($this->context . '.filter.name', 'filter_name');
-		$this->setState('filter.name', $name);
 
-		$alias = $this->getUserStateFromRequest($this->context . '.filter.alias', 'filter_alias');
-		$this->setState('filter.alias', $alias);
+		// Check if the form was submitted
+		$formSubmited = $app->input->post->get('form_submited');
 
-		$description = $this->getUserStateFromRequest($this->context . '.filter.description', 'filter_description');
-		$this->setState('filter.description', $description);
-        
-		$sorting = $this->getUserStateFromRequest($this->context . '.filter.sorting', 'filter_sorting', 0, 'int');
-		$this->setState('filter.sorting', $sorting);
-        
 		$access = $this->getUserStateFromRequest($this->context . '.filter.access', 'filter_access', 0, 'int');
-		$this->setState('filter.access', $access);
-        
-		$search = $this->getUserStateFromRequest($this->context . '.filter.search', 'filter_search');
-		$this->setState('filter.search', $search);
+		if ($formSubmited)
+		{
+			$access = $app->input->post->get('access');
+			$this->setState('filter.access', $access);
+		}
 
 		$published = $this->getUserStateFromRequest($this->context . '.filter.published', 'filter_published', '');
 		$this->setState('filter.published', $published);
-        
+
 		$created_by = $this->getUserStateFromRequest($this->context . '.filter.created_by', 'filter_created_by', '');
 		$this->setState('filter.created_by', $created_by);
 
 		$created = $this->getUserStateFromRequest($this->context . '.filter.created', 'filter_created');
 		$this->setState('filter.created', $created);
+
+		$sorting = $this->getUserStateFromRequest($this->context . '.filter.sorting', 'filter_sorting', 0, 'int');
+		$this->setState('filter.sorting', $sorting);
+
+		$search = $this->getUserStateFromRequest($this->context . '.filter.search', 'filter_search');
+		$this->setState('filter.search', $search);
+
+		$dynamic_get = $this->getUserStateFromRequest($this->context . '.filter.dynamic_get', 'filter_dynamic_get');
+		if ($formSubmited)
+		{
+			$dynamic_get = $app->input->post->get('dynamic_get');
+			$this->setState('filter.dynamic_get', $dynamic_get);
+		}
+
+		$add_php_view = $this->getUserStateFromRequest($this->context . '.filter.add_php_view', 'filter_add_php_view');
+		if ($formSubmited)
+		{
+			$add_php_view = $app->input->post->get('add_php_view');
+			$this->setState('filter.add_php_view', $add_php_view);
+		}
+
+		$name = $this->getUserStateFromRequest($this->context . '.filter.name', 'filter_name');
+		if ($formSubmited)
+		{
+			$name = $app->input->post->get('name');
+			$this->setState('filter.name', $name);
+		}
+
+		$description = $this->getUserStateFromRequest($this->context . '.filter.description', 'filter_description');
+		if ($formSubmited)
+		{
+			$description = $app->input->post->get('description');
+			$this->setState('filter.description', $description);
+		}
 
 		// List state information.
 		parent::populateState($ordering, $direction);
@@ -104,20 +124,24 @@ class ComponentbuilderModelTemplates extends JModelList
 	 * @return  mixed  An array of data items on success, false on failure.
 	 */
 	public function getItems()
-	{ 
+	{
 		// check in items
 		$this->checkInNow();
 
 		// load parent items
 		$items = parent::getItems();
 
-		// set values to display correctly.
+		// Set values to display correctly.
 		if (ComponentbuilderHelper::checkArray($items))
 		{
-			// get user object.
-			$user = JFactory::getUser();
+			// Get the user object if not set.
+			if (!isset($user) || !ComponentbuilderHelper::checkObject($user))
+			{
+				$user = JFactory::getUser();
+			}
 			foreach ($items as $nr => &$item)
 			{
+				// Remove items the user can't access.
 				$access = ($user->authorise('template.access', 'com_componentbuilder.template.' . (int) $item->id) && $user->authorise('template.access', 'com_componentbuilder'));
 				if (!$access)
 				{
@@ -126,10 +150,44 @@ class ComponentbuilderModelTemplates extends JModelList
 				}
 
 			}
-		}  
+		}
+
+		// set selection value to a translatable value
+		if (ComponentbuilderHelper::checkArray($items))
+		{
+			foreach ($items as $nr => &$item)
+			{
+				// convert add_php_view
+				$item->add_php_view = $this->selectionTranslation($item->add_php_view, 'add_php_view');
+			}
+		}
+
         
 		// return items
 		return $items;
+	}
+
+	/**
+	 * Method to convert selection values to translatable string.
+	 *
+	 * @return translatable string
+	 */
+	public function selectionTranslation($value,$name)
+	{
+		// Array of add_php_view language strings
+		if ($name === 'add_php_view')
+		{
+			$add_php_viewArray = array(
+				1 => 'COM_COMPONENTBUILDER_TEMPLATE_YES',
+				0 => 'COM_COMPONENTBUILDER_TEMPLATE_NO'
+			);
+			// Now check if value is found in this array
+			if (isset($add_php_viewArray[$value]) && ComponentbuilderHelper::checkString($add_php_viewArray[$value]))
+			{
+				return $add_php_viewArray[$value];
+			}
+		}
+		return $value;
 	}
 	
 	/**
@@ -151,9 +209,9 @@ class ComponentbuilderModelTemplates extends JModelList
 		// From the componentbuilder_item table
 		$query->from($db->quoteName('#__componentbuilder_template', 'a'));
 
-		// From the componentbuilder_snippet table.
-		$query->select($db->quoteName('g.name','snippet_name'));
-		$query->join('LEFT', $db->quoteName('#__componentbuilder_snippet', 'g') . ' ON (' . $db->quoteName('a.snippet') . ' = ' . $db->quoteName('g.id') . ')');
+		// From the componentbuilder_dynamic_get table.
+		$query->select($db->quoteName('g.name','dynamic_get_name'));
+		$query->join('LEFT', $db->quoteName('#__componentbuilder_dynamic_get', 'g') . ' ON (' . $db->quoteName('a.dynamic_get') . ' = ' . $db->quoteName('g.id') . ')');
 
 		// Filter by published state
 		$published = $this->getState('filter.published');
@@ -170,9 +228,17 @@ class ComponentbuilderModelTemplates extends JModelList
 		$query->select('ag.title AS access_level');
 		$query->join('LEFT', '#__viewlevels AS ag ON ag.id = a.access');
 		// Filter by access level.
-		if ($access = $this->getState('filter.access'))
+		$_access = $this->getState('filter.access');
+		if ($_access && is_numeric($_access))
 		{
-			$query->where('a.access = ' . (int) $access);
+			$query->where('a.access = ' . (int) $_access);
+		}
+		elseif (ComponentbuilderHelper::checkArray($_access))
+		{
+			// Secure the array for the query
+			$_access = ArrayHelper::toInteger($_access);
+			// Filter by the Access Array.
+			$query->where('a.access IN (' . implode(',', $_access) . ')');
 		}
 		// Implement View Level Access
 		if (!$user->authorise('core.options', 'com_componentbuilder'))
@@ -191,14 +257,48 @@ class ComponentbuilderModelTemplates extends JModelList
 			else
 			{
 				$search = $db->quote('%' . $db->escape($search) . '%');
-				$query->where('(a.name LIKE '.$search.' OR a.alias LIKE '.$search.' OR a.description LIKE '.$search.')');
+				$query->where('(a.name LIKE '.$search.' OR a.description LIKE '.$search.' OR a.dynamic_get LIKE '.$search.' OR g.name LIKE '.$search.' OR a.alias LIKE '.$search.')');
 			}
 		}
 
+		// Filter by Dynamic_get.
+		$_dynamic_get = $this->getState('filter.dynamic_get');
+		if (is_numeric($_dynamic_get))
+		{
+			if (is_float($_dynamic_get))
+			{
+				$query->where('a.dynamic_get = ' . (float) $_dynamic_get);
+			}
+			else
+			{
+				$query->where('a.dynamic_get = ' . (int) $_dynamic_get);
+			}
+		}
+		elseif (ComponentbuilderHelper::checkString($_dynamic_get))
+		{
+			$query->where('a.dynamic_get = ' . $db->quote($db->escape($_dynamic_get)));
+		}
+		// Filter by Add_php_view.
+		$_add_php_view = $this->getState('filter.add_php_view');
+		if (is_numeric($_add_php_view))
+		{
+			if (is_float($_add_php_view))
+			{
+				$query->where('a.add_php_view = ' . (float) $_add_php_view);
+			}
+			else
+			{
+				$query->where('a.add_php_view = ' . (int) $_add_php_view);
+			}
+		}
+		elseif (ComponentbuilderHelper::checkString($_add_php_view))
+		{
+			$query->where('a.add_php_view = ' . $db->quote($db->escape($_add_php_view)));
+		}
 
 		// Add the list ordering clause.
 		$orderCol = $this->state->get('list.ordering', 'a.id');
-		$orderDirn = $this->state->get('list.direction', 'asc');	
+		$orderDirn = $this->state->get('list.direction', 'desc');
 		if ($orderCol != '')
 		{
 			$query->order($db->escape($orderCol . ' ' . $orderDirn));
@@ -208,19 +308,25 @@ class ComponentbuilderModelTemplates extends JModelList
 	}
 
 	/**
-	* Method to get list export data.
-	*
-	* @return mixed  An array of data items on success, false on failure.
-	*/
-	public function getExportData($pks)
+	 * Method to get list export data.
+	 *
+	 * @param   array  $pks  The ids of the items to get
+	 * @param   JUser  $user  The user making the request
+	 *
+	 * @return mixed  An array of data items on success, false on failure.
+	 */
+	public function getExportData($pks, $user = null)
 	{
 		// setup the query
-		if (ComponentbuilderHelper::checkArray($pks))
+		if (($pks_size = ComponentbuilderHelper::checkArray($pks)) !== false || 'bulk' === $pks)
 		{
-			// Set a value to know this is exporting method.
+			// Set a value to know this is export method. (USE IN CUSTOM CODE TO ALTER OUTCOME)
 			$_export = true;
-			// Get the user object.
-			$user = JFactory::getUser();
+			// Get the user object if not set.
+			if (!isset($user) || !ComponentbuilderHelper::checkObject($user))
+			{
+				$user = JFactory::getUser();
+			}
 			// Create a new query object.
 			$db = JFactory::getDBO();
 			$query = $db->getQuery(true);
@@ -230,7 +336,24 @@ class ComponentbuilderModelTemplates extends JModelList
 
 			// From the componentbuilder_template table
 			$query->from($db->quoteName('#__componentbuilder_template', 'a'));
-			$query->where('a.id IN (' . implode(',',$pks) . ')');
+			// The bulk export path
+			if ('bulk' === $pks)
+			{
+				$query->where('a.id > 0');
+			}
+			// A large array of ID's will not work out well
+			elseif ($pks_size > 500)
+			{
+				// Use lowest ID
+				$query->where('a.id >= ' . (int) min($pks));
+				// Use highest ID
+				$query->where('a.id <= ' . (int) max($pks));
+			}
+			// The normal default path
+			else
+			{
+				$query->where('a.id IN (' . implode(',',$pks) . ')');
+			}
 			// Implement View Level Access
 			if (!$user->authorise('core.options', 'com_componentbuilder'))
 			{
@@ -239,7 +362,7 @@ class ComponentbuilderModelTemplates extends JModelList
 			}
 
 			// Order the results by ordering
-			$query->order('a.ordering  ASC');
+			$query->order('a.id desc');
 
 			// Load the items
 			$db->setQuery($query);
@@ -248,13 +371,12 @@ class ComponentbuilderModelTemplates extends JModelList
 			{
 				$items = $db->loadObjectList();
 
-				// set values to display correctly.
+				// Set values to display correctly.
 				if (ComponentbuilderHelper::checkArray($items))
 				{
-					// get user object.
-					$user = JFactory::getUser();
 					foreach ($items as $nr => &$item)
 					{
+						// Remove items the user can't access.
 						$access = ($user->authorise('template.access', 'com_componentbuilder.template.' . (int) $item->id) && $user->authorise('template.access', 'com_componentbuilder'));
 						if (!$access)
 						{
@@ -309,7 +431,7 @@ class ComponentbuilderModelTemplates extends JModelList
 			return $headers;
 		}
 		return false;
-	} 
+	}
 	
 	/**
 	 * Method to get a store id based on model configuration state.
@@ -323,27 +445,40 @@ class ComponentbuilderModelTemplates extends JModelList
 		$id .= ':' . $this->getState('filter.id');
 		$id .= ':' . $this->getState('filter.search');
 		$id .= ':' . $this->getState('filter.published');
+		// Check if the value is an array
+		$_access = $this->getState('filter.access');
+		if (ComponentbuilderHelper::checkArray($_access))
+		{
+			$id .= ':' . implode(':', $_access);
+		}
+		// Check if this is only an number or string
+		elseif (is_numeric($_access)
+		 || ComponentbuilderHelper::checkString($_access))
+		{
+			$id .= ':' . $_access;
+		}
 		$id .= ':' . $this->getState('filter.ordering');
 		$id .= ':' . $this->getState('filter.created_by');
 		$id .= ':' . $this->getState('filter.modified_by');
+		$id .= ':' . $this->getState('filter.dynamic_get');
+		$id .= ':' . $this->getState('filter.add_php_view');
 		$id .= ':' . $this->getState('filter.name');
-		$id .= ':' . $this->getState('filter.alias');
 		$id .= ':' . $this->getState('filter.description');
 
 		return parent::getStoreId($id);
 	}
 
 	/**
-	* Build an SQL query to checkin all items left checked out longer then a set time.
-	*
-	* @return  a bool
-	*
-	*/
+	 * Build an SQL query to checkin all items left checked out longer then a set time.
+	 *
+	 * @return  a bool
+	 *
+	 */
 	protected function checkInNow()
 	{
 		// Get set check in time
 		$time = JComponentHelper::getParams('com_componentbuilder')->get('check_in');
-		
+
 		if ($time)
 		{
 

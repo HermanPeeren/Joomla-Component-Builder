@@ -1,27 +1,13 @@
 <?php
-/*--------------------------------------------------------------------------------------------------------|  www.vdm.io  |------/
-    __      __       _     _____                 _                                  _     __  __      _   _               _
-    \ \    / /      | |   |  __ \               | |                                | |   |  \/  |    | | | |             | |
-     \ \  / /_ _ ___| |_  | |  | | _____   _____| | ___  _ __  _ __ ___   ___ _ __ | |_  | \  / | ___| |_| |__   ___   __| |
-      \ \/ / _` / __| __| | |  | |/ _ \ \ / / _ \ |/ _ \| '_ \| '_ ` _ \ / _ \ '_ \| __| | |\/| |/ _ \ __| '_ \ / _ \ / _` |
-       \  / (_| \__ \ |_  | |__| |  __/\ V /  __/ | (_) | |_) | | | | | |  __/ | | | |_  | |  | |  __/ |_| | | | (_) | (_| |
-        \/ \__,_|___/\__| |_____/ \___| \_/ \___|_|\___/| .__/|_| |_| |_|\___|_| |_|\__| |_|  |_|\___|\__|_| |_|\___/ \__,_|
-                                                        | |                                                                 
-                                                        |_| 				
-/-------------------------------------------------------------------------------------------------------------------------------/
-
-	@version		2.7.x
-	@created		30th April, 2015
-	@package		Component Builder
-	@subpackage		edit.php
-	@author			Llewellyn van der Merwe <http://joomlacomponentbuilder.com>	
-	@github			Joomla Component Builder <https://github.com/vdm-io/Joomla-Component-Builder>
-	@copyright		Copyright (C) 2015. All Rights Reserved
-	@license		GNU/GPL Version 2 or later - http://www.gnu.org/licenses/gpl-2.0.html 
-	
-	Builds Complex Joomla Components 
-                                                             
-/-----------------------------------------------------------------------------------------------------------------------------*/
+/**
+ * @package    Joomla.Component.Builder
+ *
+ * @created    30th April, 2015
+ * @author     Llewellyn van der Merwe <http://www.joomlacomponentbuilder.com>
+ * @github     Joomla Component Builder <https://github.com/vdm-io/Joomla-Component-Builder>
+ * @copyright  Copyright (C) 2015 - 2020 Vast Development Method. All rights reserved.
+ * @license    GNU General Public License version 2 or later; see LICENSE.txt
+ */
 
 // No direct access to this file
 defined('_JEXEC') or die('Restricted access');
@@ -31,7 +17,7 @@ JHtml::_('behavior.tooltip');
 JHtml::_('behavior.formvalidation');
 JHtml::_('formbehavior.chosen', 'select');
 JHtml::_('behavior.keepalive');
-$componentParams = JComponentHelper::getParams('com_componentbuilder');
+$componentParams = $this->params; // will be removed just use $this->params instead
 ?>
 <script type="text/javascript">
 	// waiting spinner
@@ -56,7 +42,7 @@ $componentParams = JComponentHelper::getParams('com_componentbuilder');
 	});
 </script>
 <div id="componentbuilder_loader" style="display: none;">
-<form action="<?php echo JRoute::_('index.php?option=com_componentbuilder&layout=edit&id='.(int) $this->item->id.$this->referral); ?>" method="post" name="adminForm" id="adminForm" class="form-validate" enctype="multipart/form-data">
+<form action="<?php echo JRoute::_('index.php?option=com_componentbuilder&layout=edit&id='. (int) $this->item->id . $this->referral); ?>" method="post" name="adminForm" id="adminForm" class="form-validate" enctype="multipart/form-data">
 
 	<?php echo JLayoutHelper::render('validation_rule.extends_formrule_above', $this); ?>
 <div class="form-horizontal">
@@ -79,7 +65,11 @@ $componentParams = JComponentHelper::getParams('com_componentbuilder');
 		</div>
 	<?php echo JHtml::_('bootstrap.endTab'); ?>
 
-	<?php if ($this->canDo->get('validation_rule.delete') || $this->canDo->get('core.edit.created_by') || $this->canDo->get('validation_rule.edit.state') || $this->canDo->get('core.edit.created')) : ?>
+	<?php $this->ignore_fieldsets = array('details','metadata','vdmmetadata','accesscontrol'); ?>
+	<?php $this->tab_name = 'validation_ruleTab'; ?>
+	<?php echo JLayoutHelper::render('joomla.edit.params', $this); ?>
+
+	<?php if ($this->canDo->get('core.edit.created_by') || $this->canDo->get('core.edit.created') || $this->canDo->get('validation_rule.edit.state') || ($this->canDo->get('validation_rule.delete') && $this->canDo->get('validation_rule.edit.state'))) : ?>
 	<?php echo JHtml::_('bootstrap.addTab', 'validation_ruleTab', 'publishing', JText::_('COM_COMPONENTBUILDER_VALIDATION_RULE_PUBLISHING', true)); ?>
 		<div class="row-fluid form-horizontal-desktop">
 			<div class="span6">
@@ -117,7 +107,6 @@ $componentParams = JComponentHelper::getParams('com_componentbuilder');
 		<input type="hidden" name="task" value="validation_rule.edit" />
 		<?php echo JHtml::_('form.token'); ?>
 	</div>
-	</div>
 </div>
 </form>
 </div>
@@ -132,14 +121,12 @@ jQuery('#componentbuilder_loader').on('change', '#jform_inherit',function (e) {
 	var rulefilename = jQuery("#jform_inherit option:selected").val();
 	getExistingValidationRuleCode(rulefilename);
 });
-
 jQuery('#componentbuilder_loader').on('change', '#jform_name',function (e)
 {
 	var ruleName = jQuery('#jform_name').val();
 	// check if this rule name is taken
 	checkRuleName(ruleName);
 });
-
 
 // nice little dot trick :)
 jQuery(document).ready( function($) {
@@ -152,5 +139,22 @@ jQuery(document).ready( function($) {
 	}
 	$(".loading-dots").text(dots);
   } , 500);
-}); 
+});
+
+<?php
+	$app = JFactory::getApplication();
+?>
+function JRouter(link) {
+<?php
+	if ($app->isClient('site'))
+	{
+		echo 'var url = "'.JURI::root().'";';
+	}
+	else
+	{
+		echo 'var url = "";';
+	}
+?>
+	return url+link;
+}
 </script>

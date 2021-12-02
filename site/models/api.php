@@ -1,33 +1,18 @@
 <?php
-/*--------------------------------------------------------------------------------------------------------|  www.vdm.io  |------/
-    __      __       _     _____                 _                                  _     __  __      _   _               _
-    \ \    / /      | |   |  __ \               | |                                | |   |  \/  |    | | | |             | |
-     \ \  / /_ _ ___| |_  | |  | | _____   _____| | ___  _ __  _ __ ___   ___ _ __ | |_  | \  / | ___| |_| |__   ___   __| |
-      \ \/ / _` / __| __| | |  | |/ _ \ \ / / _ \ |/ _ \| '_ \| '_ ` _ \ / _ \ '_ \| __| | |\/| |/ _ \ __| '_ \ / _ \ / _` |
-       \  / (_| \__ \ |_  | |__| |  __/\ V /  __/ | (_) | |_) | | | | | |  __/ | | | |_  | |  | |  __/ |_| | | | (_) | (_| |
-        \/ \__,_|___/\__| |_____/ \___| \_/ \___|_|\___/| .__/|_| |_| |_|\___|_| |_|\__| |_|  |_|\___|\__|_| |_|\___/ \__,_|
-                                                        | |                                                                 
-                                                        |_| 				
-/-------------------------------------------------------------------------------------------------------------------------------/
-
-	@version		2.7.x
-	@created		30th April, 2015
-	@package		Component Builder
-	@subpackage		api.php
-	@author			Llewellyn van der Merwe <http://joomlacomponentbuilder.com>	
-	@github			Joomla Component Builder <https://github.com/vdm-io/Joomla-Component-Builder>
-	@copyright		Copyright (C) 2015. All Rights Reserved
-	@license		GNU/GPL Version 2 or later - http://www.gnu.org/licenses/gpl-2.0.html 
-	
-	Builds Complex Joomla Components 
-                                                             
-/-----------------------------------------------------------------------------------------------------------------------------*/
+/**
+ * @package    Joomla.Component.Builder
+ *
+ * @created    30th April, 2015
+ * @author     Llewellyn van der Merwe <http://www.joomlacomponentbuilder.com>
+ * @github     Joomla Component Builder <https://github.com/vdm-io/Joomla-Component-Builder>
+ * @copyright  Copyright (C) 2015 - 2020 Vast Development Method. All rights reserved.
+ * @license    GNU General Public License version 2 or later; see LICENSE.txt
+ */
 
 // No direct access to this file
 defined('_JEXEC') or die('Restricted access');
 
-// import Joomla modelitem library
-jimport('joomla.application.component.modelitem');
+use Joomla\Utilities\ArrayHelper;
 
 /**
  * Componentbuilder Api Model
@@ -136,9 +121,6 @@ class ComponentbuilderModelApi extends JModelItem
 					$app->redirect(JURI::root());
 					return false;
 				}
-			// Load the JEvent Dispatcher
-			JPluginHelper::importPlugin('content');
-			$this->_dispatcher = JEventDispatcher::getInstance();
 
 				// set data object to item.
 				$this->_item[$pk] = $data;
@@ -148,7 +130,7 @@ class ComponentbuilderModelApi extends JModelItem
 				if ($e->getCode() == 404)
 				{
 					// Need to go thru the error handler to allow Redirect to work.
-					JError::raiseWaring(404, $e->getMessage());
+					JError::raiseWarning(404, $e->getMessage());
 				}
 				else
 				{
@@ -159,15 +141,14 @@ class ComponentbuilderModelApi extends JModelItem
 		}
 
 		return $this->_item[$pk];
-	} 
-
+	}
 
 	/**
-	* Get the uikit needed components
-	*
-	* @return mixed  An array of objects on success.
-	*
-	*/
+	 * Get the uikit needed components
+	 *
+	 * @return mixed  An array of objects on success.
+	 *
+	 */
 	public function getUikitComp()
 	{
 		if (isset($this->uikitComp) && ComponentbuilderHelper::checkArray($this->uikitComp))
@@ -175,17 +156,44 @@ class ComponentbuilderModelApi extends JModelItem
 			return $this->uikitComp;
 		}
 		return false;
-	} 
+	}
 
 	public $messages = array();
 	public $model;
 
 	protected $compiler;
 
+	public function getTranslationLinkedComponents()
+	{
+		// Get a db connection.
+		$db = JFactory::getDbo();
+		// Create a new query object.
+		$query = $db->getQuery(true);
+		// for now we only have crowdin
+		$query->select($db->quoteName(array('id', 'translation_tool', 'crowdin_account_api_key', 'crowdin_project_api_key' ,'crowdin_project_identifier', 'crowdin_username')));
+		$query->from($db->quoteName('#__componentbuilder_joomla_component'));
+		$query->where($db->quoteName('translation_tool') . ' > 0');
+		$query->where($db->quoteName('published') . ' >= 1');
+		$db->setQuery($query);
+		$db->execute();
+		if ($db->getNumRows())
+		{
+			return $db->loadObjectList();
+		}
+		return false;
+	}
+
+	public function translate($component)
+	{
+		$this->messages[] = JText::_('COM_COMPONENTBUILDER_TRANSLATOR_MODULE_NOT_READYBR_THIS_AREA_IS_STILL_UNDER_PRODUCTION_HOPEFULLY_WITH_NEXT_UPDATE');
+		return false;
+	}
+
 	public function compileInstall($component)
 	{
 		$values = array(
 			'version' => 3,
+			'install' => 1,
 			'component' => 0,
 			'backup' => 0,
 			'repository' => 0,
@@ -211,7 +219,7 @@ class ComponentbuilderModelApi extends JModelItem
 			if (1 == $published && $checked_out == 0)
 			{
 				// start up Compiler
-				$this->compiler	 = new Compiler($values);
+				$this->compiler = new Compiler($values);
 				if($this->compiler)
 				{
 					// component was compiled
@@ -219,10 +227,27 @@ class ComponentbuilderModelApi extends JModelItem
 					// get compiler model to run the installer
 					$model = ComponentbuilderHelper::getModel('compiler', JPATH_COMPONENT_ADMINISTRATOR);
 					// now install components
-					if ($model->install($this->compiler->componentFolderName.'.zip'))
+					if (1 == $values['install'] && $model->install($this->compiler->componentFolderName.'.zip'))
 					{
 						// component was installed
 						$this->messages[] = JText::sprintf('COM_COMPONENTBUILDER_THE_S_WAS_SUCCESSFULLY_INSTALLED_AND_REMOVED_FROM_TEMP_FOLDER', $this->compiler->componentFolderName);
+					}
+					elseif (1 != $values['install'])
+					{
+						jimport('joomla.filesystem.file');
+						$config = JFactory::getConfig();
+						$package = $config->get('tmp_path') . '/' . $this->compiler->componentFolderName.'.zip';
+						// just remove from temp
+						if (JFile::delete($package) && !is_file($package))
+						{
+							// component was installed
+							$this->messages[] = JText::sprintf('COM_COMPONENTBUILDER_THE_S_WAS_NOT_INSTALLED_BY_YOUR_REQUEST_AND_IS_ALSO_REMOVED_FROM_TEMP_FOLDER', $this->compiler->componentFolderName);
+						}
+						else
+						{
+							// component was not installed
+							$this->messages[] = JText::sprintf('COM_COMPONENTBUILDER_THE_S_WAS_NOT_INSTALLED_BY_YOUR_REQUEST_AND_IS_STILL_IN_THE_TEMP_FOLDER', $this->compiler->componentFolderName);
+						}
 					}
 					else
 					{
@@ -243,5 +268,5 @@ class ComponentbuilderModelApi extends JModelItem
 		// set that the component was not found
 		$this->messages[] = JText::_('COM_COMPONENTBUILDER_COMPONENT_WAS_NOT_FOUND');
 		return false;
-	} 
+	}
 }

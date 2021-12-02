@@ -1,44 +1,25 @@
 <?php
-
-/* --------------------------------------------------------------------------------------------------------|  www.vdm.io  |------/
-  __      __       _     _____                 _                                  _     __  __      _   _               _
-  \ \    / /      | |   |  __ \               | |                                | |   |  \/  |    | | | |             | |
-   \ \  / /_ _ ___| |_  | |  | | _____   _____| | ___  _ __  _ __ ___   ___ _ __ | |_  | \  / | ___| |_| |__   ___   __| |
-    \ \/ / _` / __| __| | |  | |/ _ \ \ / / _ \ |/ _ \| '_ \| '_ ` _ \ / _ \ '_ \| __| | |\/| |/ _ \ __| '_ \ / _ \ / _` |
-     \  / (_| \__ \ |_  | |__| |  __/\ V /  __/ | (_) | |_) | | | | | |  __/ | | | |_  | |  | |  __/ |_| | | | (_) | (_| |
-      \/ \__,_|___/\__| |_____/ \___| \_/ \___|_|\___/| .__/|_| |_| |_|\___|_| |_|\__| |_|  |_|\___|\__|_| |_|\___/ \__,_|
-                                                      | |
-                                                      |_|
-  /-------------------------------------------------------------------------------------------------------------------------------/
-
-  @version		2.6.x
-  @created		30th April, 2015
-  @package		Component Builder
-  @subpackage	compiler.php
-  @author		Llewellyn van der Merwe <http://www.vdm.io>
-  @my wife		Roline van der Merwe <http://www.vdm.io/>
-  @copyright	Copyright (C) 2015. All Rights Reserved
-  @license		GNU/GPL Version 2 or later - http://www.gnu.org/licenses/gpl-2.0.html
-
-  Builds Complex Joomla Components
-
-  /----------------------------------------------------------------------------------------------------------------------------- */
+/**
+ * @package    Joomla.Component.Builder
+ *
+ * @created    30th April, 2015
+ * @author     Llewellyn van der Merwe <http://www.joomlacomponentbuilder.com>
+ * @github     Joomla Component Builder <https://github.com/vdm-io/Joomla-Component-Builder>
+ * @copyright  Copyright (C) 2015 - 2020 Vast Development Method. All rights reserved.
+ * @license    GNU General Public License version 2 or later; see LICENSE.txt
+ */
 
 // No direct access to this file
 defined('_JEXEC') or die('Restricted access');
 
 /**
- * Interpretation class
+ * Infusion class
  */
 class Infusion extends Interpretation
 {
-
-	public $eximportView = array();
-	public $importCustomScripts = array();
 	public $langFiles = array();
 	public $removeSiteFolder = false;
-	public $langNot = array();
-	public $langSet = array();
+	public $removeSiteEditFolder = true;
 
 	/**
 	 * Constructor
@@ -51,16 +32,17 @@ class Infusion extends Interpretation
 			// infuse the data into the structure
 			return $this->buildFileContent();
 		}
+
 		return false;
 	}
 
 	/**
 	 * Set the line number in comments
-	 * 
-	 * @param   int   $nr  The line number
-	 * 
+	 *
+	 * @param   int  $nr  The line number
+	 *
 	 * @return  void
-	 * 
+	 *
 	 */
 	private function setLine($nr)
 	{
@@ -68,425 +50,967 @@ class Infusion extends Interpretation
 		{
 			return ' [Infusion ' . $nr . ']';
 		}
+
 		return '';
 	}
 
 	/**
 	 * Build the content for the structure
-	 * 
+	 *
 	 *
 	 * @return  boolean  on success
-	 * 
+	 *
 	 */
 	protected function buildFileContent()
 	{
-		if (isset($this->componentData->admin_views) && ComponentbuilderHelper::checkArray($this->componentData->admin_views))
+		if (isset($this->componentData->admin_views)
+			&& ComponentbuilderHelper::checkArray(
+				$this->componentData->admin_views
+			))
 		{
-			// ###COMPONENT###
-			$this->fileContentStatic['###COMPONENT###'] = $this->placeholders['###COMPONENT###'];
+			// Trigger Event: jcb_ce_onBeforeBuildFilesContent
+			$this->triggerEvent(
+				'jcb_ce_onBeforeBuildFilesContent',
+				array(&$this->componentContext, &$this->componentData,
+				      &$this->fileContentStatic, &$this->fileContentDynamic,
+				      &$this->placeholders, &$this->hhh)
+			);
 
-			// ###Component###
-			$this->fileContentStatic['###Component###'] = $this->placeholders['###Component###'];
+			// COMPONENT
+			$this->fileContentStatic[$this->hhh . 'COMPONENT' . $this->hhh]
+				= $this->placeholders[$this->hhh . 'COMPONENT' . $this->hhh];
 
-			// ###component###
-			$this->fileContentStatic['###component###'] = $this->placeholders['###component###'];
+			// Component
+			$this->fileContentStatic[$this->hhh . 'Component' . $this->hhh]
+				= $this->placeholders[$this->hhh . 'Component' . $this->hhh];
 
-			// ###COMPANYNAME###
-			$this->fileContentStatic['###COMPANYNAME###'] = trim(JFilterOutput::cleanText($this->componentData->companyname));
+			// component
+			$this->fileContentStatic[$this->hhh . 'component' . $this->hhh]
+				= $this->placeholders[$this->hhh . 'component' . $this->hhh];
 
-			// ###CREATIONDATE###
-			$this->fileContentStatic['###CREATIONDATE###'] = JFactory::getDate($this->componentData->created)->format('jS F, Y');
-			$this->fileContentStatic['###CREATIONDATE###GLOBAL'] = $this->fileContentStatic['###CREATIONDATE###'];
+			// COMPANYNAME
+			$this->fileContentStatic[$this->hhh . 'COMPANYNAME' . $this->hhh]
+				= trim(
+				JFilterOutput::cleanText($this->componentData->companyname)
+			);
 
-			// ###BUILDDATE###
-			$this->fileContentStatic['###BUILDDATE###'] = JFactory::getDate()->format('jS F, Y');
-			$this->fileContentStatic['###BUILDDATE###GLOBAL'] = $this->fileContentStatic['###BUILDDATE###'];
+			// CREATIONDATE
+			$this->fileContentStatic[$this->hhh . 'CREATIONDATE' . $this->hhh]
+				= JFactory::getDate($this->componentData->created)->format(
+				'jS F, Y'
+			);
+			$this->fileContentStatic[$this->hhh . 'CREATIONDATE' . $this->hhh
+			. 'GLOBAL']
+				= $this->fileContentStatic[$this->hhh . 'CREATIONDATE'
+			. $this->hhh];
 
-			// ###AUTHOR###
-			$this->fileContentStatic['###AUTHOR###'] = trim(JFilterOutput::cleanText($this->componentData->author));
+			// BUILDDATE
+			$this->fileContentStatic[$this->hhh . 'BUILDDATE' . $this->hhh]
+				= JFactory::getDate()->format('jS F, Y');
+			$this->fileContentStatic[$this->hhh . 'BUILDDATE' . $this->hhh
+			. 'GLOBAL']
+				= $this->fileContentStatic[$this->hhh . 'BUILDDATE'
+			. $this->hhh];
 
-			// ###AUTHOREMAIL###
-			$this->fileContentStatic['###AUTHOREMAIL###'] = trim($this->componentData->email);
+			// AUTHOR
+			$this->fileContentStatic[$this->hhh . 'AUTHOR' . $this->hhh] = trim(
+				JFilterOutput::cleanText($this->componentData->author)
+			);
 
-			// ###AUTHORWEBSITE###
-			$this->fileContentStatic['###AUTHORWEBSITE###'] = trim($this->componentData->website);
+			// AUTHOREMAIL
+			$this->fileContentStatic[$this->hhh . 'AUTHOREMAIL' . $this->hhh]
+				= trim($this->componentData->email);
 
-			// ###COPYRIGHT###
-			$this->fileContentStatic['###COPYRIGHT###'] = trim($this->componentData->copyright);
+			// AUTHORWEBSITE
+			$this->fileContentStatic[$this->hhh . 'AUTHORWEBSITE' . $this->hhh]
+				= trim($this->componentData->website);
 
-			// ###LICENSE###
-			$this->fileContentStatic['###LICENSE###'] = trim($this->componentData->license);
+			// COPYRIGHT
+			$this->fileContentStatic[$this->hhh . 'COPYRIGHT' . $this->hhh]
+				= trim($this->componentData->copyright);
 
-			// ###VERSION###
-			$this->fileContentStatic['###VERSION###'] = trim($this->componentData->component_version);
+			// LICENSE
+			$this->fileContentStatic[$this->hhh . 'LICENSE' . $this->hhh]
+				= trim($this->componentData->license);
+
+			// VERSION
+			$this->fileContentStatic[$this->hhh . 'VERSION' . $this->hhh]
+				= trim($this->componentData->component_version);
 			// set the actual global version
-			$this->fileContentStatic['###ACTUALVERSION###'] = $this->fileContentStatic['###VERSION###'];
+			$this->fileContentStatic[$this->hhh . 'ACTUALVERSION' . $this->hhh]
+				= $this->fileContentStatic[$this->hhh . 'VERSION' . $this->hhh];
 
 			// do some Tweaks to the version based on selected options
-			if (strpos($this->fileContentStatic['###VERSION###'], '.') !== false)
+			if (strpos(
+					$this->fileContentStatic[$this->hhh . 'VERSION'
+					. $this->hhh], '.'
+				) !== false)
 			{
-				$versionArray = explode('.', $this->fileContentStatic['###VERSION###']);
+				$versionArray = explode(
+					'.', $this->fileContentStatic[$this->hhh . 'VERSION'
+				. $this->hhh]
+				);
 			}
 			// load only first two values
-			if (isset($versionArray) && ComponentbuilderHelper::checkArray($versionArray) && $this->componentData->mvc_versiondate == 2)
+			if (isset($versionArray)
+				&& ComponentbuilderHelper::checkArray(
+					$versionArray
+				)
+				&& $this->componentData->mvc_versiondate == 2)
 			{
-				$this->fileContentStatic['###VERSION###'] = $versionArray[0] . '.' . $versionArray[1] . '.x';
+				$this->fileContentStatic[$this->hhh . 'VERSION' . $this->hhh]
+					= $versionArray[0] . '.' . $versionArray[1] . '.x';
 			}
 			// load only the first value
-			elseif (isset($versionArray) && ComponentbuilderHelper::checkArray($versionArray) && $this->componentData->mvc_versiondate == 3)
+			elseif (isset($versionArray)
+				&& ComponentbuilderHelper::checkArray(
+					$versionArray
+				)
+				&& $this->componentData->mvc_versiondate == 3)
 			{
-				$this->fileContentStatic['###VERSION###'] = $versionArray[0] . '.x.x';
+				$this->fileContentStatic[$this->hhh . 'VERSION' . $this->hhh]
+					= $versionArray[0] . '.x.x';
 			}
 			unset($versionArray);
 
 			// set the global version in case			
-			$this->fileContentStatic['###VERSION###GLOBAL'] = $this->fileContentStatic['###VERSION###'];
+			$this->fileContentStatic[$this->hhh . 'VERSION' . $this->hhh
+			. 'GLOBAL']
+				= $this->fileContentStatic[$this->hhh . 'VERSION' . $this->hhh];
 
-			// ###Component_name###
-			$this->fileContentStatic['###Component_name###'] = JFilterOutput::cleanText($this->componentData->name);
+			// Component_name
+			$this->fileContentStatic[$this->hhh . 'Component_name' . $this->hhh]
+				= JFilterOutput::cleanText($this->componentData->name);
 
-			// ###SHORT_DISCRIPTION###
-			$this->fileContentStatic['###SHORT_DESCRIPTION###'] = trim(JFilterOutput::cleanText($this->componentData->short_description));
+			// SHORT_DISCRIPTION
+			$this->fileContentStatic[$this->hhh . 'SHORT_DESCRIPTION'
+			. $this->hhh]
+				= trim(
+				JFilterOutput::cleanText(
+					$this->componentData->short_description
+				)
+			);
 
-			// ###DESCRIPTION###
-			$this->fileContentStatic['###DESCRIPTION###'] = trim($this->componentData->description);
+			// DESCRIPTION
+			$this->fileContentStatic[$this->hhh . 'DESCRIPTION' . $this->hhh]
+				= trim($this->componentData->description);
 
-			// ###COMP_IMAGE_TYPE###
-			$this->fileContentStatic['###COMP_IMAGE_TYPE###'] = $this->setComponentImageType($this->componentData->image);
+			// COMP_IMAGE_TYPE
+			$this->fileContentStatic[$this->hhh . 'COMP_IMAGE_TYPE'
+			. $this->hhh]
+				= $this->setComponentImageType($this->componentData->image);
 
-			// ###ACCESS_SECTIONS###
-			$this->fileContentStatic['###ACCESS_SECTIONS###'] = $this->setAccessSections();
+			// ACCESS_SECTIONS
+			$this->fileContentStatic[$this->hhh . 'ACCESS_SECTIONS'
+			. $this->hhh]
+				= $this->setAccessSections();
 
-			// ###CONFIG_FIELDSETS###
-			$keepLang = $this->lang;
+			// CONFIG_FIELDSETS
+			$keepLang   = $this->lang;
 			$this->lang = 'admin';
 
 			// start loading the category tree scripts
-			$this->fileContentStatic['###CATEGORY_CLASS_TREES###'] = '';
+			$this->fileContentStatic[$this->hhh . 'CATEGORY_CLASS_TREES'
+			. $this->hhh]
+				= '';
 			// run the field sets for first time
 			$this->setConfigFieldsets(1);
 			$this->lang = $keepLang;
 
-			// ###ADMINJS###
-			$this->fileContentStatic['###ADMINJS###'] = $this->setPlaceholders($this->customScriptBuilder['component_js'], $this->placeholders);
-			// ###SITEJS###
-			$this->fileContentStatic['###SITEJS###'] = $this->setPlaceholders($this->customScriptBuilder['component_js'], $this->placeholders);
+			// ADMINJS
+			$this->fileContentStatic[$this->hhh . 'ADMINJS' . $this->hhh]
+				= $this->setPlaceholders(
+				$this->customScriptBuilder['component_js'], $this->placeholders
+			);
+			// SITEJS
+			$this->fileContentStatic[$this->hhh . 'SITEJS' . $this->hhh]
+				= $this->setPlaceholders(
+				$this->customScriptBuilder['component_js'], $this->placeholders
+			);
 
-			// ###ADMINCSS###
-			$this->fileContentStatic['###ADMINCSS###'] = $this->setPlaceholders($this->customScriptBuilder['component_css_admin'], $this->placeholders);
-			// ###SITECSS###
-			$this->fileContentStatic['###SITECSS###'] = $this->setPlaceholders($this->customScriptBuilder['component_css_site'], $this->placeholders);
+			// ADMINCSS
+			$this->fileContentStatic[$this->hhh . 'ADMINCSS' . $this->hhh]
+				= $this->setPlaceholders(
+				$this->customScriptBuilder['component_css_admin'],
+				$this->placeholders
+			);
+			// SITECSS
+			$this->fileContentStatic[$this->hhh . 'SITECSS' . $this->hhh]
+				= $this->setPlaceholders(
+				$this->customScriptBuilder['component_css_site'],
+				$this->placeholders
+			);
 
-			// ###CUSTOM_HELPER_SCRIPT###
-			$this->fileContentStatic['###CUSTOM_HELPER_SCRIPT###'] = $this->setPlaceholders($this->customScriptBuilder['component_php_helper_admin'], $this->placeholders);
+			// CUSTOM_HELPER_SCRIPT
+			$this->fileContentStatic[$this->hhh . 'CUSTOM_HELPER_SCRIPT'
+			. $this->hhh]
+				= $this->setPlaceholders(
+				$this->customScriptBuilder['component_php_helper_admin'],
+				$this->placeholders
+			);
 
-			// ###BOTH_CUSTOM_HELPER_SCRIPT###
-			$this->fileContentStatic['###BOTH_CUSTOM_HELPER_SCRIPT###'] = $this->setPlaceholders($this->customScriptBuilder['component_php_helper_both'], $this->placeholders);
+			// BOTH_CUSTOM_HELPER_SCRIPT
+			$this->fileContentStatic[$this->hhh . 'BOTH_CUSTOM_HELPER_SCRIPT'
+			. $this->hhh]
+				= $this->setPlaceholders(
+				$this->customScriptBuilder['component_php_helper_both'],
+				$this->placeholders
+			);
 
-			// ###ADMIN_GLOBAL_EVENT_HELPER###
-			$this->fileContentStatic['###ADMIN_GLOBAL_EVENT_HELPER###'] = '';
+			// ADMIN_GLOBAL_EVENT_HELPER
+			$this->fileContentStatic[$this->hhh . 'ADMIN_GLOBAL_EVENT_HELPER'
+			. $this->hhh]
+				= '';
 
-			// ###ADMIN_GLOBAL_EVENT###
-			$this->fileContentStatic['###ADMIN_GLOBAL_EVENT###'] = '';
-
-			// set incase no extra admin files are loaded
-			$this->fileContentStatic['###EXSTRA_ADMIN_FILES###'] = '';
+			// ADMIN_GLOBAL_EVENT
+			$this->fileContentStatic[$this->hhh . 'ADMIN_GLOBAL_EVENT'
+			. $this->hhh]
+				= '';
 
 			// now load the data for the global event if needed
 			if ($this->componentData->add_admin_event == 1)
 			{
-				// ###ADMIN_GLOBAL_EVENT###
-				$this->fileContentStatic['###ADMIN_GLOBAL_EVENT###'] = PHP_EOL . PHP_EOL . '// Triger the Global Admin Event';
-				$this->fileContentStatic['###ADMIN_GLOBAL_EVENT###'] .= PHP_EOL . $this->fileContentStatic['###Component###'] . 'Helper::globalEvent($document);';
-				// ###ADMIN_GLOBAL_EVENT_HELPER###
-				$this->fileContentStatic['###ADMIN_GLOBAL_EVENT_HELPER###'] = PHP_EOL . PHP_EOL . "\t" . '/**';
-				$this->fileContentStatic['###ADMIN_GLOBAL_EVENT_HELPER###'] .= PHP_EOL . "\t" . '*	The Global Admin Event Method.';
-				$this->fileContentStatic['###ADMIN_GLOBAL_EVENT_HELPER###'] .= PHP_EOL . "\t" . '**/';
-				$this->fileContentStatic['###ADMIN_GLOBAL_EVENT_HELPER###'] .= PHP_EOL . "\t" . 'public static function globalEvent($document)';
-				$this->fileContentStatic['###ADMIN_GLOBAL_EVENT_HELPER###'] .= PHP_EOL . "\t" . '{';
-				$this->fileContentStatic['###ADMIN_GLOBAL_EVENT_HELPER###'] .= PHP_EOL . $this->setPlaceholders($this->customScriptBuilder['component_php_admin_event'], $this->placeholders);
-				$this->fileContentStatic['###ADMIN_GLOBAL_EVENT_HELPER###'] .= PHP_EOL . "\t" . '}';
+				// ADMIN_GLOBAL_EVENT
+				$this->fileContentStatic[$this->hhh . 'ADMIN_GLOBAL_EVENT'
+				. $this->hhh]
+					= PHP_EOL . PHP_EOL . '// Triger the Global Admin Event';
+				$this->fileContentStatic[$this->hhh . 'ADMIN_GLOBAL_EVENT'
+				. $this->hhh]
+					.= PHP_EOL . $this->fileContentStatic[$this->hhh
+					. 'Component' . $this->hhh]
+					. 'Helper::globalEvent($document);';
+				// ADMIN_GLOBAL_EVENT_HELPER
+				$this->fileContentStatic[$this->hhh
+				. 'ADMIN_GLOBAL_EVENT_HELPER' . $this->hhh]
+					= PHP_EOL . PHP_EOL . $this->_t(1) . '/**';
+				$this->fileContentStatic[$this->hhh
+				. 'ADMIN_GLOBAL_EVENT_HELPER' . $this->hhh]
+					.= PHP_EOL . $this->_t(1)
+					. '*	The Global Admin Event Method.';
+				$this->fileContentStatic[$this->hhh
+				. 'ADMIN_GLOBAL_EVENT_HELPER' . $this->hhh]
+					.= PHP_EOL . $this->_t(1) . '**/';
+				$this->fileContentStatic[$this->hhh
+				. 'ADMIN_GLOBAL_EVENT_HELPER' . $this->hhh]
+					.= PHP_EOL . $this->_t(1)
+					. 'public static function globalEvent($document)';
+				$this->fileContentStatic[$this->hhh
+				. 'ADMIN_GLOBAL_EVENT_HELPER' . $this->hhh]
+					.= PHP_EOL . $this->_t(1) . '{';
+				$this->fileContentStatic[$this->hhh
+				. 'ADMIN_GLOBAL_EVENT_HELPER' . $this->hhh]
+					.= PHP_EOL . $this->setPlaceholders(
+						$this->customScriptBuilder['component_php_admin_event'],
+						$this->placeholders
+					);
+				$this->fileContentStatic[$this->hhh
+				. 'ADMIN_GLOBAL_EVENT_HELPER' . $this->hhh]
+					.= PHP_EOL . $this->_t(1) . '}';
 			}
 
 			// now load the readme file if needed
 			if ($this->componentData->addreadme == 1)
 			{
-				$this->fileContentStatic['###EXSTRA_ADMIN_FILES###'] .= PHP_EOL . "\t\t\t<filename>README.txt</filename>";
+				$this->fileContentStatic[$this->hhh . 'EXSTRA_ADMIN_FILES'
+				. $this->hhh]
+					.= PHP_EOL . $this->_t(3)
+					. "<filename>README.txt</filename>";
 			}
 
-			// ###HELPER_CREATEUSER###
-			$this->fileContentStatic['###HELPER_CREATEUSER###'] = $this->setCreateUserHelperMethod($this->componentData->creatuserhelper);
+			// HELPER_CREATEUSER
+			$this->fileContentStatic[$this->hhh . 'HELPER_CREATEUSER'
+			. $this->hhh]
+				= $this->setCreateUserHelperMethod(
+				$this->componentData->creatuserhelper
+			);
 
-			// ###HELP###
-			$this->fileContentStatic['###HELP###'] = $this->noHelp();
-			// ###HELP_SITE###
-			$this->fileContentStatic['###HELP_SITE###'] = $this->noHelp();
+			// HELP
+			$this->fileContentStatic[$this->hhh . 'HELP' . $this->hhh]
+				= $this->noHelp();
+			// HELP_SITE
+			$this->fileContentStatic[$this->hhh . 'HELP_SITE' . $this->hhh]
+				= $this->noHelp();
 
 			// build route parse switch
-			$this->fileContentStatic['###ROUTER_PARSE_SWITCH###'] = '';
+			$this->fileContentStatic[$this->hhh . 'ROUTER_PARSE_SWITCH'
+			. $this->hhh]
+				= '';
 			// build route views
-			$this->fileContentStatic['###ROUTER_BUILD_VIEWS###'] = '';
+			$this->fileContentStatic[$this->hhh . 'ROUTER_BUILD_VIEWS'
+			. $this->hhh]
+				= '';
 
 			// add the helper emailer if set
-			$this->fileContentStatic['###HELPER_EMAIL###'] = $this->addEmailHelper();
+			$this->fileContentStatic[$this->hhh . 'HELPER_EMAIL' . $this->hhh]
+				= $this->addEmailHelper();
 
+			// load the global placeholders
+			if (ComponentbuilderHelper::checkArray($this->globalPlaceholders))
+			{
+				foreach (
+					$this->globalPlaceholders as $globalPlaceholder =>
+					$gloabalValue
+				)
+				{
+					$this->fileContentStatic[$globalPlaceholder]
+						= $gloabalValue;
+				}
+			}
 			// reset view array
-			$viewarray = array();
+			$viewarray            = array();
 			$site_edit_view_array = array();
 			// start dynamic build
 			foreach ($this->componentData->admin_views as $view)
 			{
 				// set the target
 				$this->target = 'admin';
-				$this->lang = 'admin';
+				$this->lang   = 'admin';
 
-				// set single view
-				if (isset($view['settings']->name_single))
-				{
-					$viewName_single = ComponentbuilderHelper::safeString($view['settings']->name_single);
-				}
-
-				// set list view
-				if (isset($view['settings']->name_list))
-				{
-					$viewName_list = ComponentbuilderHelper::safeString($view['settings']->name_list);
-				}
+				// set local names
+				$nameSingleCode = $view['settings']->name_single_code;
+				$nameListCode   = $view['settings']->name_list_code;
 
 				// set the view placeholders
 				$this->setViewPlaceholders($view['settings']);
 
 				// set site edit view array
-				if (isset($view['edit_create_site_view']) && $view['edit_create_site_view'])
+				if (isset($view['edit_create_site_view'])
+					&& is_numeric(
+						$view['edit_create_site_view']
+					)
+					&& $view['edit_create_site_view'] > 0)
 				{
-					$site_edit_view_array[] = "\t\t\t\t'" . $viewName_single . "'";
-					$this->lang = 'both';
+					$site_edit_view_array[] = $this->_t(4) . "'"
+						. $nameSingleCode . "'";
+					$this->lang             = 'both';
+					// insure site view does not get removed
+					$this->removeSiteEditFolder = false;
 				}
 				// check if help is being loaded
-				$this->checkHelp($viewName_single);
+				$this->checkHelp($nameSingleCode);
 				// set custom admin view list links
-				$this->setCustomAdminViewListLink($view, $viewName_list);
+				$this->setCustomAdminViewListLink(
+					$view, $nameListCode
+				);
 
 				// set view array
-				$viewarray[] = "\t\t\t\t'" . $viewName_single . "' => '" . $viewName_list . "'";
+				$viewarray[] = $this->_t(4) . "'"
+					. $nameSingleCode . "' => '"
+					. $nameListCode . "'";
 				// set the view names
-				if (isset($view['settings']->name_single) && $view['settings']->name_single != 'null')
+				if (isset($view['settings']->name_single)
+					&& $view['settings']->name_single != 'null')
 				{
 					// set license per view if needed
-					$this->setLockLicensePer($viewName_single, $this->target);
-					$this->setLockLicensePer($viewName_list, $this->target);
+					$this->setLockLicensePer(
+						$nameSingleCode, $this->target
+					);
+					$this->setLockLicensePer(
+						$nameListCode, $this->target
+					);
 
-					// ###FIELDSETS### <<<DYNAMIC>>>
-					$this->fileContentDynamic[$viewName_single]['###FIELDSETS###'] = $this->setFieldSet($view, $this->fileContentStatic['###component###'], $viewName_single, $viewName_list);
+					// Trigger Event: jcb_ce_onBeforeBuildAdminEditViewContent
+					$this->triggerEvent(
+						'jcb_ce_onBeforeBuildAdminEditViewContent',
+						array(&$this->componentContext, &$view,
+						      &$nameSingleCode,
+						      &$nameListCode,
+						      &$this->fileContentStatic,
+						      &$this->fileContentDynamic[$nameSingleCode],
+						      &$this->placeholders, &$this->hhh)
+					);
 
-					// ###ACCESSCONTROL### <<<DYNAMIC>>>
-					$this->fileContentDynamic[$viewName_single]['###ACCESSCONTROL###'] = $this->setFieldSetAccessControl($viewName_single);
+					// FIELDSETS <<<DYNAMIC>>>
+					$this->fileContentDynamic[$nameSingleCode][$this->hhh
+					. 'FIELDSETS' . $this->hhh]
+						= $this->setFieldSet(
+						$view, $this->componentCodeName,
+						$nameSingleCode,
+						$nameListCode
+					);
 
-					// ###LINKEDVIEWITEMS### <<<DYNAMIC>>>
-					$this->fileContentDynamic[$viewName_single]['###LINKEDVIEWITEMS###'] = '';
+					// ACCESSCONTROL <<<DYNAMIC>>>
+					$this->fileContentDynamic[$nameSingleCode][$this->hhh
+					. 'ACCESSCONTROL' . $this->hhh]
+						= $this->setFieldSetAccessControl(
+						$nameSingleCode
+					);
 
-					// ###ADDTOOLBAR### <<<DYNAMIC>>>
-					$this->fileContentDynamic[$viewName_single]['###ADDTOOLBAR###'] = $this->setAddToolBar($view);
+					// LINKEDVIEWITEMS <<<DYNAMIC>>>
+					$this->fileContentDynamic[$nameSingleCode][$this->hhh
+					. 'LINKEDVIEWITEMS' . $this->hhh]
+						= '';
+
+					// ADDTOOLBAR <<<DYNAMIC>>>
+					$this->fileContentDynamic[$nameSingleCode][$this->hhh
+					. 'ADDTOOLBAR' . $this->hhh]
+						= $this->setAddToolBar($view);
 
 					// set the script for this view
 					$this->buildTheViewScript($view);
 
-					// ###VIEW_SCRIPT###
-					$this->fileContentDynamic[$viewName_single]['###VIEW_SCRIPT###'] = $this->setViewScript($viewName_single);
+					// VIEW_SCRIPT
+					$this->fileContentDynamic[$nameSingleCode][$this->hhh
+					. 'VIEW_SCRIPT' . $this->hhh]
+						= $this->setViewScript(
+						$nameSingleCode, 'fileScript'
+					);
 
-					// ###EDITBODYSCRIPT###
-					$this->fileContentDynamic[$viewName_single]['###EDITBODYSCRIPT###'] = $this->setEditBodyScript($viewName_single);
+					// EDITBODYSCRIPT
+					$this->fileContentDynamic[$nameSingleCode][$this->hhh
+					. 'EDITBODYSCRIPT' . $this->hhh]
+						= $this->setViewScript(
+						$nameSingleCode, 'footerScript'
+					);
 
-					// ###AJAXTOKE### <<<DYNAMIC>>>
-					$this->fileContentDynamic[$viewName_single]['###AJAXTOKE###'] = $this->setAjaxToke($viewName_single);
+					// AJAXTOKE <<<DYNAMIC>>>
+					$this->fileContentDynamic[$nameSingleCode][$this->hhh
+					. 'AJAXTOKE' . $this->hhh]
+						= $this->setAjaxToke(
+						$nameSingleCode
+					);
 
-					// ###DOCUMENT_CUSTOM_PHP### <<<DYNAMIC>>>
-					if ($phpDocument = $this->getCustomScriptBuilder('php_document', $viewName_single, PHP_EOL, null, true, false))
+					// DOCUMENT_CUSTOM_PHP <<<DYNAMIC>>>
+					if ($phpDocument = $this->getCustomScriptBuilder(
+						'php_document', $nameSingleCode,
+						PHP_EOL, null, true,
+						false
+					))
 					{
-						$this->fileContentDynamic[$viewName_single]['###DOCUMENT_CUSTOM_PHP###'] = str_replace('$document->', '$this->document->', $phpDocument);
+						$this->fileContentDynamic[$nameSingleCode][$this->hhh
+						. 'DOCUMENT_CUSTOM_PHP' . $this->hhh]
+							= str_replace(
+							'$document->', '$this->document->', $phpDocument
+						);
 						// clear some memory
 						unset($phpDocument);
 					}
 					else
 					{
-						$this->fileContentDynamic[$viewName_single]['###DOCUMENT_CUSTOM_PHP###'] = '';
+						$this->fileContentDynamic[$nameSingleCode][$this->hhh
+						. 'DOCUMENT_CUSTOM_PHP' . $this->hhh]
+							= '';
 					}
+					// LINKEDVIEWTABLESCRIPTS <<<DYNAMIC>>>
+					$this->fileContentDynamic[$nameSingleCode][$this->hhh
+					. 'LINKEDVIEWTABLESCRIPTS' . $this->hhh]
+						= '';
 
-					// ###LINKEDVIEWTABLESCRIPTS### <<<DYNAMIC>>>
-					$this->fileContentDynamic[$viewName_single]['###LINKEDVIEWTABLESCRIPTS###'] = '';
+					// VALIDATEFIX <<<DYNAMIC>>>
+					$this->fileContentDynamic[$nameSingleCode][$this->hhh
+					. 'VALIDATIONFIX' . $this->hhh]
+						= $this->setValidationFix(
+						$nameSingleCode,
+						$this->fileContentStatic[$this->hhh . 'Component'
+						. $this->hhh]
+					);
 
-					// ###VALIDATEFIX### <<<DYNAMIC>>>
-					$this->fileContentDynamic[$viewName_single]['###VALIDATIONFIX###'] = $this->setValidationFix($viewName_single, $this->fileContentStatic['###Component###']);
+					// EDITBODY <<<DYNAMIC>>>
+					$this->fileContentDynamic[$nameSingleCode][$this->hhh
+					. 'EDITBODY' . $this->hhh]
+						= $this->setEditBody($view);
 
-					// ###EDITBODY### <<<DYNAMIC>>>
-					$this->fileContentDynamic[$viewName_single]['###EDITBODY###'] = $this->setEditBody($view);
+					// EDITBODYFADEIN <<<DYNAMIC>>>
+					$this->fileContentDynamic[$nameSingleCode][$this->hhh
+					. 'EDITBODYFADEIN' . $this->hhh]
+						= $this->setFadeInEfect($view);
 
-					// ###EDITBODY### <<<DYNAMIC>>>
-					$this->fileContentDynamic[$viewName_single]['###EDITBODYFADEIN###'] = $this->setFadeInEfect($view);
+					// JTABLECONSTRUCTOR <<<DYNAMIC>>>
+					$this->fileContentDynamic[$nameSingleCode][$this->hhh
+					. 'JTABLECONSTRUCTOR' . $this->hhh]
+						= $this->setJtableConstructor(
+						$nameSingleCode
+					);
 
-					// ###JTABLECONSTRUCTOR### <<<DYNAMIC>>>
-					$this->fileContentDynamic[$viewName_single]['###JTABLECONSTRUCTOR###'] = $this->setJtableConstructor($viewName_single);
+					// JTABLEALIASCATEGORY <<<DYNAMIC>>>
+					$this->fileContentDynamic[$nameSingleCode][$this->hhh
+					. 'JTABLEALIASCATEGORY' . $this->hhh]
+						= $this->setJtableAliasCategory(
+						$nameSingleCode
+					);
 
-					// ###JTABLEALIASCATEGORY### <<<DYNAMIC>>>
-					$this->fileContentDynamic[$viewName_single]['###JTABLEALIASCATEGORY###'] = $this->setJtableAliasCategory($viewName_single);
+					// METHOD_GET_ITEM <<<DYNAMIC>>>
+					$this->fileContentDynamic[$nameSingleCode][$this->hhh
+					. 'METHOD_GET_ITEM' . $this->hhh]
+						= $this->setMethodGetItem(
+						$nameSingleCode
+					);
 
-					// ###METHOD_GET_ITEM### <<<DYNAMIC>>>
-					$this->fileContentDynamic[$viewName_single]['###METHOD_GET_ITEM###'] = $this->setMethodGetItem($viewName_single);
+					// LINKEDVIEWGLOBAL <<<DYNAMIC>>>
+					$this->fileContentDynamic[$nameSingleCode][$this->hhh
+					. 'LINKEDVIEWGLOBAL' . $this->hhh]
+						= '';
 
-					// ###LINKEDVIEWGLOBAL### <<<DYNAMIC>>>
-					$this->fileContentDynamic[$viewName_single]['###LINKEDVIEWGLOBAL###'] = '';
+					// LINKEDVIEWMETHODS <<<DYNAMIC>>>
+					$this->fileContentDynamic[$nameSingleCode][$this->hhh
+					. 'LINKEDVIEWMETHODS' . $this->hhh]
+						= '';
 
-					// ###LINKEDVIEWMETHODS### <<<DYNAMIC>>>
-					$this->fileContentDynamic[$viewName_single]['###LINKEDVIEWMETHODS###'] = '';
+					// JMODELADMIN_BEFORE_DELETE <<<DYNAMIC>>>
+					$this->fileContentDynamic[$nameSingleCode][$this->hhh
+					. 'JMODELADMIN_BEFORE_DELETE' . $this->hhh]
+						= $this->getCustomScriptBuilder(
+						'php_before_delete',
+						$nameSingleCode, PHP_EOL
+					);
 
-					// ###JMODELADMIN_BEFORE_DELETE### <<<DYNAMIC>>>
-					$this->fileContentDynamic[$viewName_single]['###JMODELADMIN_BEFORE_DELETE###'] = $this->getCustomScriptBuilder('php_before_delete', $viewName_single, PHP_EOL);
+					// JMODELADMIN_AFTER_DELETE <<<DYNAMIC>>>
+					$this->fileContentDynamic[$nameSingleCode][$this->hhh
+					. 'JMODELADMIN_AFTER_DELETE' . $this->hhh]
+						= $this->getCustomScriptBuilder(
+						'php_after_delete', $nameSingleCode,
+						PHP_EOL . PHP_EOL
+					);
 
-					// ###JMODELADMIN_AFTER_DELETE### <<<DYNAMIC>>>
-					$this->fileContentDynamic[$viewName_single]['###JMODELADMIN_AFTER_DELETE###'] = $this->getCustomScriptBuilder('php_after_delete', $viewName_single, PHP_EOL . PHP_EOL);
+					// JMODELADMIN_BEFORE_DELETE <<<DYNAMIC>>>
+					$this->fileContentDynamic[$nameSingleCode][$this->hhh
+					. 'JMODELADMIN_BEFORE_PUBLISH' . $this->hhh]
+						= $this->getCustomScriptBuilder(
+						'php_before_publish',
+						$nameSingleCode, PHP_EOL
+					);
 
-					// ###JMODELADMIN_BEFORE_DELETE### <<<DYNAMIC>>>
-					$this->fileContentDynamic[$viewName_single]['###JMODELADMIN_BEFORE_PUBLISH###'] = $this->getCustomScriptBuilder('php_before_publish', $viewName_single, PHP_EOL);
+					// JMODELADMIN_AFTER_DELETE <<<DYNAMIC>>>
+					$this->fileContentDynamic[$nameSingleCode][$this->hhh
+					. 'JMODELADMIN_AFTER_PUBLISH' . $this->hhh]
+						= $this->getCustomScriptBuilder(
+						'php_after_publish',
+						$nameSingleCode, PHP_EOL . PHP_EOL
+					);
 
-					// ###JMODELADMIN_AFTER_DELETE### <<<DYNAMIC>>>
-					$this->fileContentDynamic[$viewName_single]['###JMODELADMIN_AFTER_PUBLISH###'] = $this->getCustomScriptBuilder('php_after_publish', $viewName_single, PHP_EOL . PHP_EOL);
+					// CHECKBOX_SAVE <<<DYNAMIC>>>
+					$this->fileContentDynamic[$nameSingleCode][$this->hhh
+					. 'CHECKBOX_SAVE' . $this->hhh]
+						= $this->setCheckboxSave(
+						$nameSingleCode
+					);
 
-					// ###CHECKBOX_SAVE### <<<DYNAMIC>>>
-					$this->fileContentDynamic[$viewName_single]['###CHECKBOX_SAVE###'] = $this->setCheckboxSave($viewName_single);
+					// METHOD_ITEM_SAVE <<<DYNAMIC>>>
+					$this->fileContentDynamic[$nameSingleCode][$this->hhh
+					. 'METHOD_ITEM_SAVE' . $this->hhh]
+						= $this->setMethodItemSave(
+						$nameSingleCode
+					);
 
-					// ###METHOD_ITEM_SAVE### <<<DYNAMIC>>>
-					$this->fileContentDynamic[$viewName_single]['###METHOD_ITEM_SAVE###'] = $this->setMethodItemSave($viewName_single);
+					// POSTSAVEHOOK <<<DYNAMIC>>>
+					$this->fileContentDynamic[$nameSingleCode][$this->hhh
+					. 'POSTSAVEHOOK' . $this->hhh]
+						= $this->getCustomScriptBuilder(
+						'php_postsavehook', $nameSingleCode,
+						PHP_EOL, null,
+						true, PHP_EOL . $this->_t(2) . "return;",
+						PHP_EOL . PHP_EOL . $this->_t(2) . "return;"
+					);
 
-					// ###POSTSAVEHOOK### <<<DYNAMIC>>>
-					$this->fileContentDynamic[$viewName_single]['###POSTSAVEHOOK###'] = $this->getCustomScriptBuilder('php_postsavehook', $viewName_single, PHP_EOL, null, true, PHP_EOL . "\t\treturn;", PHP_EOL . PHP_EOL . "\t\treturn;");
-
-					// ###VIEWCSS### <<<DYNAMIC>>>
-					$this->fileContentDynamic[$viewName_single]['###VIEWCSS###'] = $this->getCustomScriptBuilder('css_view', $viewName_single, '', null, true);
+					// VIEWCSS <<<DYNAMIC>>>
+					$this->fileContentDynamic[$nameSingleCode][$this->hhh
+					. 'VIEWCSS' . $this->hhh]
+						= $this->getCustomScriptBuilder(
+						'css_view', $nameSingleCode, '',
+						null, true
+					);
 
 					// add css to front end
-					if (isset($view['edit_create_site_view']) && $view['edit_create_site_view'])
+					if (isset($view['edit_create_site_view'])
+						&& is_numeric(
+							$view['edit_create_site_view']
+						)
+						&& $view['edit_create_site_view'] > 0)
 					{
-						$this->fileContentDynamic[$viewName_single]['###SITE_VIEWCSS###'] = $this->fileContentDynamic[$viewName_single]['###VIEWCSS###'];
+						$this->fileContentDynamic[$nameSingleCode][$this->hhh
+						. 'SITE_VIEWCSS' . $this->hhh]
+							= $this->fileContentDynamic[$nameSingleCode][$this->hhh
+						. 'VIEWCSS' . $this->hhh];
+						// check if we should add a create menu
+						if ($view['edit_create_site_view'] == 2)
+						{
+							// SITE_MENU_XML <<<DYNAMIC>>>
+							$this->fileContentDynamic[$nameSingleCode][$this->hhh
+							. 'SITE_MENU_XML' . $this->hhh]
+								= $this->setAdminViewMenu(
+								$nameSingleCode, $view
+							);
+						}
+						// SITE_ADMIN_VIEW_CONTROLLER_HEADER <<<DYNAMIC>>> add the header details for the controller
+						$this->fileContentDynamic[$nameSingleCode][$this->hhh
+						. 'SITE_ADMIN_VIEW_CONTROLLER_HEADER' . $this->hhh]
+							= $this->setClassHeaders(
+							'site.admin.view.controller',
+							$nameSingleCode
+						);
+						// SITE_ADMIN_VIEW_MODEL_HEADER <<<DYNAMIC>>> add the header details for the model
+						$this->fileContentDynamic[$nameSingleCode][$this->hhh
+						. 'SITE_ADMIN_VIEW_MODEL_HEADER' . $this->hhh]
+							= $this->setClassHeaders(
+							'site.admin.view.model',
+							$nameSingleCode
+						);
+						// SITE_ADMIN_VIEW_HEADER <<<DYNAMIC>>> add the header details for the view
+						$this->fileContentDynamic[$nameSingleCode][$this->hhh
+						. 'SITE_ADMIN_VIEW_HEADER' . $this->hhh]
+							= $this->setClassHeaders(
+							'site.admin.view',
+							$nameSingleCode
+						);
 					}
+
+					// TABLAYOUTFIELDSARRAY <<<DYNAMIC>>> add the tab layout fields array to the model
+					$this->fileContentDynamic[$nameSingleCode][$this->hhh
+					. 'TABLAYOUTFIELDSARRAY' . $this->hhh]
+						= $this->getTabLayoutFieldsArray(
+						$nameSingleCode
+					);
+
+					// ADMIN_VIEW_CONTROLLER_HEADER <<<DYNAMIC>>> add the header details for the controller
+					$this->fileContentDynamic[$nameSingleCode][$this->hhh
+					. 'ADMIN_VIEW_CONTROLLER_HEADER' . $this->hhh]
+						= $this->setClassHeaders(
+						'admin.view.controller',
+						$nameSingleCode
+					);
+					// ADMIN_VIEW_MODEL_HEADER <<<DYNAMIC>>> add the header details for the model
+					$this->fileContentDynamic[$nameSingleCode][$this->hhh
+					. 'ADMIN_VIEW_MODEL_HEADER' . $this->hhh]
+						= $this->setClassHeaders(
+						'admin.view.model', $nameSingleCode
+					);
+					// ADMIN_VIEW_HEADER <<<DYNAMIC>>> add the header details for the view
+					$this->fileContentDynamic[$nameSingleCode][$this->hhh
+					. 'ADMIN_VIEW_HEADER' . $this->hhh]
+						= $this->setClassHeaders(
+						'admin.view', $nameSingleCode
+					);
+
+					// Trigger Event: jcb_ce_onAfterBuildAdminEditViewContent
+					$this->triggerEvent(
+						'jcb_ce_onAfterBuildAdminEditViewContent',
+						array(&$this->componentContext, &$view,
+						      &$nameSingleCode,
+						      &$nameListCode,
+						      &$this->fileContentStatic,
+						      &$this->fileContentDynamic[$nameSingleCode],
+						      &$this->placeholders, &$this->hhh)
+					);
 				}
 				// set the views names
-				if (isset($view['settings']->name_list) && $view['settings']->name_list != 'null')
+				if (isset($view['settings']->name_list)
+					&& $view['settings']->name_list != 'null')
 				{
 					$this->lang = 'admin';
 
-					// ###ICOMOON### <<<DYNAMIC>>>
-					$this->fileContentDynamic[$viewName_list]['###ICOMOON###'] = $view['icomoon'];
+					// ICOMOON <<<DYNAMIC>>>
+					$this->fileContentDynamic[$nameListCode][$this->hhh
+					. 'ICOMOON' . $this->hhh]
+						= $view['icomoon'];
+
+					// Trigger Event: jcb_ce_onBeforeBuildAdminListViewContent
+					$this->triggerEvent(
+						'jcb_ce_onBeforeBuildAdminListViewContent',
+						array(&$this->componentContext, &$view,
+						      &$nameSingleCode,
+						      &$nameListCode,
+						      &$this->fileContentStatic,
+						      &$this->fileContentDynamic[$nameListCode],
+						      &$this->placeholders, &$this->hhh)
+					);
 
 					// set the export/import option
-					if (isset($view['port']) && $view['port'] || 1 == $view['settings']->add_custom_import)
+					if (isset($view['port']) && $view['port']
+						|| 1 == $view['settings']->add_custom_import)
 					{
-						$this->eximportView[$viewName_list] = true;
+						$this->eximportView[$nameListCode]
+							= true;
 						if (1 == $view['settings']->add_custom_import)
 						{
 							// this view has custom import scripting
-							$this->importCustomScripts[$viewName_list] = true;
-							$this->setImportCustomScripts($viewName_list);
+							$this->importCustomScripts[$nameListCode]
+								= true;
+							// set all custom scripts
+							$this->setImportCustomScripts(
+								$nameListCode
+							);
 						}
 					}
 					else
 					{
-						$this->eximportView[$viewName_list] = false;
+						$this->eximportView[$nameListCode]
+							= false;
 					}
 
-					// set Autocheckin function
+					// set Auto check in function
 					if (isset($view['checkin']) && $view['checkin'] == 1)
 					{
-						// ###AUTOCHECKIN### <<<DYNAMIC>>>
-						$this->fileContentDynamic[$viewName_list]['###AUTOCHECKIN###'] = $this->setAutoCheckin($viewName_single, $this->fileContentStatic['###component###']);
-						// ###CHECKINCALL### <<<DYNAMIC>>>
-						$this->fileContentDynamic[$viewName_list]['###CHECKINCALL###'] = $this->setCheckinCall();
+						// AUTOCHECKIN <<<DYNAMIC>>>
+						$this->fileContentDynamic[$nameListCode][$this->hhh
+						. 'AUTOCHECKIN' . $this->hhh]
+							= $this->setAutoCheckin(
+							$nameSingleCode,
+							$this->componentCodeName
+						);
+						// CHECKINCALL <<<DYNAMIC>>>
+						$this->fileContentDynamic[$nameListCode][$this->hhh
+						. 'CHECKINCALL' . $this->hhh]
+							= $this->setCheckinCall();
 					}
 					else
 					{
-						// ###AUTOCHECKIN### <<<DYNAMIC>>>
-						$this->fileContentDynamic[$viewName_list]['###AUTOCHECKIN###'] = '';
-						// ###CHECKINCALL### <<<DYNAMIC>>>
-						$this->fileContentDynamic[$viewName_list]['###CHECKINCALL###'] = '';
+						// AUTOCHECKIN <<<DYNAMIC>>>
+						$this->fileContentDynamic[$nameListCode][$this->hhh
+						. 'AUTOCHECKIN' . $this->hhh]
+							= '';
+						// CHECKINCALL <<<DYNAMIC>>>
+						$this->fileContentDynamic[$nameListCode][$this->hhh
+						. 'CHECKINCALL' . $this->hhh]
+							= '';
 					}
-					// ###ADMIN_CUSTOM_BUTTONS_LIST###
-					$this->fileContentDynamic[$viewName_list]['###ADMIN_CUSTOM_BUTTONS_LIST###'] = $this->setCustomButtons($view, 3, "\t");
-					$this->fileContentDynamic[$viewName_list]['###ADMIN_CUSTOM_FUNCTION_ONLY_BUTTONS_LIST###'] = $this->setFunctionOnlyButtons($viewName_list);
+					// admin list file contnet
+					$this->fileContentDynamic[$nameListCode][$this->hhh
+					. 'ADMIN_JAVASCRIPT_FILE' . $this->hhh]
+						= $this->setViewScript(
+						$nameListCode, 'list_fileScript'
+					);
+					// ADMIN_CUSTOM_BUTTONS_LIST
+					$this->fileContentDynamic[$nameListCode][$this->hhh
+					. 'ADMIN_CUSTOM_BUTTONS_LIST' . $this->hhh]
+						= $this->setCustomButtons($view, 3, $this->_t(1));
+					$this->fileContentDynamic[$nameListCode][$this->hhh
+					. 'ADMIN_CUSTOM_FUNCTION_ONLY_BUTTONS_LIST' . $this->hhh]
+						= $this->setFunctionOnlyButtons(
+						$nameListCode
+					);
 
-					// ###GET_ITEMS_METHOD_STRING_FIX### <<<DYNAMIC>>>
-					$this->fileContentDynamic[$viewName_list]['###GET_ITEMS_METHOD_STRING_FIX###'] = $this->setGetItemsMethodStringFix($viewName_single, $this->fileContentStatic['###Component###']);
+					// GET_ITEMS_METHOD_STRING_FIX <<<DYNAMIC>>>
+					$this->fileContentDynamic[$nameListCode][$this->hhh
+					. 'GET_ITEMS_METHOD_STRING_FIX' . $this->hhh]
+						= $this->setGetItemsMethodStringFix(
+						$nameSingleCode,
+						$nameListCode,
+						$this->fileContentStatic[$this->hhh . 'Component'
+						. $this->hhh]
+					);
 
-					// ###GET_ITEMS_METHOD_AFTER_ALL### <<<DYNAMIC>>>
-					$this->fileContentDynamic[$viewName_list]['###GET_ITEMS_METHOD_AFTER_ALL###'] = $this->getCustomScriptBuilder('php_getitems_after_all', $viewName_single, PHP_EOL);
+					// GET_ITEMS_METHOD_AFTER_ALL <<<DYNAMIC>>>
+					$this->fileContentDynamic[$nameListCode][$this->hhh
+					. 'GET_ITEMS_METHOD_AFTER_ALL' . $this->hhh]
+						= $this->getCustomScriptBuilder(
+						'php_getitems_after_all',
+						$nameSingleCode, PHP_EOL
+					);
 
-					// ###SELECTIONTRANSLATIONFIX### <<<DYNAMIC>>>
-					$this->fileContentDynamic[$viewName_list]['###SELECTIONTRANSLATIONFIX###'] = $this->setSelectionTranslationFix($viewName_list, $this->fileContentStatic['###Component###']);
+					// SELECTIONTRANSLATIONFIX <<<DYNAMIC>>>
+					$this->fileContentDynamic[$nameListCode][$this->hhh
+					. 'SELECTIONTRANSLATIONFIX' . $this->hhh]
+						= $this->setSelectionTranslationFix(
+						$nameListCode,
+						$this->fileContentStatic[$this->hhh . 'Component'
+						. $this->hhh]
+					);
 
-					// ###SELECTIONTRANSLATIONFIXFUNC### <<<DYNAMIC>>>
-					$this->fileContentDynamic[$viewName_list]['###SELECTIONTRANSLATIONFIXFUNC###'] = $this->setSelectionTranslationFixFunc($viewName_list, $this->fileContentStatic['###Component###']);
+					// SELECTIONTRANSLATIONFIXFUNC <<<DYNAMIC>>>
+					$this->fileContentDynamic[$nameListCode][$this->hhh
+					. 'SELECTIONTRANSLATIONFIXFUNC' . $this->hhh]
+						= $this->setSelectionTranslationFixFunc(
+						$nameListCode,
+						$this->fileContentStatic[$this->hhh . 'Component'
+						. $this->hhh]
+					);
 
-					// ###FILTER_FIELDS### <<<DYNAMIC>>>
-					$this->fileContentDynamic[$viewName_list]['###FILTER_FIELDS###'] = $this->setFilterFields($viewName_list);
+					// FILTER_FIELDS <<<DYNAMIC>>>
+					$this->fileContentDynamic[$nameListCode][$this->hhh
+					. 'FILTER_FIELDS' . $this->hhh]
+						= $this->setFilterFieldsArray(
+						$nameSingleCode,
+						$nameListCode
+					);
 
-					// ###STOREDID### <<<DYNAMIC>>>
-					$this->fileContentDynamic[$viewName_list]['###STOREDID###'] = $this->setStoredId($viewName_list);
+					// STOREDID <<<DYNAMIC>>>
+					$this->fileContentDynamic[$nameListCode][$this->hhh
+					. 'STOREDID' . $this->hhh]
+						= $this->setStoredId(
+						$nameSingleCode, $nameListCode
+					);
 
-					// ###POPULATESTATE### <<<DYNAMIC>>>
-					$this->fileContentDynamic[$viewName_list]['###POPULATESTATE###'] = $this->setPopulateState($viewName_list);
+					// POPULATESTATE <<<DYNAMIC>>>
+					$this->fileContentDynamic[$nameListCode][$this->hhh
+					. 'POPULATESTATE' . $this->hhh]
+						= $this->setPopulateState(
+						$nameSingleCode, $nameListCode
+					);
 
-					// ###SORTFIELDS### <<<DYNAMIC>>>
-					$this->fileContentDynamic[$viewName_list]['###SORTFIELDS###'] = $this->setSortFields($viewName_list);
+					// SORTFIELDS <<<DYNAMIC>>>
+					$this->fileContentDynamic[$nameListCode][$this->hhh
+					. 'SORTFIELDS' . $this->hhh]
+						= $this->setSortFields(
+						$nameListCode
+					);
 
-					// ###CATEGORYFILTER### <<<DYNAMIC>>>
-					$this->fileContentDynamic[$viewName_list]['###CATEGORYFILTER###'] = $this->setCategoryFilter($viewName_list);
-
-					// ###CATEGORY_VIEWS###
-					if (!isset($this->fileContentStatic['###ROUTER_CATEGORY_VIEWS###']))
+					// CATEGORY_VIEWS
+					if (!isset(
+						$this->fileContentStatic[$this->hhh
+						. 'ROUTER_CATEGORY_VIEWS' . $this->hhh]
+					))
 					{
-						$this->fileContentStatic['###ROUTER_CATEGORY_VIEWS###'] = '';
+						$this->fileContentStatic[$this->hhh
+						. 'ROUTER_CATEGORY_VIEWS' . $this->hhh]
+							= '';
 					}
-					$this->fileContentStatic['###ROUTER_CATEGORY_VIEWS###'] .= $this->setRouterCategoryViews($viewName_single, $viewName_list);
+					$this->fileContentStatic[$this->hhh
+					. 'ROUTER_CATEGORY_VIEWS' . $this->hhh]
+						.= $this->setRouterCategoryViews(
+						$nameSingleCode,
+						$nameListCode
+					);
 
-					// ###OTHERFILTERS### <<<DYNAMIC>>>
-					$this->fileContentDynamic[$viewName_list]['###OTHERFILTERS###'] = $this->setOtherFilter($viewName_list);
+					// FILTERFIELDDISPLAYHELPER <<<DYNAMIC>>>
+					$this->fileContentDynamic[$nameListCode][$this->hhh
+					. 'FILTERFIELDDISPLAYHELPER' . $this->hhh]
+						= $this->setFilterFieldSidebarDisplayHelper(
+						$nameSingleCode,
+						$nameListCode
+					);
 
-					// ###FILTERFUNCTIONS### <<<DYNAMIC>>>
-					$this->fileContentDynamic[$viewName_list]['###FILTERFUNCTIONS###'] = $this->setFilterFunctions($viewName_single, $viewName_list);
+					// BATCHDISPLAYHELPER <<<DYNAMIC>>>
+					$this->fileContentDynamic[$nameListCode][$this->hhh
+					. 'BATCHDISPLAYHELPER' . $this->hhh]
+						= $this->setBatchDisplayHelper(
+						$nameSingleCode,
+						$nameListCode
+					);
 
-					// ###LISTQUERY### <<<DYNAMIC>>>
-					$this->fileContentDynamic[$viewName_list]['###LISTQUERY###'] = $this->setListQuery($viewName_single, $viewName_list);
+					// FILTERFUNCTIONS <<<DYNAMIC>>>
+					$this->fileContentDynamic[$nameListCode][$this->hhh
+					. 'FILTERFUNCTIONS' . $this->hhh]
+						= $this->setFilterFieldHelper(
+						$nameSingleCode,
+						$nameListCode
+					);
 
-					// ###MODELEXPORTMETHOD### <<<DYNAMIC>>>
-					$this->fileContentDynamic[$viewName_list]['###MODELEXPORTMETHOD###'] = $this->setModelExportMethod($viewName_single, $viewName_list);
+					// FIELDFILTERSETS <<<DYNAMIC>>>
+					$this->fileContentDynamic['filter_'
+					. $nameListCode][$this->hhh
+					. 'FIELDFILTERSETS' . $this->hhh]
+						= $this->setFieldFilterSet(
+						$nameSingleCode,
+						$nameListCode
+					);
 
-					// ###MODELEXIMPORTMETHOD### <<<DYNAMIC>>>
-					$this->fileContentDynamic[$viewName_list]['###CONTROLLEREXIMPORTMETHOD###'] = $this->setControllerEximportMethod($viewName_single, $viewName_list);
+					// FIELDLISTSETS <<<DYNAMIC>>>
+					$this->fileContentDynamic['filter_'
+					. $nameListCode][$this->hhh
+					. 'FIELDLISTSETS' . $this->hhh]
+						= $this->setFieldFilterListSet(
+						$nameSingleCode,
+						$nameListCode
+					);
 
-					// ###EXPORTBUTTON### <<<DYNAMIC>>>
-					$this->fileContentDynamic[$viewName_list]['###EXPORTBUTTON###'] = $this->setExportButton($viewName_single, $viewName_list);
+					// LISTQUERY <<<DYNAMIC>>>
+					$this->fileContentDynamic[$nameListCode][$this->hhh
+					. 'LISTQUERY' . $this->hhh]
+						= $this->setListQuery(
+						$nameSingleCode,
+						$nameListCode
+					);
 
-					// ###IMPORTBUTTON### <<<DYNAMIC>>>
-					$this->fileContentDynamic[$viewName_list]['###IMPORTBUTTON###'] = $this->setImportButton($viewName_single, $viewName_list);
+					// MODELEXPORTMETHOD <<<DYNAMIC>>>
+					$this->fileContentDynamic[$nameListCode][$this->hhh
+					. 'MODELEXPORTMETHOD' . $this->hhh]
+						= $this->setGetItemsModelMethod(
+						$nameSingleCode,
+						$nameListCode
+					);
 
-					// ###LISTHEAD### <<<DYNAMIC>>>
-					$this->fileContentDynamic[$viewName_list]['###LISTHEAD###'] = $this->setListHead($viewName_single, $viewName_list);
+					// MODELEXIMPORTMETHOD <<<DYNAMIC>>>
+					$this->fileContentDynamic[$nameListCode][$this->hhh
+					. 'CONTROLLEREXIMPORTMETHOD' . $this->hhh]
+						= $this->setControllerEximportMethod(
+						$nameSingleCode,
+						$nameListCode
+					);
 
-					// ###LISTBODY### <<<DYNAMIC>>>
-					$this->fileContentDynamic[$viewName_list]['###LISTBODY###'] = $this->setListBody($viewName_single, $viewName_list);
+					// EXPORTBUTTON <<<DYNAMIC>>>
+					$this->fileContentDynamic[$nameListCode][$this->hhh
+					. 'EXPORTBUTTON' . $this->hhh]
+						= $this->setExportButton(
+						$nameSingleCode,
+						$nameListCode
+					);
 
-					// ###LISTCOLNR### <<<DYNAMIC>>>
-					$this->fileContentDynamic[$viewName_list]['###LISTCOLNR###'] = $this->setListColnr($viewName_list);
+					// IMPORTBUTTON <<<DYNAMIC>>>
+					$this->fileContentDynamic[$nameListCode][$this->hhh
+					. 'IMPORTBUTTON' . $this->hhh]
+						= $this->setImportButton(
+						$nameSingleCode,
+						$nameListCode
+					);
 
-					// ###JVIEWLISTCANDO### <<<DYNAMIC>>>
-					$this->fileContentDynamic[$viewName_list]['###JVIEWLISTCANDO###'] = $this->setJviewListCanDo($viewName_single, $viewName_list);
+					// VIEWS_DEFAULT_BODY <<<DYNAMIC>>>
+					$this->fileContentDynamic[$nameListCode][$this->hhh
+					. 'VIEWS_DEFAULT_BODY' . $this->hhh]
+						= $this->setDefaultViewsBody(
+						$nameSingleCode,
+						$nameListCode
+					);
 
-					// ###VIEWSCSS### <<<DYNAMIC>>>
-					$this->fileContentDynamic[$viewName_list]['###VIEWSCSS###'] = $this->getCustomScriptBuilder('css_views', $viewName_list, '', null, true);
+					// LISTHEAD <<<DYNAMIC>>>
+					$this->fileContentDynamic[$nameListCode][$this->hhh
+					. 'LISTHEAD' . $this->hhh]
+						= $this->setListHead(
+						$nameSingleCode,
+						$nameListCode
+					);
 
-					// ###VIEWS_FOOTER_SCRIPT### <<<DYNAMIC>>>
-					$scriptNote = PHP_EOL . '//' . $this->setLine(__LINE__) . ' ' . $viewName_list.' footer script';
-					if ($footerScript = $this->getCustomScriptBuilder('views_footer', $viewName_single, '', $scriptNote, true, false, PHP_EOL))
+					// LISTBODY <<<DYNAMIC>>>
+					$this->fileContentDynamic[$nameListCode][$this->hhh
+					. 'LISTBODY' . $this->hhh]
+						= $this->setListBody(
+						$nameSingleCode,
+						$nameListCode
+					);
+
+					// LISTCOLNR <<<DYNAMIC>>>
+					$this->fileContentDynamic[$nameListCode][$this->hhh
+					. 'LISTCOLNR' . $this->hhh]
+						= $this->setListColnr(
+						$nameListCode
+					);
+
+					// JVIEWLISTCANDO <<<DYNAMIC>>>
+					$this->fileContentDynamic[$nameListCode][$this->hhh
+					. 'JVIEWLISTCANDO' . $this->hhh]
+						= $this->setJviewListCanDo(
+						$nameSingleCode,
+						$nameListCode
+					);
+
+					// VIEWSCSS <<<DYNAMIC>>>
+					$this->fileContentDynamic[$nameListCode][$this->hhh
+					. 'VIEWSCSS' . $this->hhh]
+						= $this->getCustomScriptBuilder(
+						'css_views', $nameSingleCode, '',
+						null, true
+					);
+
+					// ADMIN_DIPLAY_METHOD <<<DYNAMIC>>>
+					$this->fileContentDynamic[$nameListCode][$this->hhh
+					. 'ADMIN_DIPLAY_METHOD' . $this->hhh]
+						= $this->setAdminViewDisplayMethod(
+						$nameListCode
+					);
+
+					// VIEWS_FOOTER_SCRIPT <<<DYNAMIC>>>
+					$scriptNote = PHP_EOL . '//' . $this->setLine(__LINE__)
+						. ' ' . $nameListCode
+						. ' footer script';
+					if (($footerScript = $this->getCustomScriptBuilder(
+							'views_footer', $nameSingleCode, '',
+							$scriptNote, true,
+							false, PHP_EOL
+						)) !== false
+						&& ComponentbuilderHelper::checkString($footerScript))
 					{
 						// only minfy if no php is added to the footer script
-						if ($this->minify && strpos($footerScript, '<?php') === false)
+						if ($this->minify
+							&& strpos($footerScript, '<?php') === false)
 						{
 							// minfy the script
 							$minifier = new JS;
@@ -495,239 +1019,632 @@ class Infusion extends Interpretation
 							// clear some memory
 							unset($minifier);
 						}
-						$this->fileContentDynamic[$viewName_list]['###VIEWS_FOOTER_SCRIPT###'] = PHP_EOL . '<script type="text/javascript">' . $footerScript . "</script>";
+						$this->fileContentDynamic[$nameListCode][$this->hhh
+						. 'VIEWS_FOOTER_SCRIPT' . $this->hhh]
+							= PHP_EOL . '<script type="text/javascript">'
+							. $footerScript . "</script>";
 						// clear some memory
 						unset($footerScript);
 					}
 					else
 					{
-						$this->fileContentDynamic[$viewName_list]['###VIEWS_FOOTER_SCRIPT###'] = '';
+						$this->fileContentDynamic[$nameListCode][$this->hhh
+						. 'VIEWS_FOOTER_SCRIPT' . $this->hhh]
+							= '';
 					}
+
+					// ADMIN_VIEWS_CONTROLLER_HEADER <<<DYNAMIC>>> add the header details for the controller
+					$this->fileContentDynamic[$nameListCode][$this->hhh
+					. 'ADMIN_VIEWS_CONTROLLER_HEADER' . $this->hhh]
+						= $this->setClassHeaders(
+						'admin.views.controller',
+						$nameListCode
+					);
+					// ADMIN_VIEWS_MODEL_HEADER <<<DYNAMIC>>> add the header details for the model
+					$this->fileContentDynamic[$nameListCode][$this->hhh
+					. 'ADMIN_VIEWS_MODEL_HEADER' . $this->hhh]
+						= $this->setClassHeaders(
+						'admin.views.model', $nameListCode
+					);
+					// ADMIN_VIEWS_HEADER <<<DYNAMIC>>> add the header details for the views
+					$this->fileContentDynamic[$nameListCode][$this->hhh
+					. 'ADMIN_VIEWS_HEADER' . $this->hhh]
+						= $this->setClassHeaders(
+						'admin.views', $nameListCode
+					);
+
+					// Trigger Event: jcb_ce_onAfterBuildAdminListViewContent
+					$this->triggerEvent(
+						'jcb_ce_onAfterBuildAdminListViewContent',
+						array(&$this->componentContext, &$view,
+						      &$nameSingleCode,
+						      &$nameListCode,
+						      &$this->fileContentStatic,
+						      &$this->fileContentDynamic[$nameListCode],
+						      &$this->placeholders, &$this->hhh)
+					);
 				}
 
 				// set u fields used in batch
-				$this->fileContentDynamic[$viewName_single]['###UNIQUEFIELDS###'] = $this->setUniqueFields($viewName_single);
+				$this->fileContentDynamic[$nameSingleCode][$this->hhh
+				. 'UNIQUEFIELDS' . $this->hhh]
+					= $this->setUniqueFields(
+					$nameSingleCode
+				);
 
-				// ###TITLEALIASFIX### <<<DYNAMIC>>>
-				$this->fileContentDynamic[$viewName_single]['###TITLEALIASFIX###'] = $this->setAliasTitleFix($viewName_single);
+				// TITLEALIASFIX <<<DYNAMIC>>>
+				$this->fileContentDynamic[$nameSingleCode][$this->hhh
+				. 'TITLEALIASFIX' . $this->hhh]
+					= $this->setAliasTitleFix(
+					$nameSingleCode
+				);
 
-				// ###GENERATENEWTITLE### <<<DYNAMIC>>>
-				$this->fileContentDynamic[$viewName_single]['###GENERATENEWTITLE###'] = $this->setGenerateNewTitle($viewName_single);
+				// GENERATENEWTITLE <<<DYNAMIC>>>
+				$this->fileContentDynamic[$nameSingleCode][$this->hhh
+				. 'GENERATENEWTITLE' . $this->hhh]
+					= $this->setGenerateNewTitle(
+					$nameSingleCode
+				);
 
-				// ###GENERATENEWALIAS### <<<DYNAMIC>>>
-				$this->fileContentDynamic[$viewName_single]['###GENERATENEWALIAS###'] = $this->setGenerateNewAlias($viewName_single);
+				// GENERATENEWALIAS <<<DYNAMIC>>>
+				$this->fileContentDynamic[$nameSingleCode][$this->hhh
+				. 'GENERATENEWALIAS' . $this->hhh]
+					= $this->setGenerateNewAlias(
+					$nameSingleCode
+				);
 
-				// ###MODEL_BATCH_COPY### <<<DYNAMIC>>>
-				$this->fileContentDynamic[$viewName_single]['###MODEL_BATCH_COPY###'] = $this->setBatchCopy($viewName_single);
+				// MODEL_BATCH_COPY <<<DYNAMIC>>>
+				$this->fileContentDynamic[$nameSingleCode][$this->hhh
+				. 'MODEL_BATCH_COPY' . $this->hhh]
+					= $this->setBatchCopy($nameSingleCode);
 
-				// ###MODEL_BATCH_MOVE### <<<DYNAMIC>>>
-				$this->fileContentDynamic[$viewName_single]['###MODEL_BATCH_MOVE###'] = $this->setBatchMove($viewName_single);
+				// MODEL_BATCH_MOVE <<<DYNAMIC>>>
+				$this->fileContentDynamic[$nameSingleCode][$this->hhh
+				. 'MODEL_BATCH_MOVE' . $this->hhh]
+					= $this->setBatchMove($nameSingleCode);
 
-				// ###BATCH_ONCLICK_CANCEL_SCRIPT### <<<DYNAMIC>>>
-				$this->fileContentDynamic[$viewName_list]['###BATCH_ONCLICK_CANCEL_SCRIPT###'] = ''; // TODO <-- must still be build
-				// ###JCONTROLLERFORM_ALLOWADD### <<<DYNAMIC>>>
-				$this->fileContentDynamic[$viewName_single]['###JCONTROLLERFORM_ALLOWADD###'] = $this->setJcontrollerAllowAdd($viewName_single, $viewName_list);
+				// BATCH_ONCLICK_CANCEL_SCRIPT <<<DYNAMIC>>>
+				$this->fileContentDynamic[$nameListCode][$this->hhh
+				. 'BATCH_ONCLICK_CANCEL_SCRIPT' . $this->hhh]
+					= ''; // TODO <-- must still be build
 
-				// ###JCONTROLLERFORM_ALLOWEDIT### <<<DYNAMIC>>>
-				$this->fileContentDynamic[$viewName_single]['###JCONTROLLERFORM_ALLOWEDIT###'] = $this->setJcontrollerAllowEdit($viewName_single, $viewName_list);
+				// JCONTROLLERFORM_ALLOWADD <<<DYNAMIC>>>
+				$this->fileContentDynamic[$nameSingleCode][$this->hhh
+				. 'JCONTROLLERFORM_ALLOWADD' . $this->hhh]
+					= $this->setJcontrollerAllowAdd(
+					$nameSingleCode,
+					$nameListCode
+				);
 
-				// ###JMODELADMIN_GETFORM### <<<DYNAMIC>>>
-				$this->fileContentDynamic[$viewName_single]['###JMODELADMIN_GETFORM###'] = $this->setJmodelAdminGetForm($viewName_single, $viewName_list);
+				// JCONTROLLERFORM_BEFORECANCEL <<<DYNAMIC>>>
+				$this->fileContentDynamic[$nameSingleCode][$this->hhh
+				. 'JCONTROLLERFORM_BEFORECANCEL' . $this->hhh]
+					= $this->getCustomScriptBuilder(
+					'php_before_cancel', $nameSingleCode,
+					PHP_EOL, null, null,
+					''
+				);
 
-				// ###JMODELADMIN_ALLOWEDIT### <<<DYNAMIC>>>
-				$this->fileContentDynamic[$viewName_single]['###JMODELADMIN_ALLOWEDIT###'] = $this->setJmodelAdminAllowEdit($viewName_single, $viewName_list);
+				// JCONTROLLERFORM_AFTERCANCEL <<<DYNAMIC>>>
+				$this->fileContentDynamic[$nameSingleCode][$this->hhh
+				. 'JCONTROLLERFORM_AFTERCANCEL' . $this->hhh]
+					= $this->getCustomScriptBuilder(
+					'php_after_cancel', $nameSingleCode,
+					PHP_EOL, null, null,
+					''
+				);
 
-				// ###JMODELADMIN_CANDELETE### <<<DYNAMIC>>>
-				$this->fileContentDynamic[$viewName_single]['###JMODELADMIN_CANDELETE###'] = $this->setJmodelAdminCanDelete($viewName_single, $viewName_list);
+				// JCONTROLLERFORM_ALLOWEDIT <<<DYNAMIC>>>
+				$this->fileContentDynamic[$nameSingleCode][$this->hhh
+				. 'JCONTROLLERFORM_ALLOWEDIT' . $this->hhh]
+					= $this->setJcontrollerAllowEdit(
+					$nameSingleCode,
+					$nameListCode
+				);
 
-				// ###JMODELADMIN_CANEDITSTATE### <<<DYNAMIC>>>
-				$this->fileContentDynamic[$viewName_single]['###JMODELADMIN_CANEDITSTATE###'] = $this->setJmodelAdminCanEditState($viewName_single, $viewName_list);
+				// JMODELADMIN_GETFORM <<<DYNAMIC>>>
+				$this->fileContentDynamic[$nameSingleCode][$this->hhh
+				. 'JMODELADMIN_GETFORM' . $this->hhh]
+					= $this->setJmodelAdminGetForm(
+					$nameSingleCode,
+					$nameListCode
+				);
+
+				// JMODELADMIN_ALLOWEDIT <<<DYNAMIC>>>
+				$this->fileContentDynamic[$nameSingleCode][$this->hhh
+				. 'JMODELADMIN_ALLOWEDIT' . $this->hhh]
+					= $this->setJmodelAdminAllowEdit(
+					$nameSingleCode,
+					$nameListCode
+				);
+
+				// JMODELADMIN_CANDELETE <<<DYNAMIC>>>
+				$this->fileContentDynamic[$nameSingleCode][$this->hhh
+				. 'JMODELADMIN_CANDELETE' . $this->hhh]
+					= $this->setJmodelAdminCanDelete(
+					$nameSingleCode,
+					$nameListCode
+				);
+
+				// JMODELADMIN_CANEDITSTATE <<<DYNAMIC>>>
+				$this->fileContentDynamic[$nameSingleCode][$this->hhh
+				. 'JMODELADMIN_CANEDITSTATE' . $this->hhh]
+					= $this->setJmodelAdminCanEditState(
+					$nameSingleCode,
+					$nameListCode
+				);
 
 				// set custom admin view Toolbare buttons
-				// ###CUSTOM_ADMIN_DYNAMIC_BUTTONS###  <<<DYNAMIC>>>
-				$this->fileContentDynamic[$viewName_list]['###CUSTOM_ADMIN_DYNAMIC_BUTTONS###'] = $this->setCustomAdminDynamicButton($viewName_list);
-				// ###CUSTOM_ADMIN_DYNAMIC_BUTTONS_CONTROLLER###  <<<DYNAMIC>>>
-				$this->fileContentDynamic[$viewName_list]['###CUSTOM_ADMIN_DYNAMIC_BUTTONS_CONTROLLER###'] = $this->setCustomAdminDynamicButtonController($viewName_list);
+				// CUSTOM_ADMIN_DYNAMIC_BUTTONS  <<<DYNAMIC>>>
+				$this->fileContentDynamic[$nameListCode][$this->hhh
+				. 'CUSTOM_ADMIN_DYNAMIC_BUTTONS' . $this->hhh]
+					= $this->setCustomAdminDynamicButton(
+					$nameListCode
+				);
+				// CUSTOM_ADMIN_DYNAMIC_BUTTONS_CONTROLLER  <<<DYNAMIC>>>
+				$this->fileContentDynamic[$nameListCode][$this->hhh
+				. 'CUSTOM_ADMIN_DYNAMIC_BUTTONS_CONTROLLER' . $this->hhh]
+					= $this->setCustomAdminDynamicButtonController(
+					$nameListCode
+				);
 
 				// set helper router
-				if (!isset($this->fileContentStatic['###ROUTEHELPER###']))
+				if (!isset(
+					$this->fileContentStatic[$this->hhh . 'ROUTEHELPER'
+					. $this->hhh]
+				))
 				{
-					$this->fileContentStatic['###ROUTEHELPER###'] = '';
+					$this->fileContentStatic[$this->hhh . 'ROUTEHELPER'
+					. $this->hhh]
+						= '';
 				}
-				$this->fileContentStatic['###ROUTEHELPER###'] .= $this->setRouterHelp($viewName_single, $viewName_list);
+				$this->fileContentStatic[$this->hhh . 'ROUTEHELPER'
+				. $this->hhh]
+					.= $this->setRouterHelp(
+					$nameSingleCode,
+					$nameListCode
+				);
 
-				if (isset($view['edit_create_site_view']) && $view['edit_create_site_view'])
+				if (isset($view['edit_create_site_view'])
+					&& is_numeric(
+						$view['edit_create_site_view']
+					)
+					&& $view['edit_create_site_view'] > 0)
 				{
 					// add needed router stuff for front edit views
-					$this->fileContentStatic['###ROUTER_PARSE_SWITCH###'] .= $this->routerParseSwitch($viewName_single, null, false);
-					$this->fileContentStatic['###ROUTER_BUILD_VIEWS###'] .= $this->routerBuildViews($viewName_single);
+					$this->fileContentStatic[$this->hhh . 'ROUTER_PARSE_SWITCH'
+					. $this->hhh]
+						.= $this->routerParseSwitch(
+						$nameSingleCode, null, false
+					);
+					$this->fileContentStatic[$this->hhh . 'ROUTER_BUILD_VIEWS'
+					. $this->hhh]
+						.= $this->routerBuildViews(
+						$nameSingleCode
+					);
 				}
 
-				// ###ACCESS_SECTIONS###
-				if (!isset($this->fileContentStatic['###ACCESS_SECTIONS###']))
+				// ACCESS_SECTIONS
+				if (!isset(
+					$this->fileContentStatic[$this->hhh . 'ACCESS_SECTIONS'
+					. $this->hhh]
+				))
 				{
-					$this->fileContentStatic['###ACCESS_SECTIONS###'] = '';
+					$this->fileContentStatic[$this->hhh . 'ACCESS_SECTIONS'
+					. $this->hhh]
+						= '';
 				}
-				$this->fileContentStatic['###ACCESS_SECTIONS###'] .= $this->setAccessSectionsCategory($viewName_single, $viewName_list);
+				$this->fileContentStatic[$this->hhh . 'ACCESS_SECTIONS'
+				. $this->hhh]
+					.= $this->setAccessSectionsCategory(
+					$nameSingleCode,
+					$nameListCode
+				);
+				// set the Joomla Fields ACCESS section if needed
+				if (isset($view['joomla_fields'])
+					&& $view['joomla_fields'] == 1)
+				{
+					$this->fileContentStatic[$this->hhh . 'ACCESS_SECTIONS'
+					. $this->hhh]
+						.= $this->setAccessSectionsJoomlaFields();
+				}
 
-				// ###HELPER_EXEL###
-				$this->fileContentStatic['###HELPER_EXEL###'] = $this->setExelHelperMethods();
+				// Trigger Event: jcb_ce_onAfterBuildAdminViewContent
+				$this->triggerEvent(
+					'jcb_ce_onAfterBuildAdminViewContent',
+					array(&$this->componentContext, &$view,
+					      &$nameSingleCode,
+					      &$nameListCode,
+					      &$this->fileContentStatic,
+					      &$this->fileContentDynamic, &$this->placeholders,
+					      &$this->hhh)
+				);
 			}
 
+			// setup the layouts
+			$this->setCustomViewLayouts();
+
+			// ADMIN_HELPER_CLASS_HEADER
+			$this->fileContentStatic[$this->hhh . 'ADMIN_HELPER_CLASS_HEADER'
+			. $this->hhh]
+				= $this->setHelperClassHeader('admin');
+
+			// SITE_HELPER_CLASS_HEADER
+			$this->fileContentStatic[$this->hhh . 'SITE_HELPER_CLASS_HEADER'
+			. $this->hhh]
+				= $this->setHelperClassHeader('site');
+
+			// HELPER_EXEL
+			$this->fileContentStatic[$this->hhh . 'HELPER_EXEL'
+			. $this->hhh]
+				= $this->setHelperExelMethods();
+
 			// setup custom_admin_views and all needed stuff for the site
-			if (isset($this->componentData->custom_admin_views) && ComponentbuilderHelper::checkArray($this->componentData->custom_admin_views))
+			if (isset($this->componentData->custom_admin_views)
+				&& ComponentbuilderHelper::checkArray(
+					$this->componentData->custom_admin_views
+				))
 			{
 				$this->target = 'custom_admin';
-				$this->lang = 'admin';
-				// var_dump($this->componentData->custom_admin_views);exit;
+				$this->lang   = 'admin';
 				// start dynamic build
 				foreach ($this->componentData->custom_admin_views as $view)
 				{
 					// for single views
-					$this->fileContentDynamic[$view['settings']->code]['###SView###'] = $view['settings']->Code;
-					$this->fileContentDynamic[$view['settings']->code]['###sview###'] = $view['settings']->code;
-					$this->fileContentDynamic[$view['settings']->code]['###SVIEW###'] = $view['settings']->CODE;
+					$this->fileContentDynamic[$view['settings']->code][$this->hhh
+					. 'SView' . $this->hhh]
+						= $view['settings']->Code;
+					$this->fileContentDynamic[$view['settings']->code][$this->hhh
+					. 'sview' . $this->hhh]
+						= $view['settings']->code;
+					$this->fileContentDynamic[$view['settings']->code][$this->hhh
+					. 'SVIEW' . $this->hhh]
+						= $view['settings']->CODE;
 					// for list views
-					$this->fileContentDynamic[$view['settings']->code]['###SViews###'] = $view['settings']->Code;
-					$this->fileContentDynamic[$view['settings']->code]['###sviews###'] = $view['settings']->code;
-					$this->fileContentDynamic[$view['settings']->code]['###SVIEWS###'] = $view['settings']->CODE;
+					$this->fileContentDynamic[$view['settings']->code][$this->hhh
+					. 'SViews' . $this->hhh]
+						= $view['settings']->Code;
+					$this->fileContentDynamic[$view['settings']->code][$this->hhh
+					. 'sviews' . $this->hhh]
+						= $view['settings']->code;
+					$this->fileContentDynamic[$view['settings']->code][$this->hhh
+					. 'SVIEWS' . $this->hhh]
+						= $view['settings']->CODE;
 					// add to lang array
-					if (!isset($this->langContent[$this->lang][$this->langPrefix . '_' . $view['settings']->CODE]))
-					{
-						$this->langContent[$this->lang][$this->langPrefix . '_' . $view['settings']->CODE] = $view['settings']->name;
-					}
-					if (!isset($this->langContent[$this->lang][$this->langPrefix . '_' . $view['settings']->CODE . '_DESC']))
-					{
-						$this->langContent[$this->lang][$this->langPrefix . '_' . $view['settings']->CODE . '_DESC'] = $view['settings']->description;
-					}
-					// ###ICOMOON### <<<DYNAMIC>>>
-					$this->fileContentDynamic[$view['settings']->code]['###ICOMOON###'] = $view['icomoon'];
+					$this->setLangContent(
+						$this->lang,
+						$this->langPrefix . '_' . $view['settings']->CODE,
+						$view['settings']->name
+					);
+					$this->setLangContent(
+						$this->lang,
+						$this->langPrefix . '_' . $view['settings']->CODE
+						. '_DESC', $view['settings']->description
+					);
+					// ICOMOON <<<DYNAMIC>>>
+					$this->fileContentDynamic[$view['settings']->code][$this->hhh
+					. 'ICOMOON' . $this->hhh]
+						= $view['icomoon'];
 
 					// set placeholders
-					$this->placeholders['###SView###'] = $view['settings']->Code;
-					$this->placeholders['###sview###'] = $view['settings']->code;
-					$this->placeholders['###SVIEW###'] = $view['settings']->CODE;
-					$this->placeholders['[[[SView]]]'] = $view['settings']->Code;
-					$this->placeholders['[[[sview]]]'] = $view['settings']->code;
-					$this->placeholders['[[[SVIEW]]]'] = $view['settings']->CODE;
-					$this->placeholders['###SViews###'] = $view['settings']->Code;
-					$this->placeholders['###sviews###'] = $view['settings']->code;
-					$this->placeholders['###SVIEWS###'] = $view['settings']->CODE;
-					$this->placeholders['[[[SViews]]]'] = $view['settings']->Code;
-					$this->placeholders['[[[sviews]]]'] = $view['settings']->code;
-					$this->placeholders['[[[SVIEWS]]]'] = $view['settings']->CODE;
+					$this->placeholders[$this->hhh . 'SView' . $this->hhh]
+						= $view['settings']->Code;
+					$this->placeholders[$this->hhh . 'sview' . $this->hhh]
+						= $view['settings']->code;
+					$this->placeholders[$this->hhh . 'SVIEW' . $this->hhh]
+						= $view['settings']->CODE;
+					$this->placeholders[$this->bbb . 'SView' . $this->ddd]
+						= $view['settings']->Code;
+					$this->placeholders[$this->bbb . 'sview' . $this->ddd]
+						= $view['settings']->code;
+					$this->placeholders[$this->bbb . 'SVIEW' . $this->ddd]
+						= $view['settings']->CODE;
+					$this->placeholders[$this->hhh . 'SViews' . $this->hhh]
+						= $view['settings']->Code;
+					$this->placeholders[$this->hhh . 'sviews' . $this->hhh]
+						= $view['settings']->code;
+					$this->placeholders[$this->hhh . 'SVIEWS' . $this->hhh]
+						= $view['settings']->CODE;
+					$this->placeholders[$this->bbb . 'SViews' . $this->ddd]
+						= $view['settings']->Code;
+					$this->placeholders[$this->bbb . 'sviews' . $this->ddd]
+						= $view['settings']->code;
+					$this->placeholders[$this->bbb . 'SVIEWS' . $this->ddd]
+						= $view['settings']->CODE;
+
+					// Trigger Event: jcb_ce_onBeforeBuildCustomAdminViewContent
+					$this->triggerEvent(
+						'jcb_ce_onBeforeBuildCustomAdminViewContent',
+						array(&$this->componentContext, &$view,
+						      &$view['settings']->code,
+						      &$this->fileContentStatic,
+						      &$this->fileContentDynamic[$view['settings']->code],
+						      &$this->placeholders, &$this->hhh)
+					);
 
 					// set license per view if needed
-					$this->setLockLicensePer($view['settings']->code, $this->target);
+					$this->setLockLicensePer(
+						$view['settings']->code, $this->target
+					);
+
+					// check if this custom admin view is the default view
+					if ($this->dynamicDashboardType === 'custom_admin_views'
+						&& $this->dynamicDashboard === $view['settings']->code)
+					{
+						// HIDEMAINMENU <<<DYNAMIC>>>
+						$this->fileContentDynamic[$view['settings']->code][$this->hhh
+						. 'HIDEMAINMENU' . $this->hhh]
+							= '';
+					}
+					else
+					{
+						// HIDEMAINMENU <<<DYNAMIC>>>
+						$this->fileContentDynamic[$view['settings']->code][$this->hhh
+						. 'HIDEMAINMENU' . $this->hhh]
+							= PHP_EOL . $this->_t(2) . '//' . $this->setLine(
+								__LINE__
+							) . " hide the main menu"
+							. PHP_EOL . $this->_t(2)
+							. "\$this->app->input->set('hidemainmenu', true);";
+					}
 
 					if ($view['settings']->main_get->gettype == 1)
 					{
-						// ###CUSTOM_ADMIN_BEFORE_GET_ITEM### <<<DYNAMIC>>>
-						$this->fileContentDynamic[$view['settings']->code]['###CUSTOM_ADMIN_BEFORE_GET_ITEM###'] = $this->getCustomScriptBuilder($this->target . '_php_before_getitem', $view['settings']->code, '', null, true);
+						// CUSTOM_ADMIN_BEFORE_GET_ITEM <<<DYNAMIC>>>
+						$this->fileContentDynamic[$view['settings']->code][$this->hhh
+						. 'CUSTOM_ADMIN_BEFORE_GET_ITEM' . $this->hhh]
+							= $this->getCustomScriptBuilder(
+							$this->target . '_php_before_getitem',
+							$view['settings']->code, '', null, true
+						);
 
-						// ###CUSTOM_ADMIN_GET_ITEM### <<<DYNAMIC>>>
-						$this->fileContentDynamic[$view['settings']->code]['###CUSTOM_ADMIN_GET_ITEM###'] = $this->setCustomViewGetItem($view['settings']->main_get, $view['settings']->code, "\t\t");
+						// CUSTOM_ADMIN_GET_ITEM <<<DYNAMIC>>>
+						$this->fileContentDynamic[$view['settings']->code][$this->hhh
+						. 'CUSTOM_ADMIN_GET_ITEM' . $this->hhh]
+							= $this->setCustomViewGetItem(
+							$view['settings']->main_get,
+							$view['settings']->code, $this->_t(2)
+						);
 
-						// ###CUSTOM_ADMIN_AFTER_GET_ITEM### <<<DYNAMIC>>>
-						$this->fileContentDynamic[$view['settings']->code]['###CUSTOM_ADMIN_AFTER_GET_ITEM###'] = $this->getCustomScriptBuilder($this->target . '_php_after_getitem', $view['settings']->code, '', null, true);
+						// CUSTOM_ADMIN_AFTER_GET_ITEM <<<DYNAMIC>>>
+						$this->fileContentDynamic[$view['settings']->code][$this->hhh
+						. 'CUSTOM_ADMIN_AFTER_GET_ITEM' . $this->hhh]
+							= $this->getCustomScriptBuilder(
+							$this->target . '_php_after_getitem',
+							$view['settings']->code, '', null, true
+						);
 					}
 					elseif ($view['settings']->main_get->gettype == 2)
 					{
-						// ###CUSTOM_ADMIN_GET_LIST_QUERY### <<<DYNAMIC>>>
-						$this->fileContentDynamic[$view['settings']->code]['###CUSTOM_ADMIN_GET_LIST_QUERY###'] = $this->setCustomViewListQuery($view['settings']->main_get, $view['settings']->code);
+						// CUSTOM_ADMIN_GET_LIST_QUERY <<<DYNAMIC>>>
+						$this->fileContentDynamic[$view['settings']->code][$this->hhh
+						. 'CUSTOM_ADMIN_GET_LIST_QUERY' . $this->hhh]
+							= $this->setCustomViewListQuery(
+							$view['settings']->main_get, $view['settings']->code
+						);
 
-						// ###CUSTOM_ADMIN_CUSTOM_BEFORE_LIST_QUERY### <<<DYNAMIC>>>
-						$this->fileContentDynamic[$view['settings']->code]['###CUSTOM_ADMIN_CUSTOM_BEFORE_LIST_QUERY###'] = $this->getCustomScriptBuilder($this->target . '_php_getlistquery', $view['settings']->code, PHP_EOL, null, true);
+						// CUSTOM_ADMIN_CUSTOM_BEFORE_LIST_QUERY <<<DYNAMIC>>>
+						$this->fileContentDynamic[$view['settings']->code][$this->hhh
+						. 'CUSTOM_ADMIN_CUSTOM_BEFORE_LIST_QUERY' . $this->hhh]
+							= $this->getCustomScriptBuilder(
+							$this->target . '_php_getlistquery',
+							$view['settings']->code, PHP_EOL, null, true
+						);
 
-						// ###CUSTOM_ADMIN_BEFORE_GET_ITEMS### <<<DYNAMIC>>>
-						$this->fileContentDynamic[$view['settings']->code]['###CUSTOM_ADMIN_BEFORE_GET_ITEMS###'] = $this->getCustomScriptBuilder($this->target . '_php_before_getitems', $view['settings']->code, PHP_EOL, null, true);
+						// CUSTOM_ADMIN_BEFORE_GET_ITEMS <<<DYNAMIC>>>
+						$this->fileContentDynamic[$view['settings']->code][$this->hhh
+						. 'CUSTOM_ADMIN_BEFORE_GET_ITEMS' . $this->hhh]
+							= $this->getCustomScriptBuilder(
+							$this->target . '_php_before_getitems',
+							$view['settings']->code, PHP_EOL, null, true
+						);
 
-						// ###CUSTOM_ADMIN_GET_ITEMS### <<<DYNAMIC>>>
-						$this->fileContentDynamic[$view['settings']->code]['###CUSTOM_ADMIN_GET_ITEMS###'] = $this->setCustomViewGetItems($view['settings']->main_get, $view['settings']->code);
+						// CUSTOM_ADMIN_GET_ITEMS <<<DYNAMIC>>>
+						$this->fileContentDynamic[$view['settings']->code][$this->hhh
+						. 'CUSTOM_ADMIN_GET_ITEMS' . $this->hhh]
+							= $this->setCustomViewGetItems(
+							$view['settings']->main_get, $view['settings']->code
+						);
 
-						// ###CUSTOM_ADMIN_AFTER_GET_ITEMS### <<<DYNAMIC>>>
-						$this->fileContentDynamic[$view['settings']->code]['###CUSTOM_ADMIN_AFTER_GET_ITEMS###'] = $this->getCustomScriptBuilder($this->target . '_php_after_getitems', $view['settings']->code, PHP_EOL, null, true);
+						// CUSTOM_ADMIN_AFTER_GET_ITEMS <<<DYNAMIC>>>
+						$this->fileContentDynamic[$view['settings']->code][$this->hhh
+						. 'CUSTOM_ADMIN_AFTER_GET_ITEMS' . $this->hhh]
+							= $this->getCustomScriptBuilder(
+							$this->target . '_php_after_getitems',
+							$view['settings']->code, PHP_EOL, null, true
+						);
 					}
 
-					// ###CUSTOM_ADMIN_CUSTOM_METHODS### <<<DYNAMIC>>>
-					$this->fileContentDynamic[$view['settings']->code]['###CUSTOM_ADMIN_CUSTOM_METHODS###'] = $this->setCustomViewCustomItemMethods($view['settings']->main_get, $view['settings']->code);
-					$this->fileContentDynamic[$view['settings']->code]['###CUSTOM_ADMIN_CUSTOM_METHODS###'] .= $this->setCustomViewCustomMethods($view, $view['settings']->code);
-					// ###CUSTOM_ADMIN_DIPLAY_METHOD### <<<DYNAMIC>>>
-					$this->fileContentDynamic[$view['settings']->code]['###CUSTOM_ADMIN_DIPLAY_METHOD###'] = $this->setCustomViewDisplayMethod($view);
+					// CUSTOM_ADMIN_CUSTOM_METHODS <<<DYNAMIC>>>
+					$this->fileContentDynamic[$view['settings']->code][$this->hhh
+					. 'CUSTOM_ADMIN_CUSTOM_METHODS' . $this->hhh]
+						= $this->setCustomViewCustomItemMethods(
+						$view['settings']->main_get, $view['settings']->code
+					);
+					$this->fileContentDynamic[$view['settings']->code][$this->hhh
+					. 'CUSTOM_ADMIN_CUSTOM_METHODS' . $this->hhh]
+						.= $this->setCustomViewCustomMethods(
+						$view, $view['settings']->code
+					);
+					// CUSTOM_ADMIN_DIPLAY_METHOD <<<DYNAMIC>>>
+					$this->fileContentDynamic[$view['settings']->code][$this->hhh
+					. 'CUSTOM_ADMIN_DIPLAY_METHOD' . $this->hhh]
+						= $this->setCustomViewDisplayMethod($view);
 					// set document details
 					$this->setPrepareDocument($view);
-					// ###CUSTOM_ADMIN_EXTRA_DIPLAY_METHODS### <<<DYNAMIC>>>
-					$this->fileContentDynamic[$view['settings']->code]['###CUSTOM_ADMIN_EXTRA_DIPLAY_METHODS###'] = $this->setCustomViewExtraDisplayMethods($view);
-					// ###CUSTOM_ADMIN_CODE_BODY### <<<DYNAMIC>>>
-					$this->fileContentDynamic[$view['settings']->code]['###CUSTOM_ADMIN_CODE_BODY###'] = $this->setCustomViewCodeBody($view);
-					// ###CUSTOM_ADMIN_BODY### <<<DYNAMIC>>>
-					$this->fileContentDynamic[$view['settings']->code]['###CUSTOM_ADMIN_BODY###'] = $this->setCustomViewBody($view);
-					// ###CUSTOM_ADMIN_SUBMITBUTTON_SCRIPT### <<<DYNAMIC>>>
-					$this->fileContentDynamic[$view['settings']->code]['###CUSTOM_ADMIN_SUBMITBUTTON_SCRIPT###'] = $this->setCustomViewSubmitButtonScript($view);
+					// CUSTOM_ADMIN_EXTRA_DIPLAY_METHODS <<<DYNAMIC>>>
+					$this->fileContentDynamic[$view['settings']->code][$this->hhh
+					. 'CUSTOM_ADMIN_EXTRA_DIPLAY_METHODS' . $this->hhh]
+						= $this->setCustomViewExtraDisplayMethods($view);
+					// CUSTOM_ADMIN_CODE_BODY <<<DYNAMIC>>>
+					$this->fileContentDynamic[$view['settings']->code][$this->hhh
+					. 'CUSTOM_ADMIN_CODE_BODY' . $this->hhh]
+						= $this->setCustomViewCodeBody($view);
+					// CUSTOM_ADMIN_BODY <<<DYNAMIC>>>
+					$this->fileContentDynamic[$view['settings']->code][$this->hhh
+					. 'CUSTOM_ADMIN_BODY' . $this->hhh]
+						= $this->setCustomViewBody($view);
+					// CUSTOM_ADMIN_SUBMITBUTTON_SCRIPT <<<DYNAMIC>>>
+					$this->fileContentDynamic[$view['settings']->code][$this->hhh
+					. 'CUSTOM_ADMIN_SUBMITBUTTON_SCRIPT' . $this->hhh]
+						= $this->setCustomViewSubmitButtonScript($view);
 
 					// setup the templates
 					$this->setCustomViewTemplateBody($view);
+
+					// set the site form if needed
+					$this->fileContentDynamic[$view['settings']->code][$this->hhh
+					. 'CUSTOM_ADMIN_TOP_FORM' . $this->hhh]
+						= $this->setCustomViewForm(
+						$view['settings']->code,
+						$view['settings']->main_get->gettype, 1
+					);
+					$this->fileContentDynamic[$view['settings']->code][$this->hhh
+					. 'CUSTOM_ADMIN_BOTTOM_FORM' . $this->hhh]
+						= $this->setCustomViewForm(
+						$view['settings']->code,
+						$view['settings']->main_get->gettype, 2
+					);
+
+					// set headers based on the main get type
+					if ($view['settings']->main_get->gettype == 1)
+					{
+						// CUSTOM_ADMIN_VIEW_CONTROLLER_HEADER <<<DYNAMIC>>> add the header details for the controller
+						$this->fileContentDynamic[$view['settings']->code][$this->hhh
+						. 'CUSTOM_ADMIN_VIEW_CONTROLLER_HEADER' . $this->hhh]
+							= $this->setClassHeaders(
+							'custom.admin.view.controller',
+							$view['settings']->code
+						);
+						// CUSTOM_ADMIN_VIEW_MODEL_HEADER <<<DYNAMIC>>> add the header details for the model
+						$this->fileContentDynamic[$view['settings']->code][$this->hhh
+						. 'CUSTOM_ADMIN_VIEW_MODEL_HEADER' . $this->hhh]
+							= $this->setClassHeaders(
+							'custom.admin.view.model', $view['settings']->code
+						);
+						// CUSTOM_ADMIN_VIEW_HEADER <<<DYNAMIC>>> add the header details for the view
+						$this->fileContentDynamic[$view['settings']->code][$this->hhh
+						. 'CUSTOM_ADMIN_VIEW_HEADER' . $this->hhh]
+							= $this->setClassHeaders(
+							'custom.admin.view', $view['settings']->code
+						);
+					}
+					elseif ($view['settings']->main_get->gettype == 2)
+					{
+						// CUSTOM_ADMIN_VIEWS_CONTROLLER_HEADER <<<DYNAMIC>>> add the header details for the controller
+						$this->fileContentDynamic[$view['settings']->code][$this->hhh
+						. 'CUSTOM_ADMIN_VIEWS_CONTROLLER_HEADER' . $this->hhh]
+							= $this->setClassHeaders(
+							'custom.admin.views.controller',
+							$view['settings']->code
+						);
+						// CUSTOM_ADMIN_VIEWS_MODEL_HEADER <<<DYNAMIC>>> add the header details for the model
+						$this->fileContentDynamic[$view['settings']->code][$this->hhh
+						. 'CUSTOM_ADMIN_VIEWS_MODEL_HEADER' . $this->hhh]
+							= $this->setClassHeaders(
+							'custom.admin.views.model', $view['settings']->code
+						);
+						// CUSTOM_ADMIN_VIEWS_HEADER <<<DYNAMIC>>> add the header details for the view
+						$this->fileContentDynamic[$view['settings']->code][$this->hhh
+						. 'CUSTOM_ADMIN_VIEWS_HEADER' . $this->hhh]
+							= $this->setClassHeaders(
+							'custom.admin.views', $view['settings']->code
+						);
+					}
+
+					// Trigger Event: jcb_ce_onAfterBuildCustomAdminViewContent
+					$this->triggerEvent(
+						'jcb_ce_onAfterBuildCustomAdminViewContent',
+						array(&$this->componentContext, &$view,
+						      &$view['settings']->code,
+						      &$this->fileContentStatic,
+						      &$this->fileContentDynamic[$view['settings']->code],
+						      &$this->placeholders, &$this->hhh)
+					);
 				}
 
 				// setup the layouts
 				$this->setCustomViewLayouts();
 			}
 
-			// ###VIEWARRAY###
-			$this->fileContentStatic['###VIEWARRAY###'] = PHP_EOL . implode("," . PHP_EOL, $viewarray);
+			// VIEWARRAY
+			$this->fileContentStatic[$this->hhh . 'VIEWARRAY' . $this->hhh]
+				= PHP_EOL . implode("," . PHP_EOL, $viewarray);
 
-			// ###CUSTOM_ADMIN_EDIT_VIEW_ARRAY###
-			$this->fileContentStatic['###SITE_EDIT_VIEW_ARRAY###'] = PHP_EOL . implode("," . PHP_EOL, $site_edit_view_array);
+			// CUSTOM_ADMIN_EDIT_VIEW_ARRAY
+			$this->fileContentStatic[$this->hhh . 'SITE_EDIT_VIEW_ARRAY'
+			. $this->hhh]
+				= PHP_EOL . implode("," . PHP_EOL, $site_edit_view_array);
 
-			// ###MAINMENUS###
-			$this->fileContentStatic['###MAINMENUS###'] = $this->setMainMenus();
+			// MAINMENUS
+			$this->fileContentStatic[$this->hhh . 'MAINMENUS' . $this->hhh]
+				= $this->setMainMenus();
 
-			// ###SUBMENU###
-			$this->fileContentStatic['###SUBMENU###'] = $this->setSubMenus();
+			// SUBMENU
+			$this->fileContentStatic[$this->hhh . 'SUBMENU' . $this->hhh]
+				= $this->setSubMenus();
 
-			// ###GET_CRYPT_KEY###
-			$this->fileContentStatic['###GET_CRYPT_KEY###'] = $this->setGetCryptKey();
+			// GET_CRYPT_KEY
+			$this->fileContentStatic[$this->hhh . 'GET_CRYPT_KEY' . $this->hhh]
+				= $this->setGetCryptKey();
 
 			// set the license locker
 			$this->setLockLicense();
 
-			// ###CONTRIBUTORS###
-			$this->fileContentStatic['###CONTRIBUTORS###'] = $this->theContributors;
+			// CONTRIBUTORS
+			$this->fileContentStatic[$this->hhh . 'CONTRIBUTORS' . $this->hhh]
+				= $this->theContributors;
 
-			// ###INSTALL###
-			$this->fileContentStatic['###INSTALL###'] = $this->setInstall();
+			// INSTALL
+			$this->fileContentStatic[$this->hhh . 'INSTALL' . $this->hhh]
+				= $this->setInstall();
 
-			// ###UNINSTALL###
-			$this->fileContentStatic['###UNINSTALL###'] = $this->setUninstall();
+			// UNINSTALL
+			$this->fileContentStatic[$this->hhh . 'UNINSTALL' . $this->hhh]
+				= $this->setUninstall();
 
-			// ###UPDATE_VERSION_MYSQL###
+			// UPDATE_VERSION_MYSQL
 			$this->setVersionController();
 
 			// only set these if default dashboard it used
 			if (!ComponentbuilderHelper::checkString($this->dynamicDashboard))
 			{
-				// ###DASHBOARDVIEW###
-				$this->fileContentStatic['###DASHBOARDVIEW###'] = $this->fileContentStatic['###component###'];
+				// DASHBOARDVIEW
+				$this->fileContentStatic[$this->hhh . 'DASHBOARDVIEW'
+				. $this->hhh]
+					= $this->componentCodeName;
 
-				// ###DASHBOARDICONS###
-				$this->fileContentDynamic[$this->fileContentStatic['###component###']]['###DASHBOARDICONS###'] = $this->setDashboardIcons();
+				// DASHBOARDICONS
+				$this->fileContentDynamic[$this->componentCodeName][$this->hhh
+				. 'DASHBOARDICONS' . $this->hhh]
+					= $this->setDashboardIcons();
 
-				// ###DASHBOARDICONACCESS###
-				$this->fileContentDynamic[$this->fileContentStatic['###component###']]['###DASHBOARDICONACCESS###'] = $this->setDashboardIconAccess();
+				// DASHBOARDICONACCESS
+				$this->fileContentDynamic[$this->componentCodeName][$this->hhh
+				. 'DASHBOARDICONACCESS' . $this->hhh]
+					= $this->setDashboardIconAccess();
 
-				// ###DASH_MODEL_METHODS###
-				$this->fileContentDynamic[$this->fileContentStatic['###component###']]['###DASH_MODEL_METHODS###'] = $this->setDashboardModelMethods();
+				// DASH_MODEL_METHODS
+				$this->fileContentDynamic[$this->componentCodeName][$this->hhh
+				. 'DASH_MODEL_METHODS' . $this->hhh]
+					= $this->setDashboardModelMethods();
 
-				// ###DASH_GET_CUSTOM_DATA###
-				$this->fileContentDynamic[$this->fileContentStatic['###component###']]['###DASH_GET_CUSTOM_DATA###'] = $this->setDashboardGetCustomData();
+				// DASH_GET_CUSTOM_DATA
+				$this->fileContentDynamic[$this->componentCodeName][$this->hhh
+				. 'DASH_GET_CUSTOM_DATA' . $this->hhh]
+					= $this->setDashboardGetCustomData();
 
-				// ###DASH_DISPLAY_DATA###
-				$this->fileContentDynamic[$this->fileContentStatic['###component###']]['###DASH_DISPLAY_DATA###'] = $this->setDashboardDisplayData();
+				// DASH_DISPLAY_DATA
+				$this->fileContentDynamic[$this->componentCodeName][$this->hhh
+				. 'DASH_DISPLAY_DATA' . $this->hhh]
+					= $this->setDashboardDisplayData();
 			}
 			else
 			{
-				// ###DASHBOARDVIEW###
-				$this->fileContentStatic['###DASHBOARDVIEW###'] = $this->dynamicDashboard;
+				// DASHBOARDVIEW
+				$this->fileContentStatic[$this->hhh . 'DASHBOARDVIEW'
+				. $this->hhh]
+					= $this->dynamicDashboard;
 			}
 
 			// add import
@@ -736,8 +1653,27 @@ class Infusion extends Interpretation
 				// setup import files
 				$target = array('admin' => 'import');
 				$this->buildDynamique($target, 'import');
-				// set the controller
-				$this->fileContentDynamic['import']['###BLABLABLA###'] = '';
+				// IMPORT_EXT_METHOD <<<DYNAMIC>>>
+				$this->fileContentDynamic['import'][$this->hhh
+				. 'IMPORT_EXT_METHOD' . $this->hhh]
+					= PHP_EOL . PHP_EOL . $this->setPlaceholders(
+						ComponentbuilderHelper::getDynamicScripts('ext'),
+						$this->placeholders
+					);
+				// IMPORT_SETDATA_METHOD <<<DYNAMIC>>>
+				$this->fileContentDynamic['import'][$this->hhh
+				. 'IMPORT_SETDATA_METHOD' . $this->hhh]
+					= PHP_EOL . PHP_EOL . $this->setPlaceholders(
+						ComponentbuilderHelper::getDynamicScripts('setdata'),
+						$this->placeholders
+					);
+				// IMPORT_SAVE_METHOD <<<DYNAMIC>>>
+				$this->fileContentDynamic['import'][$this->hhh
+				. 'IMPORT_SAVE_METHOD' . $this->hhh]
+					= PHP_EOL . PHP_EOL . $this->setPlaceholders(
+						ComponentbuilderHelper::getDynamicScripts('save'),
+						$this->placeholders
+					);
 			}
 
 			// ensure that the ajax model and controller is set if needed
@@ -747,10 +1683,16 @@ class Infusion extends Interpretation
 				$target = array('admin' => 'ajax');
 				$this->buildDynamique($target, 'ajax');
 				// set the controller
-				$this->fileContentDynamic['ajax']['###REGISTER_AJAX_TASK###'] = $this->setRegisterAjaxTask('admin');
-				$this->fileContentDynamic['ajax']['###AJAX_INPUT_RETURN###'] = $this->setAjaxInputReturn('admin');
+				$this->fileContentDynamic['ajax'][$this->hhh
+				. 'REGISTER_AJAX_TASK' . $this->hhh]
+					= $this->setRegisterAjaxTask('admin');
+				$this->fileContentDynamic['ajax'][$this->hhh
+				. 'AJAX_INPUT_RETURN' . $this->hhh]
+					= $this->setAjaxInputReturn('admin');
 				// set the module
-				$this->fileContentDynamic['ajax']['###AJAX_MODEL_METHODS###'] = $this->setAjaxModelMethods('admin');
+				$this->fileContentDynamic['ajax'][$this->hhh
+				. 'AJAX_MODEL_METHODS' . $this->hhh]
+					= $this->setAjaxModelMethods('admin');
 			}
 
 			// ensure that the site ajax model and controller is set if needed
@@ -760,14 +1702,21 @@ class Infusion extends Interpretation
 				$target = array('site' => 'ajax');
 				$this->buildDynamique($target, 'ajax');
 				// set the controller
-				$this->fileContentDynamic['ajax']['###REGISTER_SITE_AJAX_TASK###'] = $this->setRegisterAjaxTask('site');
-				$this->fileContentDynamic['ajax']['###AJAX_SITE_INPUT_RETURN###'] = $this->setAjaxInputReturn('site');
+				$this->fileContentDynamic['ajax'][$this->hhh
+				. 'REGISTER_SITE_AJAX_TASK' . $this->hhh]
+					= $this->setRegisterAjaxTask('site');
+				$this->fileContentDynamic['ajax'][$this->hhh
+				. 'AJAX_SITE_INPUT_RETURN' . $this->hhh]
+					= $this->setAjaxInputReturn('site');
 				// set the module
-				$this->fileContentDynamic['ajax']['###AJAX_SITE_MODEL_METHODS###'] = $this->setAjaxModelMethods('site');
+				$this->fileContentDynamic['ajax'][$this->hhh
+				. 'AJAX_SITE_MODEL_METHODS' . $this->hhh]
+					= $this->setAjaxModelMethods('site');
 			}
-			
+
 			// build the validation rules
-			if (isset($this->validationRules) && ComponentbuilderHelper::checkArray($this->validationRules))
+			if (isset($this->validationRules)
+				&& ComponentbuilderHelper::checkArray($this->validationRules))
 			{
 				foreach ($this->validationRules as $rule => $_php)
 				{
@@ -775,19 +1724,25 @@ class Infusion extends Interpretation
 					$target = array('admin' => 'a_rule_zi');
 					$this->buildDynamique($target, 'rule', $rule);
 					// set the JFormRule Name
-					$this->fileContentDynamic['a_rule_zi_'.$rule]['###Name###'] = ucfirst($rule);
+					$this->fileContentDynamic['a_rule_zi_' . $rule][$this->hhh
+					. 'Name' . $this->hhh]
+						= ucfirst($rule);
 					// set the JFormRule PHP
-					$this->fileContentDynamic['a_rule_zi_'.$rule]['###VALIDATION_RULE_METHODS###'] = PHP_EOL . $_php;
+					$this->fileContentDynamic['a_rule_zi_' . $rule][$this->hhh
+					. 'VALIDATION_RULE_METHODS' . $this->hhh]
+						= PHP_EOL . $_php;
 				}
 			}
 
 			// run the second run if needed
-			if (isset($this->secondRunAdmin) && ComponentbuilderHelper::checkArray($this->secondRunAdmin))
+			if (isset($this->secondRunAdmin)
+				&& ComponentbuilderHelper::checkArray($this->secondRunAdmin))
 			{
 				// start dynamic build
 				foreach ($this->secondRunAdmin as $function => $arrays)
 				{
-					if (ComponentbuilderHelper::checkArray($arrays) && ComponentbuilderHelper::checkString($function))
+					if (ComponentbuilderHelper::checkArray($arrays)
+						&& ComponentbuilderHelper::checkString($function))
 					{
 						foreach ($arrays as $array)
 						{
@@ -797,145 +1752,306 @@ class Infusion extends Interpretation
 				}
 			}
 
-			// ###CONFIG_FIELDSETS###
-			$keepLang = $this->lang;
+			// CONFIG_FIELDSETS
+			$keepLang   = $this->lang;
 			$this->lang = 'admin';
 			// run field sets for second time
 			$this->setConfigFieldsets(2);
 			$this->lang = $keepLang;
 
 			// setup front-views and all needed stuff for the site
-			if (isset($this->componentData->site_views) && ComponentbuilderHelper::checkArray($this->componentData->site_views))
+			if (isset($this->componentData->site_views)
+				&& ComponentbuilderHelper::checkArray(
+					$this->componentData->site_views
+				))
 			{
 				$this->target = 'site';
-				// var_dump($this->componentData->site_views);exit;
 				// start dynamic build
 				foreach ($this->componentData->site_views as $view)
 				{
 					// for list views
-					$this->fileContentDynamic[$view['settings']->code]['###SViews###'] = $view['settings']->Code;
-					$this->fileContentDynamic[$view['settings']->code]['###sviews###'] = $view['settings']->code;
+					$this->fileContentDynamic[$view['settings']->code][$this->hhh
+					. 'SViews' . $this->hhh]
+						= $view['settings']->Code;
+					$this->fileContentDynamic[$view['settings']->code][$this->hhh
+					. 'sviews' . $this->hhh]
+						= $view['settings']->code;
 					// for single views
-					$this->fileContentDynamic[$view['settings']->code]['###SView###'] = $view['settings']->Code;
-					$this->fileContentDynamic[$view['settings']->code]['###sview###'] = $view['settings']->code;
+					$this->fileContentDynamic[$view['settings']->code][$this->hhh
+					. 'SView' . $this->hhh]
+						= $view['settings']->Code;
+					$this->fileContentDynamic[$view['settings']->code][$this->hhh
+					. 'sview' . $this->hhh]
+						= $view['settings']->code;
 
 					// set placeholder
-					$this->placeholders['###SView###'] = $view['settings']->Code;
-					$this->placeholders['###sview###'] = $view['settings']->code;
-					$this->placeholders['###SVIEW###'] = $view['settings']->CODE;
-					$this->placeholders['[[[SView]]]'] = $view['settings']->Code;
-					$this->placeholders['[[[sview]]]'] = $view['settings']->code;
-					$this->placeholders['[[[SVIEW]]]'] = $view['settings']->CODE;
-					$this->placeholders['###SViews###'] = $view['settings']->Code;
-					$this->placeholders['###sviews###'] = $view['settings']->code;
-					$this->placeholders['###SVIEWS###'] = $view['settings']->CODE;
-					$this->placeholders['[[[SViews]]]'] = $view['settings']->Code;
-					$this->placeholders['[[[sviews]]]'] = $view['settings']->code;
-					$this->placeholders['[[[SVIEWS]]]'] = $view['settings']->CODE;
+					$this->placeholders[$this->hhh . 'SView' . $this->hhh]
+						= $view['settings']->Code;
+					$this->placeholders[$this->hhh . 'sview' . $this->hhh]
+						= $view['settings']->code;
+					$this->placeholders[$this->hhh . 'SVIEW' . $this->hhh]
+						= $view['settings']->CODE;
+					$this->placeholders[$this->bbb . 'SView' . $this->ddd]
+						= $view['settings']->Code;
+					$this->placeholders[$this->bbb . 'sview' . $this->ddd]
+						= $view['settings']->code;
+					$this->placeholders[$this->bbb . 'SVIEW' . $this->ddd]
+						= $view['settings']->CODE;
+					$this->placeholders[$this->hhh . 'SViews' . $this->hhh]
+						= $view['settings']->Code;
+					$this->placeholders[$this->hhh . 'sviews' . $this->hhh]
+						= $view['settings']->code;
+					$this->placeholders[$this->hhh . 'SVIEWS' . $this->hhh]
+						= $view['settings']->CODE;
+					$this->placeholders[$this->bbb . 'SViews' . $this->ddd]
+						= $view['settings']->Code;
+					$this->placeholders[$this->bbb . 'sviews' . $this->ddd]
+						= $view['settings']->code;
+					$this->placeholders[$this->bbb . 'SVIEWS' . $this->ddd]
+						= $view['settings']->CODE;
+
+					// Trigger Event: jcb_ce_onBeforeBuildSiteViewContent
+					$this->triggerEvent(
+						'jcb_ce_onBeforeBuildSiteViewContent',
+						array(&$this->componentContext, &$view,
+						      &$view['settings']->code,
+						      &$this->fileContentStatic,
+						      &$this->fileContentDynamic[$view['settings']->code],
+						      &$this->placeholders, &$this->hhh)
+					);
 
 					// set license per view if needed
-					$this->setLockLicensePer($view['settings']->code, $this->target);
+					$this->setLockLicensePer(
+						$view['settings']->code, $this->target
+					);
 
 					// set the site default view
-					if (isset($view['default_view']) && $view['default_view'] == 1)
+					if (isset($view['default_view'])
+						&& $view['default_view'] == 1)
 					{
-						$this->fileContentStatic['###SITE_DEFAULT_VIEW###'] = $view['settings']->code;
+						$this->fileContentStatic[$this->hhh
+						. 'SITE_DEFAULT_VIEW' . $this->hhh]
+							= $view['settings']->code;
 					}
 					// add site menu
 					if (isset($view['menu']) && $view['menu'] == 1)
 					{
-						// ###SITE_MENU_XML### <<<DYNAMIC>>>
-						$this->fileContentDynamic[$view['settings']->code]['###SITE_MENU_XML###'] = $this->setCustomViewMenu($view);
+						// SITE_MENU_XML <<<DYNAMIC>>>
+						$this->fileContentDynamic[$view['settings']->code][$this->hhh
+						. 'SITE_MENU_XML' . $this->hhh]
+							= $this->setCustomViewMenu($view);
 					}
 
 					// insure the needed route helper is loaded
-					$this->fileContentStatic['###ROUTEHELPER###'] .= $this->setRouterHelp($view['settings']->code, $view['settings']->code, true);
-					// build route details 
-					$this->fileContentStatic['###ROUTER_PARSE_SWITCH###'] .= $this->routerParseSwitch($view['settings']->code, $view);
-					$this->fileContentStatic['###ROUTER_BUILD_VIEWS###'] .= $this->routerBuildViews($view['settings']->code);
+					$this->fileContentStatic[$this->hhh . 'ROUTEHELPER'
+					. $this->hhh]
+						.= $this->setRouterHelp(
+						$view['settings']->code, $view['settings']->code, true
+					);
+					// build route details
+					$this->fileContentStatic[$this->hhh . 'ROUTER_PARSE_SWITCH'
+					. $this->hhh]
+						.= $this->routerParseSwitch(
+						$view['settings']->code, $view
+					);
+					$this->fileContentStatic[$this->hhh . 'ROUTER_BUILD_VIEWS'
+					. $this->hhh]
+						.= $this->routerBuildViews($view['settings']->code);
 
 					if ($view['settings']->main_get->gettype == 1)
 					{
-						// set user permission access check ###USER_PERMISSION_CHECK_ACCESS### <<<DYNAMIC>>>
-						$this->fileContentDynamic[$view['settings']->code]['###USER_PERMISSION_CHECK_ACCESS###'] = $this->setUserPermissionCheckAccess($view, 1);
+						// set user permission access check USER_PERMISSION_CHECK_ACCESS <<<DYNAMIC>>>
+						$this->fileContentDynamic[$view['settings']->code][$this->hhh
+						. 'USER_PERMISSION_CHECK_ACCESS' . $this->hhh]
+							= $this->setUserPermissionCheckAccess($view, 1);
 
-						// ###SITE_BEFORE_GET_ITEM### <<<DYNAMIC>>>
-						$this->fileContentDynamic[$view['settings']->code]['###SITE_BEFORE_GET_ITEM###'] = $this->getCustomScriptBuilder($this->target . '_php_before_getitem', $view['settings']->code, '', null, true);
+						// SITE_BEFORE_GET_ITEM <<<DYNAMIC>>>
+						$this->fileContentDynamic[$view['settings']->code][$this->hhh
+						. 'SITE_BEFORE_GET_ITEM' . $this->hhh]
+							= $this->getCustomScriptBuilder(
+							$this->target . '_php_before_getitem',
+							$view['settings']->code, '', null, true
+						);
 
-						// ###SITE_GET_ITEM### <<<DYNAMIC>>>
-						$this->fileContentDynamic[$view['settings']->code]['###SITE_GET_ITEM###'] = $this->setCustomViewGetItem($view['settings']->main_get, $view['settings']->code, "\t\t");
+						// SITE_GET_ITEM <<<DYNAMIC>>>
+						$this->fileContentDynamic[$view['settings']->code][$this->hhh
+						. 'SITE_GET_ITEM' . $this->hhh]
+							= $this->setCustomViewGetItem(
+							$view['settings']->main_get,
+							$view['settings']->code, $this->_t(2)
+						);
 
-						// ###SITE_AFTER_GET_ITEM### <<<DYNAMIC>>>
-						$this->fileContentDynamic[$view['settings']->code]['###SITE_AFTER_GET_ITEM###'] = $this->getCustomScriptBuilder($this->target . '_php_after_getitem', $view['settings']->code, '', null, true);
+						// SITE_AFTER_GET_ITEM <<<DYNAMIC>>>
+						$this->fileContentDynamic[$view['settings']->code][$this->hhh
+						. 'SITE_AFTER_GET_ITEM' . $this->hhh]
+							= $this->getCustomScriptBuilder(
+							$this->target . '_php_after_getitem',
+							$view['settings']->code, '', null, true
+						);
 					}
 					elseif ($view['settings']->main_get->gettype == 2)
 					{
-						// set user permission access check ###USER_PERMISSION_CHECK_ACCESS### <<<DYNAMIC>>>
-						$this->fileContentDynamic[$view['settings']->code]['###USER_PERMISSION_CHECK_ACCESS###'] = $this->setUserPermissionCheckAccess($view, 2);
-						// ###SITE_GET_LIST_QUERY### <<<DYNAMIC>>>
-						$this->fileContentDynamic[$view['settings']->code]['###SITE_GET_LIST_QUERY###'] = $this->setCustomViewListQuery($view['settings']->main_get, $view['settings']->code);
+						// set user permission access check USER_PERMISSION_CHECK_ACCESS <<<DYNAMIC>>>
+						$this->fileContentDynamic[$view['settings']->code][$this->hhh
+						. 'USER_PERMISSION_CHECK_ACCESS' . $this->hhh]
+							= $this->setUserPermissionCheckAccess($view, 2);
+						// SITE_GET_LIST_QUERY <<<DYNAMIC>>>
+						$this->fileContentDynamic[$view['settings']->code][$this->hhh
+						. 'SITE_GET_LIST_QUERY' . $this->hhh]
+							= $this->setCustomViewListQuery(
+							$view['settings']->main_get, $view['settings']->code
+						);
 
-						// ###SITE_BEFORE_GET_ITEMS### <<<DYNAMIC>>>
-						$this->fileContentDynamic[$view['settings']->code]['###SITE_BEFORE_GET_ITEMS###'] = $this->getCustomScriptBuilder($this->target . '_php_before_getitems', $view['settings']->code, PHP_EOL, null, true);
+						// SITE_BEFORE_GET_ITEMS <<<DYNAMIC>>>
+						$this->fileContentDynamic[$view['settings']->code][$this->hhh
+						. 'SITE_BEFORE_GET_ITEMS' . $this->hhh]
+							= $this->getCustomScriptBuilder(
+							$this->target . '_php_before_getitems',
+							$view['settings']->code, PHP_EOL, null, true
+						);
 
-						// ###SITE_GET_ITEMS### <<<DYNAMIC>>>
-						$this->fileContentDynamic[$view['settings']->code]['###SITE_GET_ITEMS###'] = $this->setCustomViewGetItems($view['settings']->main_get, $view['settings']->code);
+						// SITE_GET_ITEMS <<<DYNAMIC>>>
+						$this->fileContentDynamic[$view['settings']->code][$this->hhh
+						. 'SITE_GET_ITEMS' . $this->hhh]
+							= $this->setCustomViewGetItems(
+							$view['settings']->main_get, $view['settings']->code
+						);
 
-						// ###SITE_AFTER_GET_ITEMS### <<<DYNAMIC>>>
-						$this->fileContentDynamic[$view['settings']->code]['###SITE_AFTER_GET_ITEMS###'] = $this->getCustomScriptBuilder($this->target . '_php_after_getitems', $view['settings']->code, PHP_EOL, null, true);
+						// SITE_AFTER_GET_ITEMS <<<DYNAMIC>>>
+						$this->fileContentDynamic[$view['settings']->code][$this->hhh
+						. 'SITE_AFTER_GET_ITEMS' . $this->hhh]
+							= $this->getCustomScriptBuilder(
+							$this->target . '_php_after_getitems',
+							$view['settings']->code, PHP_EOL, null, true
+						);
 					}
 					// add to lang array
-					if (!isset($this->langContent['site'][$this->langPrefix . '_' . $view['settings']->CODE]))
-					{
-						$this->langContent['site'][$this->langPrefix . '_' . $view['settings']->CODE] = $view['settings']->name;
-					}
-					if (!isset($this->langContent['site'][$this->langPrefix . '_' . $view['settings']->CODE . '_DESC']))
-					{
-						$this->langContent['site'][$this->langPrefix . '_' . $view['settings']->CODE . '_DESC'] = $view['settings']->description;
-					}
-					// ###SITE_CUSTOM_METHODS### <<<DYNAMIC>>>
-					$this->fileContentDynamic[$view['settings']->code]['###SITE_CUSTOM_METHODS###'] = $this->setCustomViewCustomItemMethods($view['settings']->main_get, $view['settings']->code);
-					$this->fileContentDynamic[$view['settings']->code]['###SITE_CUSTOM_METHODS###'] .= $this->setCustomViewCustomMethods($view, $view['settings']->code);
-					// ###SITE_DIPLAY_METHOD### <<<DYNAMIC>>>
-					$this->fileContentDynamic[$view['settings']->code]['###SITE_DIPLAY_METHOD###'] = $this->setCustomViewDisplayMethod($view);
+					$this->setLangContent(
+						'site',
+						$this->langPrefix . '_' . $view['settings']->CODE,
+						$view['settings']->name
+					);
+					$this->setLangContent(
+						'site',
+						$this->langPrefix . '_' . $view['settings']->CODE
+						. '_DESC', $view['settings']->description
+					);
+					// SITE_CUSTOM_METHODS <<<DYNAMIC>>>
+					$this->fileContentDynamic[$view['settings']->code][$this->hhh
+					. 'SITE_CUSTOM_METHODS' . $this->hhh]
+						= $this->setCustomViewCustomItemMethods(
+						$view['settings']->main_get, $view['settings']->code
+					);
+					$this->fileContentDynamic[$view['settings']->code][$this->hhh
+					. 'SITE_CUSTOM_METHODS' . $this->hhh]
+						.= $this->setCustomViewCustomMethods(
+						$view, $view['settings']->code
+					);
+					// SITE_DIPLAY_METHOD <<<DYNAMIC>>>
+					$this->fileContentDynamic[$view['settings']->code][$this->hhh
+					. 'SITE_DIPLAY_METHOD' . $this->hhh]
+						= $this->setCustomViewDisplayMethod($view);
 					// set document details
 					$this->setPrepareDocument($view);
-					// ###SITE_EXTRA_DIPLAY_METHODS### <<<DYNAMIC>>>
-					$this->fileContentDynamic[$view['settings']->code]['###SITE_EXTRA_DIPLAY_METHODS###'] = $this->setCustomViewExtraDisplayMethods($view);
-					// ###SITE_CODE_BODY### <<<DYNAMIC>>>
-					$this->fileContentDynamic[$view['settings']->code]['###SITE_CODE_BODY###'] = $this->setCustomViewCodeBody($view);
-					// ###SITE_BODY### <<<DYNAMIC>>>
-					$this->fileContentDynamic[$view['settings']->code]['###SITE_BODY###'] = $this->setCustomViewBody($view);
+					// SITE_EXTRA_DIPLAY_METHODS <<<DYNAMIC>>>
+					$this->fileContentDynamic[$view['settings']->code][$this->hhh
+					. 'SITE_EXTRA_DIPLAY_METHODS' . $this->hhh]
+						= $this->setCustomViewExtraDisplayMethods($view);
+					// SITE_CODE_BODY <<<DYNAMIC>>>
+					$this->fileContentDynamic[$view['settings']->code][$this->hhh
+					. 'SITE_CODE_BODY' . $this->hhh]
+						= $this->setCustomViewCodeBody($view);
+					// SITE_BODY <<<DYNAMIC>>>
+					$this->fileContentDynamic[$view['settings']->code][$this->hhh
+					. 'SITE_BODY' . $this->hhh]
+						= $this->setCustomViewBody($view);
 
 					// setup the templates
 					$this->setCustomViewTemplateBody($view);
+
+					// set the site form if needed
+					$this->fileContentDynamic[$view['settings']->code][$this->hhh
+					. 'SITE_TOP_FORM' . $this->hhh]
+						= $this->setCustomViewForm(
+						$view['settings']->code,
+						$view['settings']->main_get->gettype, 1
+					);
+					$this->fileContentDynamic[$view['settings']->code][$this->hhh
+					. 'SITE_BOTTOM_FORM' . $this->hhh]
+						= $this->setCustomViewForm(
+						$view['settings']->code,
+						$view['settings']->main_get->gettype, 2
+					);
+
+					// set headers based on the main get type
+					if ($view['settings']->main_get->gettype == 1)
+					{
+						// insure the controller headers are added
+						if (ComponentbuilderHelper::checkString(
+								$view['settings']->php_controller
+							)
+							&& $view['settings']->php_controller != '//')
+						{
+							// SITE_VIEW_CONTROLLER_HEADER <<<DYNAMIC>>> add the header details for the model
+							$this->fileContentDynamic[$view['settings']->code][$this->hhh
+							. 'SITE_VIEW_CONTROLLER_HEADER' . $this->hhh]
+								= $this->setClassHeaders(
+								'site.view.controller', $view['settings']->code
+							);
+						}
+						// SITE_VIEW_MODEL_HEADER <<<DYNAMIC>>> add the header details for the model
+						$this->fileContentDynamic[$view['settings']->code][$this->hhh
+						. 'SITE_VIEW_MODEL_HEADER' . $this->hhh]
+							= $this->setClassHeaders(
+							'site.view.model', $view['settings']->code
+						);
+						// SITE_VIEW_HEADER <<<DYNAMIC>>> add the header details for the view
+						$this->fileContentDynamic[$view['settings']->code][$this->hhh
+						. 'SITE_VIEW_HEADER' . $this->hhh]
+							= $this->setClassHeaders(
+							'site.view', $view['settings']->code
+						);
+					}
+					elseif ($view['settings']->main_get->gettype == 2)
+					{
+						// insure the controller headers are added
+						if (ComponentbuilderHelper::checkString(
+								$view['settings']->php_controller
+							)
+							&& $view['settings']->php_controller != '//')
+						{
+							// SITE_VIEW_CONTROLLER_HEADER <<<DYNAMIC>>> add the header details for the model
+							$this->fileContentDynamic[$view['settings']->code][$this->hhh
+							. 'SITE_VIEW_CONTROLLER_HEADER' . $this->hhh]
+								= $this->setClassHeaders(
+								'site.views.controller', $view['settings']->code
+							);
+						}
+						// SITE_VIEWS_MODEL_HEADER <<<DYNAMIC>>> add the header details for the model
+						$this->fileContentDynamic[$view['settings']->code][$this->hhh
+						. 'SITE_VIEWS_MODEL_HEADER' . $this->hhh]
+							= $this->setClassHeaders(
+							'site.views.model', $view['settings']->code
+						);
+						// SITE_VIEWS_HEADER <<<DYNAMIC>>> add the header details for the view
+						$this->fileContentDynamic[$view['settings']->code][$this->hhh
+						. 'SITE_VIEWS_HEADER' . $this->hhh]
+							= $this->setClassHeaders(
+							'site.views', $view['settings']->code
+						);
+					}
+
+					// Trigger Event: jcb_ce_onAfterBuildSiteViewContent
+					$this->triggerEvent(
+						'jcb_ce_onAfterBuildSiteViewContent',
+						array(&$this->componentContext, &$view,
+						      &$view['settings']->code,
+						      &$this->fileContentStatic,
+						      &$this->fileContentDynamic[$view['settings']->code],
+						      &$this->placeholders, &$this->hhh)
+					);
 				}
-				// if no default site view was set, the redirect to root
-				if (!isset($this->fileContentStatic['###SITE_DEFAULT_VIEW###']))
-				{
-					$this->fileContentStatic['###SITE_DEFAULT_VIEW###'] = '';
-				}
-				// set site custom script to helper class
-				// ###SITE_CUSTOM_HELPER_SCRIPT###
-				$this->fileContentStatic['###SITE_CUSTOM_HELPER_SCRIPT###'] = $this->setPlaceholders($this->customScriptBuilder['component_php_helper_site'], $this->placeholders);
-				// ###SITE_GLOBAL_EVENT_HELPER###
-				$this->fileContentStatic['###SITE_GLOBAL_EVENT_HELPER###'] = '';
-				// ###SITE_GLOBAL_EVENT###
-				$this->fileContentStatic['###SITE_GLOBAL_EVENT###'] = '';
-				// now load the data for the global event if needed
-				if ($this->componentData->add_site_event == 1)
-				{
-					$this->fileContentStatic['###SITE_GLOBAL_EVENT###'] = PHP_EOL . PHP_EOL . '// Triger the Global Site Event';
-					$this->fileContentStatic['###SITE_GLOBAL_EVENT###'] .= PHP_EOL . $this->fileContentStatic['###Component###'] . 'Helper::globalEvent($document);';
-					// ###SITE_GLOBAL_EVENT_HELPER###
-					$this->fileContentStatic['###SITE_GLOBAL_EVENT_HELPER###'] = PHP_EOL . PHP_EOL . "\t" . '/**';
-					$this->fileContentStatic['###SITE_GLOBAL_EVENT_HELPER###'] .= PHP_EOL . "\t" . '*	The Global Site Event Method.';
-					$this->fileContentStatic['###SITE_GLOBAL_EVENT_HELPER###'] .= PHP_EOL . "\t" . '**/';
-					$this->fileContentStatic['###SITE_GLOBAL_EVENT_HELPER###'] .= PHP_EOL . "\t" . 'public static function globalEvent($document)';
-					$this->fileContentStatic['###SITE_GLOBAL_EVENT_HELPER###'] .= PHP_EOL . "\t" . '{';
-					$this->fileContentStatic['###SITE_GLOBAL_EVENT_HELPER###'] .= PHP_EOL . $this->setPlaceholders($this->customScriptBuilder['component_php_site_event'], $this->placeholders);
-					$this->fileContentStatic['###SITE_GLOBAL_EVENT_HELPER###'] .= PHP_EOL . "\t" . '}';
-				}
+
 				// setup the layouts
 				$this->setCustomViewLayouts();
 			}
@@ -944,59 +2060,323 @@ class Infusion extends Interpretation
 				// clear all site folder since none is needed
 				$this->removeSiteFolder = true;
 			}
+			// load the site statics
+			if (!$this->removeSiteFolder || !$this->removeSiteEditFolder)
+			{
+				$this->target = 'site';
+				// if no default site view was set, the redirect to root
+				if (!isset(
+					$this->fileContentStatic[$this->hhh . 'SITE_DEFAULT_VIEW'
+					. $this->hhh]
+				))
+				{
+					$this->fileContentStatic[$this->hhh . 'SITE_DEFAULT_VIEW'
+					. $this->hhh]
+						= '';
+				}
+				// set site custom script to helper class
+				// SITE_CUSTOM_HELPER_SCRIPT
+				$this->fileContentStatic[$this->hhh
+				. 'SITE_CUSTOM_HELPER_SCRIPT' . $this->hhh]
+					= $this->setPlaceholders(
+					$this->customScriptBuilder['component_php_helper_site'],
+					$this->placeholders
+				);
+				// SITE_GLOBAL_EVENT_HELPER
+				$this->fileContentStatic[$this->hhh . 'SITE_GLOBAL_EVENT_HELPER'
+				. $this->hhh]
+					= '';
+				// SITE_GLOBAL_EVENT
+				$this->fileContentStatic[$this->hhh . 'SITE_GLOBAL_EVENT'
+				. $this->hhh]
+					= '';
+				// now load the data for the global event if needed
+				if ($this->componentData->add_site_event == 1)
+				{
+					$this->fileContentStatic[$this->hhh . 'SITE_GLOBAL_EVENT'
+					. $this->hhh]
+						= PHP_EOL . PHP_EOL . '// Triger the Global Site Event';
+					$this->fileContentStatic[$this->hhh . 'SITE_GLOBAL_EVENT'
+					. $this->hhh]
+						.= PHP_EOL . $this->fileContentStatic[$this->hhh
+						. 'Component' . $this->hhh]
+						. 'Helper::globalEvent($document);';
+					// SITE_GLOBAL_EVENT_HELPER
+					$this->fileContentStatic[$this->hhh
+					. 'SITE_GLOBAL_EVENT_HELPER' . $this->hhh]
+						= PHP_EOL . PHP_EOL . $this->_t(1) . '/**';
+					$this->fileContentStatic[$this->hhh
+					. 'SITE_GLOBAL_EVENT_HELPER' . $this->hhh]
+						.= PHP_EOL . $this->_t(1)
+						. '*	The Global Site Event Method.';
+					$this->fileContentStatic[$this->hhh
+					. 'SITE_GLOBAL_EVENT_HELPER' . $this->hhh]
+						.= PHP_EOL . $this->_t(1) . '**/';
+					$this->fileContentStatic[$this->hhh
+					. 'SITE_GLOBAL_EVENT_HELPER' . $this->hhh]
+						.= PHP_EOL . $this->_t(1)
+						. 'public static function globalEvent($document)';
+					$this->fileContentStatic[$this->hhh
+					. 'SITE_GLOBAL_EVENT_HELPER' . $this->hhh]
+						.= PHP_EOL . $this->_t(1) . '{';
+					$this->fileContentStatic[$this->hhh
+					. 'SITE_GLOBAL_EVENT_HELPER' . $this->hhh]
+						.= PHP_EOL . $this->setPlaceholders(
+							$this->customScriptBuilder['component_php_site_event'],
+							$this->placeholders
+						);
+					$this->fileContentStatic[$this->hhh
+					. 'SITE_GLOBAL_EVENT_HELPER' . $this->hhh]
+						.= PHP_EOL . $this->_t(1) . '}';
+				}
+			}
 
-			// ###PREINSTALLSCRIPT###
-			$this->fileContentStatic['###PREINSTALLSCRIPT###'] = $this->getCustomScriptBuilder('php_preflight', 'install', PHP_EOL, null, true);
+			// PREINSTALLSCRIPT
+			$this->fileContentStatic[$this->hhh . 'PREINSTALLSCRIPT'
+			. $this->hhh]
+				= $this->getCustomScriptBuilder(
+				'php_preflight', 'install', PHP_EOL, null, true
+			);
 
-			// ###PREUPDATESCRIPT###
-			$this->fileContentStatic['###PREUPDATESCRIPT###'] = $this->getCustomScriptBuilder('php_preflight', 'update', PHP_EOL, null, true);
+			// PREUPDATESCRIPT
+			$this->fileContentStatic[$this->hhh . 'PREUPDATESCRIPT'
+			. $this->hhh]
+				= $this->getCustomScriptBuilder(
+				'php_preflight', 'update', PHP_EOL, null, true
+			);
 
-			// ###POSTINSTALLSCRIPT###
-			$this->fileContentStatic['###POSTINSTALLSCRIPT###'] = $this->setPostInstallScript();
+			// POSTINSTALLSCRIPT
+			$this->fileContentStatic[$this->hhh . 'POSTINSTALLSCRIPT'
+			. $this->hhh]
+				= $this->setPostInstallScript();
 
-			// ###POSTUPDATESCRIPT###
-			$this->fileContentStatic['###POSTUPDATESCRIPT###'] = $this->setPostUpdateScript();
+			// POSTUPDATESCRIPT
+			$this->fileContentStatic[$this->hhh . 'POSTUPDATESCRIPT'
+			. $this->hhh]
+				= $this->setPostUpdateScript();
 
-			// ###UNINSTALLSCRIPT###
-			$this->fileContentStatic['###UNINSTALLSCRIPT###'] = $this->setUninstallScript();
+			// UNINSTALLSCRIPT
+			$this->fileContentStatic[$this->hhh . 'UNINSTALLSCRIPT'
+			. $this->hhh]
+				= $this->setUninstallScript();
 
-			// ###MOVEFOLDERSSCRIPT###
-			$this->fileContentStatic['###MOVEFOLDERSSCRIPT###'] = $this->setMoveFolderScript();
+			// MOVEFOLDERSSCRIPT
+			$this->fileContentStatic[$this->hhh . 'MOVEFOLDERSSCRIPT'
+			. $this->hhh]
+				= $this->setMoveFolderScript();
 
-			// ###MOVEFOLDERSMETHOD###
-			$this->fileContentStatic['###MOVEFOLDERSMETHOD###'] = $this->setMoveFolderMethod();
+			// MOVEFOLDERSMETHOD
+			$this->fileContentStatic[$this->hhh . 'MOVEFOLDERSMETHOD'
+			. $this->hhh]
+				= $this->setMoveFolderMethod();
 
-			// ###HELPER_UIKIT###
-			$this->fileContentStatic['###HELPER_UIKIT###'] = $this->setUikitHelperMethods();
+			// HELPER_UIKIT
+			$this->fileContentStatic[$this->hhh . 'HELPER_UIKIT' . $this->hhh]
+				= $this->setUikitHelperMethods();
 
-			// ###CONFIG_FIELDSETS###
-			$this->fileContentStatic['###CONFIG_FIELDSETS###'] = implode(PHP_EOL, $this->configFieldSets);
+			// CONFIG_FIELDSETS
+			$this->fileContentStatic[$this->hhh . 'CONFIG_FIELDSETS'
+			. $this->hhh]
+				= implode(PHP_EOL, $this->configFieldSets);
 
 			// check if this has been set
-			if (!isset($this->fileContentStatic['###ROUTER_BUILD_VIEWS###']) || !ComponentbuilderHelper::checkString($this->fileContentStatic['###ROUTER_BUILD_VIEWS###']))
+			if (!isset(
+					$this->fileContentStatic[$this->hhh . 'ROUTER_BUILD_VIEWS'
+					. $this->hhh]
+				)
+				|| !ComponentbuilderHelper::checkString(
+					$this->fileContentStatic[$this->hhh . 'ROUTER_BUILD_VIEWS'
+					. $this->hhh]
+				))
 			{
-				$this->fileContentStatic['###ROUTER_BUILD_VIEWS###'] = 0;
+				$this->fileContentStatic[$this->hhh . 'ROUTER_BUILD_VIEWS'
+				. $this->hhh]
+					= 0;
 			}
 			else
 			{
-				$this->fileContentStatic['###ROUTER_BUILD_VIEWS###'] = '(' . $this->fileContentStatic['###ROUTER_BUILD_VIEWS###'] . ')';
+				$this->fileContentStatic[$this->hhh . 'ROUTER_BUILD_VIEWS'
+				. $this->hhh]
+					= '(' . $this->fileContentStatic[$this->hhh
+					. 'ROUTER_BUILD_VIEWS' . $this->hhh] . ')';
 			}
 
-			// ###README###
+			// README
 			if ($this->componentData->addreadme)
 			{
-				$this->fileContentStatic['###README###'] = $this->componentData->readme;
+				$this->fileContentStatic[$this->hhh . 'README' . $this->hhh]
+					= $this->componentData->readme;
 			}
+
+			// tweak system to set stuff to the module domain
+			$_backup_target     = $this->target;
+			$_backup_lang       = $this->lang;
+			$_backup_langPrefix = $this->langPrefix;
+			// infuse module data if set
+			if (ComponentbuilderHelper::checkArray($this->joomlaModules))
+			{
+				foreach ($this->joomlaModules as $module)
+				{
+					if (ComponentbuilderHelper::checkObject($module))
+					{
+						// Trigger Event: jcb_ce_onBeforeInfuseModuleData
+						$this->triggerEvent(
+							'jcb_ce_onBeforeInfuseModuleData',
+							array(&$this->componentContext, &$module, &$this)
+						);
+						$this->target     = $module->key;
+						$this->lang       = $module->key;
+						$this->langPrefix = $module->lang_prefix;
+						// MODCODE
+						$this->fileContentDynamic[$module->key][$this->hhh
+						. 'MODCODE' . $this->hhh]
+							= $this->getModCode($module);
+						// DYNAMICGET
+						$this->fileContentDynamic[$module->key][$this->hhh
+						. 'DYNAMICGETS' . $this->hhh]
+							= $this->setCustomViewCustomMethods(
+							$module, $module->key
+						);
+						// HELPERCODE
+						if ($module->add_class_helper >= 1)
+						{
+							$this->fileContentDynamic[$module->key][$this->hhh
+							. 'HELPERCODE' . $this->hhh]
+								= $this->getModHelperCode($module);
+						}
+						// MODDEFAULT
+						$this->fileContentDynamic[$module->key][$this->hhh
+						. 'MODDEFAULT' . $this->hhh]
+							= $this->getModDefault($module, $module->key);
+						// only add install script if needed
+						if ($module->add_install_script)
+						{
+							// INSTALLCLASS
+							$this->fileContentDynamic[$module->key][$this->hhh
+							. 'INSTALLCLASS' . $this->hhh]
+								= $this->getExtensionInstallClass($module);
+						}
+						// FIELDSET
+						if (isset($module->form_files)
+							&& ComponentbuilderHelper::checkArray(
+								$module->form_files
+							))
+						{
+							foreach ($module->form_files as $file => $files)
+							{
+								foreach ($files as $field_name => $fieldsets)
+								{
+									foreach ($fieldsets as $fieldset => $fields)
+									{
+										// FIELDSET_ . $file.$field_name.$fieldset
+										$this->fileContentDynamic[$module->key][$this->hhh
+										. 'FIELDSET_' . $file . $field_name
+										. $fieldset . $this->hhh]
+											= $this->getExtensionFieldsetXML(
+											$module, $fields
+										);
+									}
+								}
+							}
+						}
+						// MAINXML
+						$this->fileContentDynamic[$module->key][$this->hhh
+						. 'MAINXML' . $this->hhh]
+							= $this->getModuleMainXML($module);
+						// Trigger Event: jcb_ce_onAfterInfuseModuleData
+						$this->triggerEvent(
+							'jcb_ce_onAfterInfuseModuleData',
+							array(&$this->componentContext, &$module, &$this)
+						);
+					}
+				}
+			}
+			// infuse plugin data if set
+			if (ComponentbuilderHelper::checkArray($this->joomlaPlugins))
+			{
+				foreach ($this->joomlaPlugins as $plugin)
+				{
+					if (ComponentbuilderHelper::checkObject($plugin))
+					{
+						// Trigger Event: jcb_ce_onBeforeInfusePluginData
+						$this->triggerEvent(
+							'jcb_ce_onBeforeInfusePluginData',
+							array(&$this->componentContext, &$plugin, &$this)
+						);
+						$this->target     = $plugin->key;
+						$this->lang       = $plugin->key;
+						$this->langPrefix = $plugin->lang_prefix;
+						// MAINCLASS
+						$this->fileContentDynamic[$plugin->key][$this->hhh
+						. 'MAINCLASS' . $this->hhh]
+							= $this->getPluginMainClass($plugin);
+						// only add install script if needed
+						if ($plugin->add_install_script)
+						{
+							// INSTALLCLASS
+							$this->fileContentDynamic[$plugin->key][$this->hhh
+							. 'INSTALLCLASS' . $this->hhh]
+								= $this->getExtensionInstallClass($plugin);
+						}
+						// FIELDSET
+						if (isset($plugin->form_files)
+							&& ComponentbuilderHelper::checkArray(
+								$plugin->form_files
+							))
+						{
+							foreach ($plugin->form_files as $file => $files)
+							{
+								foreach ($files as $field_name => $fieldsets)
+								{
+									foreach ($fieldsets as $fieldset => $fields)
+									{
+										// FIELDSET_ . $file.$field_name.$fieldset
+										$this->fileContentDynamic[$plugin->key][$this->hhh
+										. 'FIELDSET_' . $file . $field_name
+										. $fieldset . $this->hhh]
+											= $this->getExtensionFieldsetXML(
+											$plugin, $fields
+										);
+									}
+								}
+							}
+						}
+						// MAINXML
+						$this->fileContentDynamic[$plugin->key][$this->hhh
+						. 'MAINXML' . $this->hhh]
+							= $this->getPluginMainXML($plugin);
+						// Trigger Event: jcb_ce_onAfterInfusePluginData
+						$this->triggerEvent(
+							'jcb_ce_onAfterInfusePluginData',
+							array(&$this->componentContext, &$plugin, &$this)
+						);
+					}
+				}
+			}
+			// rest globals
+			$this->target     = $_backup_target;
+			$this->lang       = $_backup_lang;
+			$this->langPrefix = $_backup_langPrefix;
+
+			// Trigger Event: jcb_ce_onAfterBuildFilesContent
+			$this->triggerEvent(
+				'jcb_ce_onAfterBuildFilesContent',
+				array(&$this->componentContext, &$this->componentData,
+				      &$this->fileContentStatic, &$this->fileContentDynamic,
+				      &$this->placeholders, &$this->hhh)
+			);
+
 			return true;
 		}
+
 		return false;
 	}
 
 	/**
 	 * Set the view place holders to global scope
-	 * 
+	 *
 	 * @param   object  $view  The view settings
-	 * 
+	 *
 	 * @ return void
 	 */
 	protected function setViewPlaceholders(&$view)
@@ -1004,66 +2384,113 @@ class Infusion extends Interpretation
 		// just to be safe, lets clear previous view placeholders
 		$this->clearFromPlaceHolders('view');
 
-		// ###VIEW### <<<DYNAMIC>>>
-		if (isset($view->name_single))
+		// VIEW <<<DYNAMIC>>>
+		if (isset($view->name_single) && $view->name_single != 'null')
 		{
 			// set main keys
-			$viewName_single = ComponentbuilderHelper::safeString($view->name_single);
-			$viewName_u = ComponentbuilderHelper::safeString($view->name_single, 'U');
-			$viewName_f = ComponentbuilderHelper::safeString($view->name_single, 'F');
+			$nameSingleCode              = $view->name_single_code;
+			$name_single_uppercase       = ComponentbuilderHelper::safeString(
+				$view->name_single, 'U'
+			);
+			$name_single_first_uppercase = ComponentbuilderHelper::safeString(
+				$view->name_single, 'F'
+			);
 
 			// set some place holder for the views
-			$this->placeholders['###view###'] = $viewName_single;
-			$this->placeholders['###View###'] = $viewName_f;
-			$this->placeholders['###VIEW###'] = $viewName_u;
-			$this->placeholders['[[[view]]]'] = $viewName_single;
-			$this->placeholders['[[[View]]]'] = $viewName_f;
-			$this->placeholders['[[[VIEW]]]'] = $viewName_u;
+			$this->placeholders[$this->hhh . 'view' . $this->hhh]
+				= $nameSingleCode;
+			$this->placeholders[$this->hhh . 'View' . $this->hhh]
+				= $name_single_first_uppercase;
+			$this->placeholders[$this->hhh . 'VIEW' . $this->hhh]
+				= $name_single_uppercase;
+			$this->placeholders[$this->bbb . 'view' . $this->ddd]
+				= $nameSingleCode;
+			$this->placeholders[$this->bbb . 'View' . $this->ddd]
+				= $name_single_first_uppercase;
+			$this->placeholders[$this->bbb . 'VIEW' . $this->ddd]
+				= $name_single_uppercase;
 		}
 
-		// ###VIEWS### <<<DYNAMIC>>>
-		if (isset($view->name_list))
+		// VIEWS <<<DYNAMIC>>>
+		if (isset($view->name_list) && $view->name_list != 'null')
 		{
-			$viewName_list = ComponentbuilderHelper::safeString($view->name_list);
-			$viewsName_u = ComponentbuilderHelper::safeString($view->name_list, 'U');
-			$viewsName_f = ComponentbuilderHelper::safeString($view->name_list, 'F');
+			$nameListCode              = $view->name_list_code;
+			$name_list_uppercase       = ComponentbuilderHelper::safeString(
+				$view->name_list, 'U'
+			);
+			$name_list_first_uppercase = ComponentbuilderHelper::safeString(
+				$view->name_list, 'F'
+			);
 
 			// set some place holder for the views
-			$this->placeholders['###views###'] = $viewName_list;
-			$this->placeholders['###Views###'] = $viewsName_f;
-			$this->placeholders['###VIEWS###'] = $viewsName_u;
-			$this->placeholders['[[[views]]]'] = $viewName_list;
-			$this->placeholders['[[[Views]]]'] = $viewsName_f;
-			$this->placeholders['[[[VIEWS]]]'] = $viewsName_u;
+			$this->placeholders[$this->hhh . 'views' . $this->hhh]
+				= $nameListCode;
+			$this->placeholders[$this->hhh . 'Views' . $this->hhh]
+				= $name_list_first_uppercase;
+			$this->placeholders[$this->hhh . 'VIEWS' . $this->hhh]
+				= $name_list_uppercase;
+			$this->placeholders[$this->bbb . 'views' . $this->ddd]
+				= $nameListCode;
+			$this->placeholders[$this->bbb . 'Views' . $this->ddd]
+				= $name_list_first_uppercase;
+			$this->placeholders[$this->bbb . 'VIEWS' . $this->ddd]
+				= $name_list_uppercase;
 		}
 
-		// ###view### <<<DYNAMIC>>>
-		if (isset($viewName_single))
+		// view <<<DYNAMIC>>>
+		if (isset($nameSingleCode))
 		{
-			$this->fileContentDynamic[$viewName_single]['###view###'] = $viewName_single;
-			$this->fileContentDynamic[$viewName_single]['###VIEW###'] = $viewName_u;
-			$this->fileContentDynamic[$viewName_single]['###View###'] = $viewName_f;
+			$this->fileContentDynamic[$nameSingleCode][$this->hhh . 'view'
+			. $this->hhh]
+				= $nameSingleCode;
+			$this->fileContentDynamic[$nameSingleCode][$this->hhh . 'VIEW'
+			. $this->hhh]
+				= $name_single_uppercase;
+			$this->fileContentDynamic[$nameSingleCode][$this->hhh . 'View'
+			. $this->hhh]
+				= $name_single_first_uppercase;
 
-			if (isset($viewName_list))
+			if (isset($nameListCode))
 			{
-				$this->fileContentDynamic[$viewName_list]['###view###'] = $viewName_single;
-				$this->fileContentDynamic[$viewName_list]['###VIEW###'] = $viewName_u;
-				$this->fileContentDynamic[$viewName_list]['###View###'] = $viewName_f;
+				$this->fileContentDynamic[$nameListCode][$this->hhh . 'view'
+				. $this->hhh]
+					= $nameSingleCode;
+				$this->fileContentDynamic[$nameListCode][$this->hhh . 'VIEW'
+				. $this->hhh]
+					= $name_single_uppercase;
+				$this->fileContentDynamic[$nameListCode][$this->hhh . 'View'
+				. $this->hhh]
+					= $name_single_first_uppercase;
 			}
 		}
 
-		// ###views### <<<DYNAMIC>>>
-		if (isset($viewName_list))
+		// views <<<DYNAMIC>>>
+		if (isset($nameListCode))
 		{
-			$this->fileContentDynamic[$viewName_list]['###views###'] = $viewName_list;
-			$this->fileContentDynamic[$viewName_list]['###VIEWS###'] = $viewsName_u;
-			$this->fileContentDynamic[$viewName_list]['###Views###'] = $viewsName_f;
+			$this->fileContentDynamic[$nameListCode][$this->hhh . 'views'
+			. $this->hhh]
+				= $nameListCode;
+			$this->fileContentDynamic[$nameListCode][$this->hhh . 'VIEWS'
+			. $this->hhh]
+				= $name_list_uppercase;
+			$this->fileContentDynamic[$nameListCode][$this->hhh . 'Views'
+			. $this->hhh]
+				= $name_list_first_uppercase;
 
-			if (isset($viewName_single))
+			if (isset($nameSingleCode))
 			{
-				$this->fileContentDynamic[$viewName_single]['###views###'] = $viewName_list;
-				$this->fileContentDynamic[$viewName_single]['###VIEWS###'] = $viewsName_u;
-				$this->fileContentDynamic[$viewName_single]['###Views###'] = $viewsName_f;
+				$this->fileContentDynamic[$nameSingleCode][$this->hhh
+				. 'views'
+				. $this->hhh]
+					= $nameListCode;
+				$this->fileContentDynamic[$nameSingleCode][$this->hhh
+				. 'VIEWS'
+				. $this->hhh]
+					= $name_list_uppercase;
+				$this->fileContentDynamic[$nameSingleCode][$this->hhh
+				. 'Views'
+				. $this->hhh]
+					= $name_list_first_uppercase;
 			}
 		}
 	}
@@ -1072,82 +2499,88 @@ class Infusion extends Interpretation
 	 * Build the language values and insert into file
 	 *
 	 * @return  boolean  on success
-	 * 
+	 *
 	 */
 	public function setLangFileData()
 	{
-		$values = array();
+		// reset values
+		$values         = array();
 		$mainLangLoader = array();
 		// check the admin lang is set
 		if ($this->setLangAdmin())
 		{
-			$values[] = array_values($this->languages[$this->langTag]['admin']);
-			$mainLangLoader['admin'] = count($this->languages[$this->langTag]['admin']);
+			$values[]                = array_values(
+				$this->languages['components'][$this->langTag]['admin']
+			);
+			$mainLangLoader['admin'] = count(
+				$this->languages['components'][$this->langTag]['admin']
+			);
 		}
 		// check the admin system lang is set
 		if ($this->setLangAdminSys())
 		{
-			$values[] = array_values($this->languages[$this->langTag]['adminsys']);
-			$mainLangLoader['adminsys'] = count($this->languages[$this->langTag]['adminsys']);
+			$values[]                   = array_values(
+				$this->languages['components'][$this->langTag]['adminsys']
+			);
+			$mainLangLoader['adminsys'] = count(
+				$this->languages['components'][$this->langTag]['adminsys']
+			);
 		}
 		// check the site lang is set
-		if (!$this->removeSiteFolder && $this->setLangSite())
+		if ((!$this->removeSiteFolder || !$this->removeSiteEditFolder)
+			&& $this->setLangSite())
 		{
-			$values[] = array_values($this->languages[$this->langTag]['site']);
-			$mainLangLoader['site'] = count($this->languages[$this->langTag]['site']);
+			$values[]               = array_values(
+				$this->languages['components'][$this->langTag]['site']
+			);
+			$mainLangLoader['site'] = count(
+				$this->languages['components'][$this->langTag]['site']
+			);
 		}
 		// check the site system lang is set
-		if (!$this->removeSiteFolder && $this->setLangSiteSys())
+		if ((!$this->removeSiteFolder || !$this->removeSiteEditFolder)
+			&& $this->setLangSiteSys())
 		{
-			$values[] = array_values($this->languages[$this->langTag]['sitesys']);
-			$mainLangLoader['sitesys'] = count($this->languages[$this->langTag]['sitesys']);
+			$values[]                  = array_values(
+				$this->languages['components'][$this->langTag]['sitesys']
+			);
+			$mainLangLoader['sitesys'] = count(
+				$this->languages['components'][$this->langTag]['sitesys']
+			);
 		}
 		$values = array_unique(ComponentbuilderHelper::mergeArrays($values));
 		// get the other lang strings if there is any
 		$this->multiLangString = $this->getMultiLangStrings($values);
 		// update insert the current lang in to DB
-		$this->setLangPlaceholders($values);
+		$this->setLangPlaceholders($values, $this->componentID);
 		// remove old unused language strings
-		$this->purgeLanuageStrings($values);
+		$this->purgeLanuageStrings($values, $this->componentID);
 		// path to INI file
 		$getPAth = $this->templatePath . '/en-GB.com_admin.ini';
+		// Trigger Event: jcb_ce_onBeforeBuildAllLangFiles
+		$this->triggerEvent(
+			'jcb_ce_onBeforeBuildAllLangFiles',
+			array(&$this->componentContext, &$this->languages['components'],
+			      &$this->langTag)
+		);
 		// now we insert the values into the files
-		if (ComponentbuilderHelper::checkArray($this->languages))
+		if (ComponentbuilderHelper::checkArray($this->languages['components']))
 		{
+			// rest xml array
 			$langXML = array();
-			foreach ($this->languages as $tag => $areas)
+			foreach ($this->languages['components'] as $tag => $areas)
 			{
 				// trim the tag
 				$tag = trim($tag);
 				foreach ($areas as $area => $languageStrings)
 				{
-					// only log messages for none $this->langTag translations
-					if ($this->langTag !== $tag)
-					{
-						$langStringNr = count($languageStrings);
-						$langStringSum = $this->bcmath('mul', $langStringNr, 100);
-						$percentage = $this->bcmath('div', $langStringSum, $mainLangLoader[$area]);
-						$stringNAme = ($langStringNr == 1) ? '(string ' . $tag . ' translated)' : '(strings ' . $tag . ' translated)';
-						// force load if debug lines are added
-						if (!$this->debugLinenr)
-						{
-							// check if we sould install this translation
-							if ($percentage < $this->percentageLanguageAdd)
-							{
-								// dont add
-								$this->langNot[$area . ' ' . $tag] = '<b>' . $mainLangLoader[$area] . '</b>(total '.$this->langTag.' strings) only <b>' . $langStringNr . '</b>' . $stringNAme . ' = ' . $percentage;
-								continue;
-							}
-						}
-						// show if it was added as well
-						$this->langSet[$area . ' ' . $tag] = '<b>' . $mainLangLoader[$area] . '</b>(total '.$this->langTag.' strings) and <b>' . $langStringNr . '</b>' . $stringNAme . ' = ' . $percentage;
-					}
 					// set naming convention
 					$p = 'admin';
 					$t = '';
 					if (strpos($area, 'site') !== false)
 					{
-						if ($this->removeSiteFolder)
+						if ($this->removeSiteFolder
+							&& $this->removeSiteEditFolder)
 						{
 							continue;
 						}
@@ -1157,52 +2590,79 @@ class Infusion extends Interpretation
 					{
 						$t = '.sys';
 					}
-					// build the path to to place the lang file
-					$path = $this->componentPath . '/' . $p . '/language/' . $tag;
-					if (!JFolder::exists($path))
-					{
-						JFolder::create($path);
-						// count the folder created
-						$this->folderCount++;
-					}
 					// build the file name
-					$fileName = $tag . '.com_' . $this->componentCodeName . $t . '.ini';
-					// move the file to its place
-					JFile::copy($getPAth, $path . '/' . $fileName);
-					// count the file created
-					$this->fileCount++;
-					// add content to it
-					$lang = array_map(function ($langstring, $placeholder) {
-						return $placeholder . '="' . $langstring . '"';
-					}, $languageStrings, array_keys($languageStrings));
-					// add to language file
-					$this->writeFile($path . '/' . $fileName, implode(PHP_EOL, $lang));
-					// set the line counter
-					$this->lineCount = $this->lineCount + count((array)$lang);
-					// build xml strings
-					if (!isset($langXML[$p]))
+					$file_name = $tag . '.com_' . $this->componentCodeName . $t
+						. '.ini';
+					// check if language should be added
+					if ($this->shouldLanguageBeAdded(
+						$tag, $languageStrings, $mainLangLoader[$area],
+						$file_name
+					))
 					{
-						$langXML[$p] = array();
+						// build the path to place the lang file
+						$path = $this->componentPath . '/' . $p . '/language/'
+							. $tag . '/';
+						if (!JFolder::exists($path))
+						{
+							JFolder::create($path);
+							// count the folder created
+							$this->folderCount++;
+						}
+						// move the file to its place
+						JFile::copy($getPAth, $path . $file_name);
+						// count the file created
+						$this->fileCount++;
+						// add content to it
+						$lang = array_map(
+							function ($langstring, $placeholder) {
+								return $placeholder . '="' . $langstring . '"';
+							}, array_values($languageStrings),
+							array_keys($languageStrings)
+						);
+						// add to language file
+						$this->writeFile(
+							$path . $file_name, implode(PHP_EOL, $lang)
+						);
+						// set the line counter
+						$this->lineCount = $this->lineCount + count(
+								(array) $lang
+							);
+						unset($lang);
+						// build xml strings
+						if (!isset($langXML[$p]))
+						{
+							$langXML[$p] = array();
+						}
+						$langXML[$p][] = '<language tag="' . $tag
+							. '">language/'
+							. $tag . '/' . $file_name . '</language>';
 					}
-					$langXML[$p][] = '<language tag="' . $tag . '">language/' . $tag . '/' . $fileName . '</language>';
 				}
 			}
-			// load the lang xml 
+			// load the lang xml
 			if (ComponentbuilderHelper::checkArray($langXML))
 			{
 				$replace = array();
-				if (isset($langXML['admin']) && ComponentbuilderHelper::checkArray($langXML['admin']))
+				if (isset($langXML['admin'])
+					&& ComponentbuilderHelper::checkArray($langXML['admin']))
 				{
-					$replace['###ADMIN_LANGUAGES###'] = implode(PHP_EOL . "\t\t\t", $langXML['admin']);
+					$replace[$this->hhh . 'ADMIN_LANGUAGES' . $this->hhh]
+						= implode(PHP_EOL . $this->_t(3), $langXML['admin']);
 				}
-				if (!$this->removeSiteFolder && isset($langXML['site']) && ComponentbuilderHelper::checkArray($langXML['site']))
+				if ((!$this->removeSiteFolder || !$this->removeSiteEditFolder)
+					&& isset($langXML['site'])
+					&& ComponentbuilderHelper::checkArray($langXML['site']))
 				{
-					$replace['###SITE_LANGUAGES###'] = implode(PHP_EOL . "\t\t", $langXML['site']);
+					$replace[$this->hhh . 'SITE_LANGUAGES' . $this->hhh]
+						= implode(PHP_EOL . $this->_t(2), $langXML['site']);
 				}
 				// build xml path
-				$xmlPath = $this->componentPath . '/' . $this->fileContentStatic['###component###'] . '.xml';
+				$xmlPath = $this->componentPath . '/' . $this->componentCodeName
+					. '.xml';
 				// get the content in xml
-				$componentXML = ComponentbuilderHelper::getFileContents($xmlPath);
+				$componentXML = ComponentbuilderHelper::getFileContents(
+					$xmlPath
+				);
 				// update the xml content
 				$componentXML = $this->setPlaceholders($componentXML, $replace);
 				// store the values back to xml
@@ -1210,4 +2670,5 @@ class Infusion extends Interpretation
 			}
 		}
 	}
+
 }

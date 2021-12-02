@@ -93,6 +93,7 @@
 			description="COM_COMPONENTBUILDER_COMPONENT_ADMIN_VIEWS_JOOMLA_COMPONENT_DESCRIPTION"
 			class="list_class"
 			multiple="false"
+			default=""
 			required="true"
 			readonly="true"
 			button="false"
@@ -102,9 +103,10 @@
 			type="subform"
 			name="addadmin_views"
 			label="COM_COMPONENTBUILDER_COMPONENT_ADMIN_VIEWS_ADDADMIN_VIEWS_LABEL"
-			layout="joomla.form.field.subform.repeatable-table"
+			layout="repeatablejcb"
 			multiple="true"
 			description="COM_COMPONENTBUILDER_COMPONENT_ADMIN_VIEWS_ADDADMIN_VIEWS_DESCRIPTION"
+			default="[{&quot;submenu&quot;:&quot;1&quot;,&quot;checkin&quot;:&quot;1&quot;,&quot;history&quot;:&quot;1&quot;,&quot;access&quot;:&quot;1&quot;,&quot;port&quot;:&quot;1&quot;,&quot;filter&quot;:&quot;2&quot;}]"
 			icon="list"
 			min="1">
 			<form hidden="true" name="list_addadmin_views_modal" repeat="true">
@@ -116,7 +118,8 @@
 					description="COM_COMPONENTBUILDER_COMPONENT_ADMIN_VIEWS_ADMINVIEW_DESCRIPTION"
 					class="fieldMedium"
 					multiple="false"
-					required="false"
+					default=""
+					required="true"
 					button="false"
 				/>
 				<!-- Icomoon Field. Type: List. (joomla) -->
@@ -125,9 +128,9 @@
 					name="icomoon"
 					label="COM_COMPONENTBUILDER_COMPONENT_ADMIN_VIEWS_ICOMOON_LABEL"
 					description="COM_COMPONENTBUILDER_COMPONENT_ADMIN_VIEWS_ICOMOON_DESCRIPTION"
-					class="list_class fieldMedium"
+					class="list_class fieldMedium icomoon342"
 					multiple="false"
-					required="false">
+					onchange="getIconImage(this);">
 					<!-- Option Set. -->
 					<option value="joomla">
 						COM_COMPONENTBUILDER_COMPONENT_ADMIN_VIEWS_JOOMLA</option>
@@ -557,7 +560,6 @@
 					label="COM_COMPONENTBUILDER_COMPONENT_ADMIN_VIEWS_MAINMENU_LABEL"
 					value="1"
 					default="1"
-					required="false"
 					description="COM_COMPONENTBUILDER_COMPONENT_ADMIN_VIEWS_MAINMENU_DESCRIPTION"
 					class="inputbox"
 				/>
@@ -567,7 +569,7 @@
 					name="dashboard_add"
 					label="COM_COMPONENTBUILDER_COMPONENT_ADMIN_VIEWS_DASHBOARD_ADD_LABEL"
 					value="1"
-					required="false"
+					default=""
 					description="COM_COMPONENTBUILDER_COMPONENT_ADMIN_VIEWS_DASHBOARD_ADD_DESCRIPTION"
 					class="inputbox"
 				/>
@@ -578,7 +580,6 @@
 					label="COM_COMPONENTBUILDER_COMPONENT_ADMIN_VIEWS_DASHBOARD_LIST_LABEL"
 					value="1"
 					default="1"
-					required="false"
 					description="COM_COMPONENTBUILDER_COMPONENT_ADMIN_VIEWS_DASHBOARD_LIST_DESCRIPTION"
 					class="inputbox"
 				/>
@@ -589,7 +590,6 @@
 					label="COM_COMPONENTBUILDER_COMPONENT_ADMIN_VIEWS_SUBMENU_LABEL"
 					value="1"
 					default="1"
-					required="false"
 					description="COM_COMPONENTBUILDER_COMPONENT_ADMIN_VIEWS_SUBMENU_DESCRIPTION"
 					class="inputbox"
 				/>
@@ -600,7 +600,6 @@
 					label="COM_COMPONENTBUILDER_COMPONENT_ADMIN_VIEWS_CHECKIN_LABEL"
 					value="1"
 					default="1"
-					required="false"
 					description="COM_COMPONENTBUILDER_COMPONENT_ADMIN_VIEWS_CHECKIN_DESCRIPTION"
 					class="inputbox"
 				/>
@@ -611,8 +610,17 @@
 					label="COM_COMPONENTBUILDER_COMPONENT_ADMIN_VIEWS_HISTORY_LABEL"
 					value="1"
 					default="1"
-					required="false"
 					description="COM_COMPONENTBUILDER_COMPONENT_ADMIN_VIEWS_HISTORY_DESCRIPTION"
+					class="inputbox"
+				/>
+				<!-- Joomla_fields Field. Type: Checkbox. (joomla) -->
+				<field
+					type="checkbox"
+					name="joomla_fields"
+					label="COM_COMPONENTBUILDER_COMPONENT_ADMIN_VIEWS_JOOMLA_FIELDS_LABEL"
+					value="1"
+					default="1"
+					description="COM_COMPONENTBUILDER_COMPONENT_ADMIN_VIEWS_JOOMLA_FIELDS_DESCRIPTION"
 					class="inputbox"
 				/>
 				<!-- Metadata Field. Type: Checkbox. (joomla) -->
@@ -622,7 +630,6 @@
 					label="COM_COMPONENTBUILDER_COMPONENT_ADMIN_VIEWS_METADATA_LABEL"
 					value="1"
 					default="1"
-					required="false"
 					description="COM_COMPONENTBUILDER_COMPONENT_ADMIN_VIEWS_METADATA_DESCRIPTION"
 					class="inputbox"
 				/>
@@ -633,7 +640,6 @@
 					label="COM_COMPONENTBUILDER_COMPONENT_ADMIN_VIEWS_ACCESS_LABEL"
 					value="1"
 					default="1"
-					required="false"
 					description="COM_COMPONENTBUILDER_COMPONENT_ADMIN_VIEWS_ACCESS_DESCRIPTION"
 					class="inputbox"
 				/>
@@ -643,20 +649,41 @@
 					name="port"
 					label="COM_COMPONENTBUILDER_COMPONENT_ADMIN_VIEWS_PORT_LABEL"
 					value="1"
-					required="false"
+					default=""
 					description="COM_COMPONENTBUILDER_COMPONENT_ADMIN_VIEWS_PORT_DESCRIPTION"
 					class="inputbox"
 				/>
-				<!-- Edit_create_site_view Field. Type: Checkbox. (joomla) -->
+				<!-- Filter Field. Type: List. (joomla) -->
 				<field
-					type="checkbox"
+					type="list"
+					name="filter"
+					label="COM_COMPONENTBUILDER_COMPONENT_ADMIN_VIEWS_FILTER_LABEL"
+					description="COM_COMPONENTBUILDER_COMPONENT_ADMIN_VIEWS_FILTER_DESCRIPTION"
+					class="fieldMedium"
+					multiple="false"
+					default="2">
+					<!-- Option Set. -->
+					<option value="1">
+						COM_COMPONENTBUILDER_COMPONENT_ADMIN_VIEWS_SIDE_OLD</option>
+					<option value="2">
+						COM_COMPONENTBUILDER_COMPONENT_ADMIN_VIEWS_ABOVE_NEW</option>
+				</field>
+				<!-- Edit_create_site_view Field. Type: List. (joomla) -->
+				<field
+					type="list"
 					name="edit_create_site_view"
 					label="COM_COMPONENTBUILDER_COMPONENT_ADMIN_VIEWS_EDIT_CREATE_SITE_VIEW_LABEL"
-					value="1"
-					required="false"
 					description="COM_COMPONENTBUILDER_COMPONENT_ADMIN_VIEWS_EDIT_CREATE_SITE_VIEW_DESCRIPTION"
-					class="inputbox"
-				/>
+					class="fieldMedium"
+					multiple="false">
+					<!-- Option Set. -->
+					<option value="">
+						COM_COMPONENTBUILDER_COMPONENT_ADMIN_VIEWS_NONE</option>
+					<option value="1">
+						COM_COMPONENTBUILDER_COMPONENT_ADMIN_VIEWS_ADD</option>
+					<option value="2">
+						COM_COMPONENTBUILDER_COMPONENT_ADMIN_VIEWS_ADDMENU</option>
+				</field>
 				<!-- Order Field. Type: Integer. (joomla) -->
 				<field
 					type="integer"
@@ -665,7 +692,6 @@
 					default="0"
 					description="COM_COMPONENTBUILDER_COMPONENT_ADMIN_VIEWS_ORDER_DESCRIPTION"
 					class="fieldSmall"
-					required="false"
 					first="0"
 					last="400"
 					step="1"

@@ -1,33 +1,16 @@
 <?php
-/*--------------------------------------------------------------------------------------------------------|  www.vdm.io  |------/
-    __      __       _     _____                 _                                  _     __  __      _   _               _
-    \ \    / /      | |   |  __ \               | |                                | |   |  \/  |    | | | |             | |
-     \ \  / /_ _ ___| |_  | |  | | _____   _____| | ___  _ __  _ __ ___   ___ _ __ | |_  | \  / | ___| |_| |__   ___   __| |
-      \ \/ / _` / __| __| | |  | |/ _ \ \ / / _ \ |/ _ \| '_ \| '_ ` _ \ / _ \ '_ \| __| | |\/| |/ _ \ __| '_ \ / _ \ / _` |
-       \  / (_| \__ \ |_  | |__| |  __/\ V /  __/ | (_) | |_) | | | | | |  __/ | | | |_  | |  | |  __/ |_| | | | (_) | (_| |
-        \/ \__,_|___/\__| |_____/ \___| \_/ \___|_|\___/| .__/|_| |_| |_|\___|_| |_|\__| |_|  |_|\___|\__|_| |_|\___/ \__,_|
-                                                        | |                                                                 
-                                                        |_| 				
-/-------------------------------------------------------------------------------------------------------------------------------/
-
-	@version		2.7.x
-	@created		30th April, 2015
-	@package		Component Builder
-	@subpackage		view.html.php
-	@author			Llewellyn van der Merwe <http://joomlacomponentbuilder.com>	
-	@github			Joomla Component Builder <https://github.com/vdm-io/Joomla-Component-Builder>
-	@copyright		Copyright (C) 2015. All Rights Reserved
-	@license		GNU/GPL Version 2 or later - http://www.gnu.org/licenses/gpl-2.0.html 
-	
-	Builds Complex Joomla Components 
-                                                             
-/-----------------------------------------------------------------------------------------------------------------------------*/
+/**
+ * @package    Joomla.Component.Builder
+ *
+ * @created    30th April, 2015
+ * @author     Llewellyn van der Merwe <http://www.joomlacomponentbuilder.com>
+ * @github     Joomla Component Builder <https://github.com/vdm-io/Joomla-Component-Builder>
+ * @copyright  Copyright (C) 2015 - 2020 Vast Development Method. All rights reserved.
+ * @license    GNU General Public License version 2 or later; see LICENSE.txt
+ */
 
 // No direct access to this file
 defined('_JEXEC') or die('Restricted access');
-
-// import Joomla view library
-jimport('joomla.application.component.view');
 
 /**
  * Componentbuilder View class for the Get_snippets
@@ -61,7 +44,7 @@ class ComponentbuilderViewGet_snippets extends JViewLegacy
 		// Check for errors.
 		if (count($errors = $this->get('Errors')))
 		{
-			throw new Exception(implode("\n", $errors), 500);
+			throw new Exception(implode(PHP_EOL, $errors), 500);
 		}
 
 		parent::display($tpl);
@@ -81,7 +64,7 @@ class ComponentbuilderViewGet_snippets extends JViewLegacy
 		$HeaderCheck = new componentbuilderHeaderCheck;
 
 		// Add View JavaScript File
-		$this->document->addScript(JURI::root(true) . "/administrator/components/com_componentbuilder/assets/js/get_snippets.js", (ComponentbuilderHelper::jVersion()->isCompatible("3.8.0")) ? array("version" => "auto") : "text/javascript"); 
+		$this->document->addScript(JURI::root(true) . "/administrator/components/com_componentbuilder/assets/js/get_snippets.js", (ComponentbuilderHelper::jVersion()->isCompatible("3.8.0")) ? array("version" => "auto") : "text/javascript");
 
 		// Load uikit options.
 		$uikit = $this->params->get('uikit_load');
@@ -134,7 +117,7 @@ class ComponentbuilderViewGet_snippets extends JViewLegacy
 					}
 				}
 			}
-		}   
+		}
 		// load the local snippets
 		if (ComponentbuilderHelper::checkArray($this->items))
 		{
@@ -145,6 +128,7 @@ class ComponentbuilderViewGet_snippets extends JViewLegacy
 				$local_snippets[$path] = $item;
 			}
 		}
+		
 		// Add the JavaScript for JStore
 		$this->document->addScript(JURI::root() .'media/com_componentbuilder/js/jquery.json.min.js');
 		$this->document->addScript(JURI::root() .'media/com_componentbuilder/js/jstorage.min.js');
@@ -178,6 +162,8 @@ class ComponentbuilderViewGet_snippets extends JViewLegacy
 			// set to use no storage
 			$expire = 30000; // only 30 seconds
 		}
+		// Set the Time To Live To JavaScript
+		$this->document->addScriptDeclaration("var expire = ". (int) $expire.";");
 		// set snippet path
 		$this->document->addScriptDeclaration("var snippetPath = '". ComponentbuilderHelper::$snippetPath ."';");
 		$this->document->addScriptDeclaration("var snippetsPath = '". ComponentbuilderHelper::$snippetsPath ."';");
@@ -247,8 +233,6 @@ class ComponentbuilderViewGet_snippets extends JViewLegacy
 				}
 			}
 		");
-		// Set the Time To Live To JavaScript
-		$this->document->addScriptDeclaration("var expire = ". (int) $expire.";");
 		// load the local snippets
 		if (ComponentbuilderHelper::checkArray($this->items))
 		{
@@ -256,7 +240,7 @@ class ComponentbuilderViewGet_snippets extends JViewLegacy
 			$this->document->addScriptDeclaration("var local_snippets = ". json_encode($local_snippets).";");
 		}
 		// add the document default css file
-		$this->document->addStyleSheet(JURI::root(true) .'/administrator/components/com_componentbuilder/assets/css/get_snippets.css', (ComponentbuilderHelper::jVersion()->isCompatible('3.8.0')) ? array('version' => 'auto') : 'text/css'); 
+		$this->document->addStyleSheet(JURI::root(true) .'/administrator/components/com_componentbuilder/assets/css/get_snippets.css', (ComponentbuilderHelper::jVersion()->isCompatible('3.8.0')) ? array('version' => 'auto') : 'text/css');
 	}
 
 	/**
@@ -268,39 +252,37 @@ class ComponentbuilderViewGet_snippets extends JViewLegacy
 		$this->app->input->set('hidemainmenu', true);
 		// add title to the page
 		JToolbarHelper::title(JText::_('COM_COMPONENTBUILDER_GET_SNIPPETS'),'search');
-		// add the back button
-		// JToolBarHelper::custom('get_snippets.back', 'undo-2', '', 'COM_COMPONENTBUILDER_BACK', false);
 		// add cpanel button
 		JToolBarHelper::custom('get_snippets.dashboard', 'grid-2', '', 'COM_COMPONENTBUILDER_DASH', false);
 		if ($this->canDo->get('get_snippets.custom_admin_views'))
 		{
 			// add Custom Admin Views button.
-			JToolBarHelper::custom('get_snippets.openCustomAdminViews', 'screen', '', 'COM_COMPONENTBUILDER_CUSTOM_ADMIN_VIEWS', false);
+			JToolBarHelper::custom('get_snippets.openCustomAdminViews', 'screen custom-button-opencustomadminviews', '', 'COM_COMPONENTBUILDER_CUSTOM_ADMIN_VIEWS', false);
 		}
 		if ($this->canDo->get('get_snippets.site_views'))
 		{
 			// add Site Views button.
-			JToolBarHelper::custom('get_snippets.openSiteViews', 'palette', '', 'COM_COMPONENTBUILDER_SITE_VIEWS', false);
+			JToolBarHelper::custom('get_snippets.openSiteViews', 'palette custom-button-opensiteviews', '', 'COM_COMPONENTBUILDER_SITE_VIEWS', false);
 		}
 		if ($this->canDo->get('get_snippets.templates'))
 		{
 			// add Templates button.
-			JToolBarHelper::custom('get_snippets.openTemplates', 'brush', '', 'COM_COMPONENTBUILDER_TEMPLATES', false);
+			JToolBarHelper::custom('get_snippets.openTemplates', 'brush custom-button-opentemplates', '', 'COM_COMPONENTBUILDER_TEMPLATES', false);
 		}
 		if ($this->canDo->get('get_snippets.layouts'))
 		{
 			// add Layouts button.
-			JToolBarHelper::custom('get_snippets.openLayouts', 'brush', '', 'COM_COMPONENTBUILDER_LAYOUTS', false);
+			JToolBarHelper::custom('get_snippets.openLayouts', 'brush custom-button-openlayouts', '', 'COM_COMPONENTBUILDER_LAYOUTS', false);
 		}
 		if ($this->canDo->get('get_snippets.snippets'))
 		{
 			// add Snippets button.
-			JToolBarHelper::custom('get_snippets.openSnippets', 'pin', '', 'COM_COMPONENTBUILDER_SNIPPETS', false);
+			JToolBarHelper::custom('get_snippets.openSnippets', 'pin custom-button-opensnippets', '', 'COM_COMPONENTBUILDER_SNIPPETS', false);
 		}
 		if ($this->canDo->get('get_snippets.libraries'))
 		{
 			// add Libraries button.
-			JToolBarHelper::custom('get_snippets.openLibraries', 'puzzle', '', 'COM_COMPONENTBUILDER_LIBRARIES', false);
+			JToolBarHelper::custom('get_snippets.openLibraries', 'puzzle custom-button-openlibraries', '', 'COM_COMPONENTBUILDER_LIBRARIES', false);
 		}
 
 		// set help url for this view if found

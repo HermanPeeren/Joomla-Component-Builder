@@ -1,33 +1,18 @@
 <?php
-/*--------------------------------------------------------------------------------------------------------|  www.vdm.io  |------/
-    __      __       _     _____                 _                                  _     __  __      _   _               _
-    \ \    / /      | |   |  __ \               | |                                | |   |  \/  |    | | | |             | |
-     \ \  / /_ _ ___| |_  | |  | | _____   _____| | ___  _ __  _ __ ___   ___ _ __ | |_  | \  / | ___| |_| |__   ___   __| |
-      \ \/ / _` / __| __| | |  | |/ _ \ \ / / _ \ |/ _ \| '_ \| '_ ` _ \ / _ \ '_ \| __| | |\/| |/ _ \ __| '_ \ / _ \ / _` |
-       \  / (_| \__ \ |_  | |__| |  __/\ V /  __/ | (_) | |_) | | | | | |  __/ | | | |_  | |  | |  __/ |_| | | | (_) | (_| |
-        \/ \__,_|___/\__| |_____/ \___| \_/ \___|_|\___/| .__/|_| |_| |_|\___|_| |_|\__| |_|  |_|\___|\__|_| |_|\___/ \__,_|
-                                                        | |                                                                 
-                                                        |_| 				
-/-------------------------------------------------------------------------------------------------------------------------------/
-
-	@version		2.7.x
-	@created		30th April, 2015
-	@package		Component Builder
-	@subpackage		ajax.json.php
-	@author			Llewellyn van der Merwe <http://joomlacomponentbuilder.com>	
-	@github			Joomla Component Builder <https://github.com/vdm-io/Joomla-Component-Builder>
-	@copyright		Copyright (C) 2015. All Rights Reserved
-	@license		GNU/GPL Version 2 or later - http://www.gnu.org/licenses/gpl-2.0.html 
-	
-	Builds Complex Joomla Components 
-                                                             
-/-----------------------------------------------------------------------------------------------------------------------------*/
+/**
+ * @package    Joomla.Component.Builder
+ *
+ * @created    30th April, 2015
+ * @author     Llewellyn van der Merwe <http://www.joomlacomponentbuilder.com>
+ * @github     Joomla Component Builder <https://github.com/vdm-io/Joomla-Component-Builder>
+ * @copyright  Copyright (C) 2015 - 2020 Vast Development Method. All rights reserved.
+ * @license    GNU General Public License version 2 or later; see LICENSE.txt
+ */
 
 // No direct access to this file
 defined('_JEXEC') or die('Restricted access');
 
-// import Joomla controllerform library
-jimport('joomla.application.component.controller');
+use Joomla\Utilities\ArrayHelper;
 
 /**
  * Componentbuilder Ajax Controller
@@ -47,6 +32,11 @@ class ComponentbuilderControllerAjax extends JControllerLegacy
 		$this->registerTask('getComponentDetails', 'ajax');
 		$this->registerTask('getCronPath', 'ajax');
 		$this->registerTask('getJCBpackageInfo', 'ajax');
+		$this->registerTask('getCrowdinDetails', 'ajax');
+		$this->registerTask('getModuleCode', 'ajax');
+		$this->registerTask('getClassCode', 'ajax');
+		$this->registerTask('getClassCodeIds', 'ajax');
+		$this->registerTask('getClassHeaderCode', 'ajax');
 		$this->registerTask('tableColumns', 'ajax');
 		$this->registerTask('fieldSelectOptions', 'ajax');
 		$this->registerTask('getDynamicScripts', 'ajax');
@@ -62,11 +52,15 @@ class ComponentbuilderControllerAjax extends JControllerLegacy
 		$this->registerTask('getDynamicValues', 'ajax');
 		$this->registerTask('checkFunctionName', 'ajax');
 		$this->registerTask('usedin', 'ajax');
+		$this->registerTask('getEditCustomCodeButtons', 'ajax');
+		$this->registerTask('placedin', 'ajax');
+		$this->registerTask('checkPlaceholderName', 'ajax');
 		$this->registerTask('getExistingValidationRuleCode', 'ajax');
 		$this->registerTask('getValidationRulesTable', 'ajax');
 		$this->registerTask('checkRuleName', 'ajax');
-		$this->registerTask('fieldOptions', 'ajax');
+		$this->registerTask('fieldTypeProperties', 'ajax');
 		$this->registerTask('getFieldPropertyDesc', 'ajax');
+		$this->registerTask('getCodeGlueOptions', 'ajax');
 		$this->registerTask('snippetDetails', 'ajax');
 		$this->registerTask('setSnippetGithub', 'ajax');
 		$this->registerTask('getSnippets', 'ajax');
@@ -79,7 +73,7 @@ class ComponentbuilderControllerAjax extends JControllerLegacy
 		// Check Token!
 		$token 		= JSession::getFormToken();
 		$call_token	= $jinput->get('token', 0, 'ALNUM');
-		if($token == $call_token)
+		if($jinput->get($token, 0, 'ALNUM') || $token === $call_token)
 		{
 			$task = $this->getTask();
 			switch($task)
@@ -274,6 +268,200 @@ class ComponentbuilderControllerAjax extends JControllerLegacy
 						}
 					}
 				break;
+				case 'getCrowdinDetails':
+					try
+					{
+						$returnRaw = $jinput->get('raw', false, 'BOOLEAN');
+						$identifierValue = $jinput->get('identifier', NULL, 'CMD');
+						$keyValue = $jinput->get('key', NULL, 'ALNUM');
+						if($identifierValue && $user->id != 0 && $keyValue)
+						{
+							$result = $this->getModel('ajax')->getCrowdinDetails($identifierValue, $keyValue);
+						}
+						else
+						{
+							$result = false;
+						}
+						if($callback = $jinput->get('callback', null, 'CMD'))
+						{
+							echo $callback . "(".json_encode($result).");";
+						}
+						elseif($returnRaw)
+						{
+							echo json_encode($result);
+						}
+						else
+						{
+							echo "(".json_encode($result).");";
+						}
+					}
+					catch(Exception $e)
+					{
+						if($callback = $jinput->get('callback', null, 'CMD'))
+						{
+							echo $callback."(".json_encode($e).");";
+						}
+						else
+						{
+							echo "(".json_encode($e).");";
+						}
+					}
+				break;
+				case 'getModuleCode':
+					try
+					{
+						$returnRaw = $jinput->get('raw', false, 'BOOLEAN');
+						$dataValue = $jinput->get('data', NULL, 'STRING');
+						if($dataValue && $user->id != 0)
+						{
+							$result = $this->getModel('ajax')->getModuleCode($dataValue);
+						}
+						else
+						{
+							$result = false;
+						}
+						if($callback = $jinput->get('callback', null, 'CMD'))
+						{
+							echo $callback . "(".json_encode($result).");";
+						}
+						elseif($returnRaw)
+						{
+							echo json_encode($result);
+						}
+						else
+						{
+							echo "(".json_encode($result).");";
+						}
+					}
+					catch(Exception $e)
+					{
+						if($callback = $jinput->get('callback', null, 'CMD'))
+						{
+							echo $callback."(".json_encode($e).");";
+						}
+						else
+						{
+							echo "(".json_encode($e).");";
+						}
+					}
+				break;
+				case 'getClassCode':
+					try
+					{
+						$returnRaw = $jinput->get('raw', false, 'BOOLEAN');
+						$idValue = $jinput->get('id', NULL, 'INT');
+						$typeValue = $jinput->get('type', NULL, 'WORD');
+						if($idValue && $user->id != 0 && $typeValue)
+						{
+							$result = $this->getModel('ajax')->getClassCode($idValue, $typeValue);
+						}
+						else
+						{
+							$result = false;
+						}
+						if($callback = $jinput->get('callback', null, 'CMD'))
+						{
+							echo $callback . "(".json_encode($result).");";
+						}
+						elseif($returnRaw)
+						{
+							echo json_encode($result);
+						}
+						else
+						{
+							echo "(".json_encode($result).");";
+						}
+					}
+					catch(Exception $e)
+					{
+						if($callback = $jinput->get('callback', null, 'CMD'))
+						{
+							echo $callback."(".json_encode($e).");";
+						}
+						else
+						{
+							echo "(".json_encode($e).");";
+						}
+					}
+				break;
+				case 'getClassCodeIds':
+					try
+					{
+						$returnRaw = $jinput->get('raw', false, 'BOOLEAN');
+						$idValue = $jinput->get('id', NULL, 'INT');
+						$typeValue = $jinput->get('type', NULL, 'WORD');
+						if($idValue && $user->id != 0 && $typeValue)
+						{
+							$result = $this->getModel('ajax')->getClassCodeIds($idValue, $typeValue);
+						}
+						else
+						{
+							$result = false;
+						}
+						if($callback = $jinput->get('callback', null, 'CMD'))
+						{
+							echo $callback . "(".json_encode($result).");";
+						}
+						elseif($returnRaw)
+						{
+							echo json_encode($result);
+						}
+						else
+						{
+							echo "(".json_encode($result).");";
+						}
+					}
+					catch(Exception $e)
+					{
+						if($callback = $jinput->get('callback', null, 'CMD'))
+						{
+							echo $callback."(".json_encode($e).");";
+						}
+						else
+						{
+							echo "(".json_encode($e).");";
+						}
+					}
+				break;
+				case 'getClassHeaderCode':
+					try
+					{
+						$returnRaw = $jinput->get('raw', false, 'BOOLEAN');
+						$idValue = $jinput->get('id', NULL, 'INT');
+						$typeValue = $jinput->get('type', NULL, 'WORD');
+						if($idValue && $user->id != 0 && $typeValue)
+						{
+							$result = $this->getModel('ajax')->getClassHeaderCode($idValue, $typeValue);
+						}
+						else
+						{
+							$result = false;
+						}
+						if($callback = $jinput->get('callback', null, 'CMD'))
+						{
+							echo $callback . "(".json_encode($result).");";
+						}
+						elseif($returnRaw)
+						{
+							echo json_encode($result);
+						}
+						else
+						{
+							echo "(".json_encode($result).");";
+						}
+					}
+					catch(Exception $e)
+					{
+						if($callback = $jinput->get('callback', null, 'CMD'))
+						{
+							echo $callback."(".json_encode($e).");";
+						}
+						else
+						{
+							echo "(".json_encode($e).");";
+						}
+					}
+				break;
 				case 'tableColumns':
 					try
 					{
@@ -394,7 +582,7 @@ class ComponentbuilderControllerAjax extends JControllerLegacy
 						$returnRaw = $jinput->get('raw', false, 'BOOLEAN');
 						$typeValue = $jinput->get('type', NULL, 'WORD');
 						$sizeValue = $jinput->get('size', NULL, 'INT');
-						if($typeValue && $sizeValue && $user->id != 0)
+						if($typeValue && $user->id != 0 && $sizeValue)
 						{
 							$result = $this->getModel('ajax')->getButton($typeValue, $sizeValue);
 						}
@@ -433,7 +621,7 @@ class ComponentbuilderControllerAjax extends JControllerLegacy
 						$returnRaw = $jinput->get('raw', false, 'BOOLEAN');
 						$typeValue = $jinput->get('type', NULL, 'WORD');
 						$sizeValue = $jinput->get('size', NULL, 'INT');
-						if($typeValue && $sizeValue && $user->id != 0)
+						if($typeValue && $user->id != 0 && $sizeValue)
 						{
 							$result = $this->getModel('ajax')->getButtonID($typeValue, $sizeValue);
 						}
@@ -508,7 +696,7 @@ class ComponentbuilderControllerAjax extends JControllerLegacy
 					try
 					{
 						$returnRaw = $jinput->get('raw', false, 'BOOLEAN');
-						$typeValue = $jinput->get('type', NULL, 'INT');
+						$typeValue = $jinput->get('type', NULL, 'ALNUM');
 						if($typeValue && $user->id != 0)
 						{
 							$result = $this->getModel('ajax')->getLinked($typeValue);
@@ -546,7 +734,7 @@ class ComponentbuilderControllerAjax extends JControllerLegacy
 					try
 					{
 						$returnRaw = $jinput->get('raw', false, 'BOOLEAN');
-						$typeValue = $jinput->get('type', NULL, 'INT');
+						$typeValue = $jinput->get('type', NULL, 'ALNUM');
 						if($typeValue && $user->id != 0)
 						{
 							$result = $this->getModel('ajax')->checkAliasField($typeValue);
@@ -663,7 +851,7 @@ class ComponentbuilderControllerAjax extends JControllerLegacy
 						$nameValue = $jinput->get('name', NULL, 'WORD');
 						$asValue = $jinput->get('as', NULL, 'WORD');
 						$typeValue = $jinput->get('type', NULL, 'INT');
-						if($nameValue && $asValue && $typeValue && $user->id != 0)
+						if($nameValue && $user->id != 0 && $asValue && $typeValue)
 						{
 							$result = $this->getModel('ajax')->getDbTableColumns($nameValue, $asValue, $typeValue);
 						}
@@ -703,7 +891,7 @@ class ComponentbuilderControllerAjax extends JControllerLegacy
 						$idValue = $jinput->get('id', NULL, 'INT');
 						$asValue = $jinput->get('as', NULL, 'WORD');
 						$typeValue = $jinput->get('type', NULL, 'INT');
-						if($idValue && $asValue && $typeValue && $user->id != 0)
+						if($idValue && $user->id != 0 && $asValue && $typeValue)
 						{
 							$result = $this->getModel('ajax')->getViewTableColumns($idValue, $asValue, $typeValue);
 						}
@@ -742,7 +930,7 @@ class ComponentbuilderControllerAjax extends JControllerLegacy
 						$returnRaw = $jinput->get('raw', false, 'BOOLEAN');
 						$idValue = $jinput->get('id', NULL, 'INT');
 						$viewValue = $jinput->get('view', NULL, 'WORD');
-						if($idValue && $viewValue && $user->id != 0)
+						if($idValue && $user->id != 0 && $viewValue)
 						{
 							$result = $this->getModel('ajax')->getDynamicValues($idValue, $viewValue);
 						}
@@ -781,7 +969,7 @@ class ComponentbuilderControllerAjax extends JControllerLegacy
 						$returnRaw = $jinput->get('raw', false, 'BOOLEAN');
 						$functioNameValue = $jinput->get('functioName', NULL, 'STRING');
 						$idValue = $jinput->get('id', NULL, 'INT');
-						if($functioNameValue && $idValue && $user->id != 0)
+						if($functioNameValue && $user->id != 0 && $idValue)
 						{
 							$result = $this->getModel('ajax')->checkFunctionName($functioNameValue, $idValue);
 						}
@@ -821,9 +1009,126 @@ class ComponentbuilderControllerAjax extends JControllerLegacy
 						$functioNameValue = $jinput->get('functioName', NULL, 'WORD');
 						$idValue = $jinput->get('id', NULL, 'INT');
 						$targetValue = $jinput->get('target', NULL, 'WORD');
-						if($functioNameValue && $idValue && $targetValue && $user->id != 0)
+						if($functioNameValue && $user->id != 0 && $idValue && $targetValue)
 						{
 							$result = $this->getModel('ajax')->usedin($functioNameValue, $idValue, $targetValue);
+						}
+						else
+						{
+							$result = false;
+						}
+						if($callback = $jinput->get('callback', null, 'CMD'))
+						{
+							echo $callback . "(".json_encode($result).");";
+						}
+						elseif($returnRaw)
+						{
+							echo json_encode($result);
+						}
+						else
+						{
+							echo "(".json_encode($result).");";
+						}
+					}
+					catch(Exception $e)
+					{
+						if($callback = $jinput->get('callback', null, 'CMD'))
+						{
+							echo $callback."(".json_encode($e).");";
+						}
+						else
+						{
+							echo "(".json_encode($e).");";
+						}
+					}
+				break;
+				case 'getEditCustomCodeButtons':
+					try
+					{
+						$returnRaw = $jinput->get('raw', false, 'BOOLEAN');
+						$idValue = $jinput->get('id', NULL, 'INT');
+						if($idValue && $user->id != 0)
+						{
+							$result = $this->getModel('ajax')->getEditCustomCodeButtons($idValue);
+						}
+						else
+						{
+							$result = false;
+						}
+						if($callback = $jinput->get('callback', null, 'CMD'))
+						{
+							echo $callback . "(".json_encode($result).");";
+						}
+						elseif($returnRaw)
+						{
+							echo json_encode($result);
+						}
+						else
+						{
+							echo "(".json_encode($result).");";
+						}
+					}
+					catch(Exception $e)
+					{
+						if($callback = $jinput->get('callback', null, 'CMD'))
+						{
+							echo $callback."(".json_encode($e).");";
+						}
+						else
+						{
+							echo "(".json_encode($e).");";
+						}
+					}
+				break;
+				case 'placedin':
+					try
+					{
+						$returnRaw = $jinput->get('raw', false, 'BOOLEAN');
+						$placeholderValue = $jinput->get('placeholder', NULL, 'WORD');
+						$idValue = $jinput->get('id', NULL, 'INT');
+						$targetValue = $jinput->get('target', NULL, 'WORD');
+						if($placeholderValue && $user->id != 0 && $idValue && $targetValue)
+						{
+							$result = $this->getModel('ajax')->placedin($placeholderValue, $idValue, $targetValue);
+						}
+						else
+						{
+							$result = false;
+						}
+						if($callback = $jinput->get('callback', null, 'CMD'))
+						{
+							echo $callback . "(".json_encode($result).");";
+						}
+						elseif($returnRaw)
+						{
+							echo json_encode($result);
+						}
+						else
+						{
+							echo "(".json_encode($result).");";
+						}
+					}
+					catch(Exception $e)
+					{
+						if($callback = $jinput->get('callback', null, 'CMD'))
+						{
+							echo $callback."(".json_encode($e).");";
+						}
+						else
+						{
+							echo "(".json_encode($e).");";
+						}
+					}
+				break;
+				case 'checkPlaceholderName':
+					try
+					{
+						$returnRaw = $jinput->get('raw', false, 'BOOLEAN');
+						$idValue = $jinput->get('id', NULL, 'INT');
+						$placeholderNameValue = $jinput->get('placeholderName', NULL, 'STRING');
+						if($idValue && $user->id != 0 && $placeholderNameValue)
+						{
+							$result = $this->getModel('ajax')->checkPlaceholderName($idValue, $placeholderNameValue);
 						}
 						else
 						{
@@ -936,7 +1241,7 @@ class ComponentbuilderControllerAjax extends JControllerLegacy
 						$returnRaw = $jinput->get('raw', false, 'BOOLEAN');
 						$nameValue = $jinput->get('name', NULL, 'STRING');
 						$idValue = $jinput->get('id', NULL, 'INT');
-						if($nameValue && $idValue && $user->id != 0)
+						if($nameValue && $user->id != 0 && $idValue)
 						{
 							$result = $this->getModel('ajax')->checkRuleName($nameValue, $idValue);
 						}
@@ -969,14 +1274,14 @@ class ComponentbuilderControllerAjax extends JControllerLegacy
 						}
 					}
 				break;
-				case 'fieldOptions':
+				case 'fieldTypeProperties':
 					try
 					{
 						$returnRaw = $jinput->get('raw', false, 'BOOLEAN');
 						$idValue = $jinput->get('id', NULL, 'INT');
 						if($idValue)
 						{
-							$result = $this->getModel('ajax')->getFieldOptions($idValue);
+							$result = $this->getModel('ajax')->getFieldTypeProperties($idValue);
 						}
 						else
 						{
@@ -1013,9 +1318,50 @@ class ComponentbuilderControllerAjax extends JControllerLegacy
 						$returnRaw = $jinput->get('raw', false, 'BOOLEAN');
 						$propertyValue = $jinput->get('property', NULL, 'WORD');
 						$fieldtypeValue = $jinput->get('fieldtype', NULL, 'ALNUM');
-						if($propertyValue && $fieldtypeValue && $user->id != 0)
+						if($propertyValue && $user->id != 0 && $fieldtypeValue)
 						{
 							$result = $this->getModel('ajax')->getFieldPropertyDesc($propertyValue, $fieldtypeValue);
+						}
+						else
+						{
+							$result = false;
+						}
+						if($callback = $jinput->get('callback', null, 'CMD'))
+						{
+							echo $callback . "(".json_encode($result).");";
+						}
+						elseif($returnRaw)
+						{
+							echo json_encode($result);
+						}
+						else
+						{
+							echo "(".json_encode($result).");";
+						}
+					}
+					catch(Exception $e)
+					{
+						if($callback = $jinput->get('callback', null, 'CMD'))
+						{
+							echo $callback."(".json_encode($e).");";
+						}
+						else
+						{
+							echo "(".json_encode($e).");";
+						}
+					}
+				break;
+				case 'getCodeGlueOptions':
+					try
+					{
+						$returnRaw = $jinput->get('raw', false, 'BOOLEAN');
+						$listfieldValue = $jinput->get('listfield', NULL, 'INT');
+						$joinfieldsValue = $jinput->get('joinfields', NULL, 'STRING');
+						$typeValue = $jinput->get('type', NULL, 'INT');
+						$areaValue = $jinput->get('area', NULL, 'INT');
+						if($listfieldValue && $user->id != 0 && $joinfieldsValue && $typeValue && $areaValue)
+						{
+							$result = $this->getModel('ajax')->getCodeGlueOptions($listfieldValue, $joinfieldsValue, $typeValue, $areaValue);
 						}
 						else
 						{
@@ -1090,7 +1436,7 @@ class ComponentbuilderControllerAjax extends JControllerLegacy
 						$returnRaw = $jinput->get('raw', false, 'BOOLEAN');
 						$pathValue = $jinput->get('path', NULL, 'STRING');
 						$statusValue = $jinput->get('status', NULL, 'WORD');
-						if($pathValue && $statusValue && $user->id != 0)
+						if($pathValue && $user->id != 0 && $statusValue)
 						{
 							$result = $this->getModel('ajax')->setSnippetGithub($pathValue, $statusValue);
 						}

@@ -93,6 +93,7 @@
 			description="COM_COMPONENTBUILDER_COMPONENT_CUSTOM_ADMIN_MENUS_JOOMLA_COMPONENT_DESCRIPTION"
 			class="list_class"
 			multiple="false"
+			default=""
 			required="true"
 			readonly="true"
 			button="false"
@@ -104,6 +105,7 @@
 			label="COM_COMPONENTBUILDER_COMPONENT_CUSTOM_ADMIN_MENUS_ADDCUSTOMMENUS_LABEL"
 			layout="joomla.form.field.subform.repeatable-table"
 			multiple="true"
+			default=""
 			icon="list">
 			<form hidden="true" name="list_addcustommenus_modal" repeat="true">
 				<!-- Name Field. Type: Text. (joomla) -->
@@ -117,7 +119,7 @@
 					class="text_area"
 					readonly="false"
 					disabled="false"
-					required="false"
+					required="true"
 					filter="STRING"
 					message="COM_COMPONENTBUILDER_COMPONENT_CUSTOM_ADMIN_MENUS_NAME_MESSAGE"
 					hint="COM_COMPONENTBUILDER_COMPONENT_CUSTOM_ADMIN_MENUS_NAME_HINT"
@@ -129,9 +131,10 @@
 					label="COM_COMPONENTBUILDER_COMPONENT_CUSTOM_ADMIN_MENUS_NAME_CODE_LABEL"
 					size="40"
 					maxlength="50"
+					default=""
 					description="COM_COMPONENTBUILDER_COMPONENT_CUSTOM_ADMIN_MENUS_NAME_CODE_DESCRIPTION"
 					class="text_area"
-					required="false"
+					required="true"
 					filter="CMD"
 					message="COM_COMPONENTBUILDER_COMPONENT_CUSTOM_ADMIN_MENUS_NAME_CODE_MESSAGE"
 					hint="COM_COMPONENTBUILDER_COMPONENT_CUSTOM_ADMIN_MENUS_NAME_CODE_HINT"
@@ -158,6 +161,7 @@
 					name="icon"
 					label="COM_COMPONENTBUILDER_COMPONENT_CUSTOM_ADMIN_MENUS_ICON_LABEL"
 					directory="images"
+					default=""
 					description="COM_COMPONENTBUILDER_COMPONENT_CUSTOM_ADMIN_MENUS_ICON_DESCRIPTION"
 					hide_default="true"
 				/>
@@ -168,7 +172,6 @@
 					label="COM_COMPONENTBUILDER_COMPONENT_CUSTOM_ADMIN_MENUS_MAINMENU_LABEL"
 					value="1"
 					default="1"
-					required="false"
 					description="COM_COMPONENTBUILDER_COMPONENT_CUSTOM_ADMIN_MENUS_MAINMENU_DESCRIPTION"
 					class="inputbox"
 				/>
@@ -179,7 +182,6 @@
 					label="COM_COMPONENTBUILDER_COMPONENT_CUSTOM_ADMIN_MENUS_DASHBOARD_LIST_LABEL"
 					value="1"
 					default="1"
-					required="false"
 					description="COM_COMPONENTBUILDER_COMPONENT_CUSTOM_ADMIN_MENUS_DASHBOARD_LIST_DESCRIPTION"
 					class="inputbox"
 				/>
@@ -190,7 +192,6 @@
 					label="COM_COMPONENTBUILDER_COMPONENT_CUSTOM_ADMIN_MENUS_SUBMENU_LABEL"
 					value="1"
 					default="1"
-					required="false"
 					description="COM_COMPONENTBUILDER_COMPONENT_CUSTOM_ADMIN_MENUS_SUBMENU_DESCRIPTION"
 					class="inputbox"
 				/>
@@ -202,7 +203,6 @@
 					description="COM_COMPONENTBUILDER_COMPONENT_CUSTOM_ADMIN_MENUS_BEFORE_DESCRIPTION"
 					class="list_class fieldMedium"
 					multiple="false"
-					required="false"
 					button="false"
 				/>
 			</form>

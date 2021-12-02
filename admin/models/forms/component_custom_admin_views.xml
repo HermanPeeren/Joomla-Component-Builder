@@ -93,6 +93,7 @@
 			description="COM_COMPONENTBUILDER_COMPONENT_CUSTOM_ADMIN_VIEWS_JOOMLA_COMPONENT_DESCRIPTION"
 			class="list_class"
 			multiple="false"
+			default=""
 			required="true"
 			readonly="true"
 			button="false"
@@ -102,8 +103,9 @@
 			type="subform"
 			name="addcustom_admin_views"
 			label="COM_COMPONENTBUILDER_COMPONENT_CUSTOM_ADMIN_VIEWS_ADDCUSTOM_ADMIN_VIEWS_LABEL"
-			layout="joomla.form.field.subform.repeatable-table"
+			layout="repeatablejcb"
 			multiple="true"
+			default=""
 			icon="list">
 			<form hidden="true" name="list_addcustom_admin_views_modal" repeat="true">
 				<!-- Customadminview Field. Type: Customadminviews. (custom) -->
@@ -114,7 +116,8 @@
 					description="COM_COMPONENTBUILDER_COMPONENT_CUSTOM_ADMIN_VIEWS_CUSTOMADMINVIEW_DESCRIPTION"
 					class="fieldMedium"
 					multiple="false"
-					required="false"
+					default=""
+					required="true"
 					button="false"
 				/>
 				<!-- Icomoon Field. Type: List. (joomla) -->
@@ -123,9 +126,9 @@
 					name="icomoon"
 					label="COM_COMPONENTBUILDER_COMPONENT_CUSTOM_ADMIN_VIEWS_ICOMOON_LABEL"
 					description="COM_COMPONENTBUILDER_COMPONENT_CUSTOM_ADMIN_VIEWS_ICOMOON_DESCRIPTION"
-					class="list_class fieldMedium"
+					class="list_class fieldMedium icomoon342"
 					multiple="false"
-					required="false">
+					onchange="getIconImage(this);">
 					<!-- Option Set. -->
 					<option value="joomla">
 						COM_COMPONENTBUILDER_COMPONENT_CUSTOM_ADMIN_VIEWS_JOOMLA</option>
@@ -555,7 +558,6 @@
 					label="COM_COMPONENTBUILDER_COMPONENT_CUSTOM_ADMIN_VIEWS_MAINMENU_LABEL"
 					value="1"
 					default="1"
-					required="false"
 					description="COM_COMPONENTBUILDER_COMPONENT_CUSTOM_ADMIN_VIEWS_MAINMENU_DESCRIPTION"
 					class="inputbox"
 				/>
@@ -566,7 +568,6 @@
 					label="COM_COMPONENTBUILDER_COMPONENT_CUSTOM_ADMIN_VIEWS_DASHBOARD_LIST_LABEL"
 					value="1"
 					default="1"
-					required="false"
 					description="COM_COMPONENTBUILDER_COMPONENT_CUSTOM_ADMIN_VIEWS_DASHBOARD_LIST_DESCRIPTION"
 					class="inputbox"
 				/>
@@ -577,7 +578,6 @@
 					label="COM_COMPONENTBUILDER_COMPONENT_CUSTOM_ADMIN_VIEWS_SUBMENU_LABEL"
 					value="1"
 					default="1"
-					required="false"
 					description="COM_COMPONENTBUILDER_COMPONENT_CUSTOM_ADMIN_VIEWS_SUBMENU_DESCRIPTION"
 					class="inputbox"
 				/>
@@ -588,7 +588,6 @@
 					label="COM_COMPONENTBUILDER_COMPONENT_CUSTOM_ADMIN_VIEWS_METADATA_LABEL"
 					value="1"
 					default="1"
-					required="false"
 					description="COM_COMPONENTBUILDER_COMPONENT_CUSTOM_ADMIN_VIEWS_METADATA_DESCRIPTION"
 					class="inputbox"
 				/>
@@ -599,7 +598,6 @@
 					label="COM_COMPONENTBUILDER_COMPONENT_CUSTOM_ADMIN_VIEWS_ACCESS_LABEL"
 					value="1"
 					default="1"
-					required="false"
 					description="COM_COMPONENTBUILDER_COMPONENT_CUSTOM_ADMIN_VIEWS_ACCESS_DESCRIPTION"
 					class="inputbox"
 				/>
@@ -611,7 +609,6 @@
 					description="COM_COMPONENTBUILDER_COMPONENT_CUSTOM_ADMIN_VIEWS_ADMINVIEWS_DESCRIPTION"
 					class="fieldMedium"
 					multiple="true"
-					required="false"
 					button="false"
 				/>
 				<!-- Before Field. Type: Componentadminmenus. (custom) -->
@@ -622,7 +619,6 @@
 					description="COM_COMPONENTBUILDER_COMPONENT_CUSTOM_ADMIN_VIEWS_BEFORE_DESCRIPTION"
 					class="list_class fieldMedium"
 					multiple="false"
-					required="false"
 					button="false"
 				/>
 			</form>

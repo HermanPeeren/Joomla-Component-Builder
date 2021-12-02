@@ -1,33 +1,16 @@
 <?php
-/*--------------------------------------------------------------------------------------------------------|  www.vdm.io  |------/
-    __      __       _     _____                 _                                  _     __  __      _   _               _
-    \ \    / /      | |   |  __ \               | |                                | |   |  \/  |    | | | |             | |
-     \ \  / /_ _ ___| |_  | |  | | _____   _____| | ___  _ __  _ __ ___   ___ _ __ | |_  | \  / | ___| |_| |__   ___   __| |
-      \ \/ / _` / __| __| | |  | |/ _ \ \ / / _ \ |/ _ \| '_ \| '_ ` _ \ / _ \ '_ \| __| | |\/| |/ _ \ __| '_ \ / _ \ / _` |
-       \  / (_| \__ \ |_  | |__| |  __/\ V /  __/ | (_) | |_) | | | | | |  __/ | | | |_  | |  | |  __/ |_| | | | (_) | (_| |
-        \/ \__,_|___/\__| |_____/ \___| \_/ \___|_|\___/| .__/|_| |_| |_|\___|_| |_|\__| |_|  |_|\___|\__|_| |_|\___/ \__,_|
-                                                        | |                                                                 
-                                                        |_| 				
-/-------------------------------------------------------------------------------------------------------------------------------/
-
-	@version		2.7.x
-	@created		30th April, 2015
-	@package		Component Builder
-	@subpackage		view.html.php
-	@author			Llewellyn van der Merwe <http://joomlacomponentbuilder.com>	
-	@github			Joomla Component Builder <https://github.com/vdm-io/Joomla-Component-Builder>
-	@copyright		Copyright (C) 2015. All Rights Reserved
-	@license		GNU/GPL Version 2 or later - http://www.gnu.org/licenses/gpl-2.0.html 
-	
-	Builds Complex Joomla Components 
-                                                             
-/-----------------------------------------------------------------------------------------------------------------------------*/
+/**
+ * @package    Joomla.Component.Builder
+ *
+ * @created    30th April, 2015
+ * @author     Llewellyn van der Merwe <http://www.joomlacomponentbuilder.com>
+ * @github     Joomla Component Builder <https://github.com/vdm-io/Joomla-Component-Builder>
+ * @copyright  Copyright (C) 2015 - 2020 Vast Development Method. All rights reserved.
+ * @license    GNU General Public License version 2 or later; see LICENSE.txt
+ */
 
 // No direct access to this file
 defined('_JEXEC') or die('Restricted access');
-
-// import Joomla view library
-jimport('joomla.application.component.view');
 
 /**
  * Componentbuilder View class for the Servers
@@ -51,9 +34,16 @@ class ComponentbuilderViewServers extends JViewLegacy
 		$this->pagination = $this->get('Pagination');
 		$this->state = $this->get('State');
 		$this->user = JFactory::getUser();
-		$this->listOrder = $this->escape($this->state->get('list.ordering'));
-		$this->listDirn = $this->escape($this->state->get('list.direction'));
-		$this->saveOrder = $this->listOrder == 'ordering';
+		// Load the filter form from xml.
+		$this->filterForm = $this->get('FilterForm');
+		// Load the active filters.
+		$this->activeFilters = $this->get('ActiveFilters');
+		// Add the list ordering clause.
+		$this->listOrder = $this->escape($this->state->get('list.ordering', 'a.id'));
+		$this->listDirn = $this->escape($this->state->get('list.direction', 'DESC'));
+		$this->saveOrder = $this->listOrder == 'a.ordering';
+		// set the return here value
+		$this->return_here = urlencode(base64_encode((string) JUri::getInstance()));
 		// get global action permissions
 		$this->canDo = ComponentbuilderHelper::getActions('server');
 		$this->canEdit = $this->canDo->get('server.edit');
@@ -133,7 +123,7 @@ class ComponentbuilderViewServers extends JViewLegacy
 				// add the button to the page
 				$dhtml = $layout->render(array('title' => $title));
 				$bar->appendButton('Custom', $dhtml, 'batch');
-			} 
+			}
 
 			if ($this->state->get('filter.published') == -2 && ($this->canState && $this->canDelete))
 			{
@@ -148,7 +138,7 @@ class ComponentbuilderViewServers extends JViewLegacy
 			{
 				JToolBarHelper::custom('servers.exportData', 'download', '', 'COM_COMPONENTBUILDER_EXPORT_DATA', true);
 			}
-		} 
+		}
 
 		if ($this->canDo->get('core.import') && $this->canDo->get('server.import'))
 		{
@@ -168,30 +158,17 @@ class ComponentbuilderViewServers extends JViewLegacy
 			JToolBarHelper::preferences('com_componentbuilder');
 		}
 
-		if ($this->canState)
+		// Only load published batch if state and batch is allowed
+		if ($this->canState && $this->canBatch)
 		{
-			JHtmlSidebar::addFilter(
-				JText::_('JOPTION_SELECT_PUBLISHED'),
-				'filter_published',
-				JHtml::_('select.options', JHtml::_('jgrid.publishedOptions'), 'value', 'text', $this->state->get('filter.published'), true)
+			JHtmlBatch_::addListSelection(
+				JText::_('COM_COMPONENTBUILDER_KEEP_ORIGINAL_STATE'),
+				'batch[published]',
+				JHtml::_('select.options', JHtml::_('jgrid.publishedOptions', array('all' => false)), 'value', 'text', '', true)
 			);
-			// only load if batch allowed
-			if ($this->canBatch)
-			{
-				JHtmlBatch_::addListSelection(
-					JText::_('COM_COMPONENTBUILDER_KEEP_ORIGINAL_STATE'),
-					'batch[published]',
-					JHtml::_('select.options', JHtml::_('jgrid.publishedOptions', array('all' => false)), 'value', 'text', '', true)
-				);
-			}
 		}
 
-		JHtmlSidebar::addFilter(
-			JText::_('JOPTION_SELECT_ACCESS'),
-			'filter_access',
-			JHtml::_('select.options', JHtml::_('access.assetgroups'), 'value', 'text', $this->state->get('filter.access'))
-		);
-
+		// Only load access batch if create, edit and batch is allowed
 		if ($this->canBatch && $this->canCreate && $this->canEdit)
 		{
 			JHtmlBatch_::addListSelection(
@@ -199,50 +176,46 @@ class ComponentbuilderViewServers extends JViewLegacy
 				'batch[access]',
 				JHtml::_('select.options', JHtml::_('access.assetgroups'), 'value', 'text')
 			);
-		} 
-
-		// Set Name Selection
-		$this->nameOptions = $this->getTheNameSelections();
-		if ($this->nameOptions)
-		{
-			// Name Filter
-			JHtmlSidebar::addFilter(
-				'- Select '.JText::_('COM_COMPONENTBUILDER_SERVER_NAME_LABEL').' -',
-				'filter_name',
-				JHtml::_('select.options', $this->nameOptions, 'value', 'text', $this->state->get('filter.name'))
-			);
-
-			if ($this->canBatch && $this->canCreate && $this->canEdit)
-			{
-				// Name Batch Selection
-				JHtmlBatch_::addListSelection(
-					'- Keep Original '.JText::_('COM_COMPONENTBUILDER_SERVER_NAME_LABEL').' -',
-					'batch[name]',
-					JHtml::_('select.options', $this->nameOptions, 'value', 'text')
-				);
-			}
 		}
 
-		// Set Protocol Selection
-		$this->protocolOptions = $this->getTheProtocolSelections();
-		if ($this->protocolOptions)
+		// Only load Name batch if create, edit, and batch is allowed
+		if ($this->canBatch && $this->canCreate && $this->canEdit)
 		{
-			// Protocol Filter
-			JHtmlSidebar::addFilter(
-				'- Select '.JText::_('COM_COMPONENTBUILDER_SERVER_PROTOCOL_LABEL').' -',
-				'filter_protocol',
-				JHtml::_('select.options', $this->protocolOptions, 'value', 'text', $this->state->get('filter.protocol'))
-			);
-
-			if ($this->canBatch && $this->canCreate && $this->canEdit)
+			// Set Name Selection
+			$this->nameOptions = JFormHelper::loadFieldType('serversfiltername')->options;
+			// We do some sanitation for Name filter
+			if (ComponentbuilderHelper::checkArray($this->nameOptions) &&
+				isset($this->nameOptions[0]->value) &&
+				!ComponentbuilderHelper::checkString($this->nameOptions[0]->value))
 			{
-				// Protocol Batch Selection
-				JHtmlBatch_::addListSelection(
-					'- Keep Original '.JText::_('COM_COMPONENTBUILDER_SERVER_PROTOCOL_LABEL').' -',
-					'batch[protocol]',
-					JHtml::_('select.options', $this->protocolOptions, 'value', 'text')
-				);
+				unset($this->nameOptions[0]);
 			}
+			// Name Batch Selection
+			JHtmlBatch_::addListSelection(
+				'- Keep Original '.JText::_('COM_COMPONENTBUILDER_SERVER_NAME_LABEL').' -',
+				'batch[name]',
+				JHtml::_('select.options', $this->nameOptions, 'value', 'text')
+			);
+		}
+
+		// Only load Protocol batch if create, edit, and batch is allowed
+		if ($this->canBatch && $this->canCreate && $this->canEdit)
+		{
+			// Set Protocol Selection
+			$this->protocolOptions = JFormHelper::loadFieldType('serversfilterprotocol')->options;
+			// We do some sanitation for Protocol filter
+			if (ComponentbuilderHelper::checkArray($this->protocolOptions) &&
+				isset($this->protocolOptions[0]->value) &&
+				!ComponentbuilderHelper::checkString($this->protocolOptions[0]->value))
+			{
+				unset($this->protocolOptions[0]);
+			}
+			// Protocol Batch Selection
+			JHtmlBatch_::addListSelection(
+				'- Keep Original '.JText::_('COM_COMPONENTBUILDER_SERVER_PROTOCOL_LABEL').' -',
+				'batch[protocol]',
+				JHtml::_('select.options', $this->protocolOptions, 'value', 'text')
+			);
 		}
 	}
 
@@ -287,79 +260,11 @@ class ComponentbuilderViewServers extends JViewLegacy
 	protected function getSortFields()
 	{
 		return array(
-			'a.sorting' => JText::_('JGRID_HEADING_ORDERING'),
+			'a.ordering' => JText::_('JGRID_HEADING_ORDERING'),
 			'a.published' => JText::_('JSTATUS'),
 			'a.name' => JText::_('COM_COMPONENTBUILDER_SERVER_NAME_LABEL'),
 			'a.protocol' => JText::_('COM_COMPONENTBUILDER_SERVER_PROTOCOL_LABEL'),
 			'a.id' => JText::_('JGRID_HEADING_ID')
 		);
-	}
-
-	protected function getTheNameSelections()
-	{
-		// Get a db connection.
-		$db = JFactory::getDbo();
-
-		// Create a new query object.
-		$query = $db->getQuery(true);
-
-		// Select the text.
-		$query->select($db->quoteName('name'));
-		$query->from($db->quoteName('#__componentbuilder_server'));
-		$query->order($db->quoteName('name') . ' ASC');
-
-		// Reset the query using our newly populated query object.
-		$db->setQuery($query);
-
-		$results = $db->loadColumn();
-
-		if ($results)
-		{
-			$results = array_unique($results);
-			$_filter = array();
-			foreach ($results as $name)
-			{
-				// Now add the name and its text to the options array
-				$_filter[] = JHtml::_('select.option', $name, $name);
-			}
-			return $_filter;
-		}
-		return false;
-	}
-
-	protected function getTheProtocolSelections()
-	{
-		// Get a db connection.
-		$db = JFactory::getDbo();
-
-		// Create a new query object.
-		$query = $db->getQuery(true);
-
-		// Select the text.
-		$query->select($db->quoteName('protocol'));
-		$query->from($db->quoteName('#__componentbuilder_server'));
-		$query->order($db->quoteName('protocol') . ' ASC');
-
-		// Reset the query using our newly populated query object.
-		$db->setQuery($query);
-
-		$results = $db->loadColumn();
-
-		if ($results)
-		{
-			// get model
-			$model = $this->getModel();
-			$results = array_unique($results);
-			$_filter = array();
-			foreach ($results as $protocol)
-			{
-				// Translate the protocol selection
-				$text = $model->selectionTranslation($protocol,'protocol');
-				// Now add the protocol and its text to the options array
-				$_filter[] = JHtml::_('select.option', $protocol, JText::_($text));
-			}
-			return $_filter;
-		}
-		return false;
 	}
 }

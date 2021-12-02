@@ -1,33 +1,16 @@
 <?php
-/*--------------------------------------------------------------------------------------------------------|  www.vdm.io  |------/
-    __      __       _     _____                 _                                  _     __  __      _   _               _
-    \ \    / /      | |   |  __ \               | |                                | |   |  \/  |    | | | |             | |
-     \ \  / /_ _ ___| |_  | |  | | _____   _____| | ___  _ __  _ __ ___   ___ _ __ | |_  | \  / | ___| |_| |__   ___   __| |
-      \ \/ / _` / __| __| | |  | |/ _ \ \ / / _ \ |/ _ \| '_ \| '_ ` _ \ / _ \ '_ \| __| | |\/| |/ _ \ __| '_ \ / _ \ / _` |
-       \  / (_| \__ \ |_  | |__| |  __/\ V /  __/ | (_) | |_) | | | | | |  __/ | | | |_  | |  | |  __/ |_| | | | (_) | (_| |
-        \/ \__,_|___/\__| |_____/ \___| \_/ \___|_|\___/| .__/|_| |_| |_|\___|_| |_|\__| |_|  |_|\___|\__|_| |_|\___/ \__,_|
-                                                        | |                                                                 
-                                                        |_| 				
-/-------------------------------------------------------------------------------------------------------------------------------/
-
-	@version		2.7.x
-	@created		30th April, 2015
-	@package		Component Builder
-	@subpackage		view.html.php
-	@author			Llewellyn van der Merwe <http://joomlacomponentbuilder.com>	
-	@github			Joomla Component Builder <https://github.com/vdm-io/Joomla-Component-Builder>
-	@copyright		Copyright (C) 2015. All Rights Reserved
-	@license		GNU/GPL Version 2 or later - http://www.gnu.org/licenses/gpl-2.0.html 
-	
-	Builds Complex Joomla Components 
-                                                             
-/-----------------------------------------------------------------------------------------------------------------------------*/
+/**
+ * @package    Joomla.Component.Builder
+ *
+ * @created    30th April, 2015
+ * @author     Llewellyn van der Merwe <http://www.joomlacomponentbuilder.com>
+ * @github     Joomla Component Builder <https://github.com/vdm-io/Joomla-Component-Builder>
+ * @copyright  Copyright (C) 2015 - 2020 Vast Development Method. All rights reserved.
+ * @license    GNU General Public License version 2 or later; see LICENSE.txt
+ */
 
 // No direct access to this file
 defined('_JEXEC') or die('Restricted access');
-
-// import Joomla view library
-jimport('joomla.application.component.view');
 
 /**
  * Componentbuilder View class for the Snippets
@@ -51,9 +34,16 @@ class ComponentbuilderViewSnippets extends JViewLegacy
 		$this->pagination = $this->get('Pagination');
 		$this->state = $this->get('State');
 		$this->user = JFactory::getUser();
-		$this->listOrder = $this->escape($this->state->get('list.ordering'));
-		$this->listDirn = $this->escape($this->state->get('list.direction'));
-		$this->saveOrder = $this->listOrder == 'ordering';
+		// Load the filter form from xml.
+		$this->filterForm = $this->get('FilterForm');
+		// Load the active filters.
+		$this->activeFilters = $this->get('ActiveFilters');
+		// Add the list ordering clause.
+		$this->listOrder = $this->escape($this->state->get('list.ordering', 'a.id'));
+		$this->listDirn = $this->escape($this->state->get('list.direction', 'desc'));
+		$this->saveOrder = $this->listOrder == 'a.ordering';
+		// set the return here value
+		$this->return_here = urlencode(base64_encode((string) JUri::getInstance()));
 		// get global action permissions
 		$this->canDo = ComponentbuilderHelper::getActions('snippet');
 		$this->canEdit = $this->canDo->get('core.edit');
@@ -133,11 +123,11 @@ class ComponentbuilderViewSnippets extends JViewLegacy
 				// add the button to the page
 				$dhtml = $layout->render(array('title' => $title));
 				$bar->appendButton('Custom', $dhtml, 'batch');
-			} 
+			}
 			if ($this->user->authorise('snippet.share_snippets', 'com_componentbuilder'))
 			{
 				// add Share Snippets button.
-				JToolBarHelper::custom('snippets.shareSnippets', 'share', '', 'COM_COMPONENTBUILDER_SHARE_SNIPPETS', false);
+				JToolBarHelper::custom('snippets.shareSnippets', 'share custom-button-sharesnippets', '', 'COM_COMPONENTBUILDER_SHARE_SNIPPETS', 'true');
 			}
 
 			if ($this->state->get('filter.published') == -2 && ($this->canState && $this->canDelete))
@@ -157,8 +147,8 @@ class ComponentbuilderViewSnippets extends JViewLegacy
 		if ($this->user->authorise('snippet.get_snippets', 'com_componentbuilder'))
 		{
 			// add Get Snippets button.
-			JToolBarHelper::custom('snippets.getSnippets', 'search', '', 'COM_COMPONENTBUILDER_GET_SNIPPETS', false);
-		} 
+			JToolBarHelper::custom('snippets.getSnippets', 'search custom-button-getsnippets', '', 'COM_COMPONENTBUILDER_GET_SNIPPETS', false);
+		}
 
 		if ($this->canDo->get('core.import') && $this->canDo->get('snippet.import'))
 		{
@@ -178,30 +168,17 @@ class ComponentbuilderViewSnippets extends JViewLegacy
 			JToolBarHelper::preferences('com_componentbuilder');
 		}
 
-		if ($this->canState)
+		// Only load published batch if state and batch is allowed
+		if ($this->canState && $this->canBatch)
 		{
-			JHtmlSidebar::addFilter(
-				JText::_('JOPTION_SELECT_PUBLISHED'),
-				'filter_published',
-				JHtml::_('select.options', JHtml::_('jgrid.publishedOptions'), 'value', 'text', $this->state->get('filter.published'), true)
+			JHtmlBatch_::addListSelection(
+				JText::_('COM_COMPONENTBUILDER_KEEP_ORIGINAL_STATE'),
+				'batch[published]',
+				JHtml::_('select.options', JHtml::_('jgrid.publishedOptions', array('all' => false)), 'value', 'text', '', true)
 			);
-			// only load if batch allowed
-			if ($this->canBatch)
-			{
-				JHtmlBatch_::addListSelection(
-					JText::_('COM_COMPONENTBUILDER_KEEP_ORIGINAL_STATE'),
-					'batch[published]',
-					JHtml::_('select.options', JHtml::_('jgrid.publishedOptions', array('all' => false)), 'value', 'text', '', true)
-				);
-			}
 		}
 
-		JHtmlSidebar::addFilter(
-			JText::_('JOPTION_SELECT_ACCESS'),
-			'filter_access',
-			JHtml::_('select.options', JHtml::_('access.assetgroups'), 'value', 'text', $this->state->get('filter.access'))
-		);
-
+		// Only load access batch if create, edit and batch is allowed
 		if ($this->canBatch && $this->canCreate && $this->canEdit)
 		{
 			JHtmlBatch_::addListSelection(
@@ -209,50 +186,46 @@ class ComponentbuilderViewSnippets extends JViewLegacy
 				'batch[access]',
 				JHtml::_('select.options', JHtml::_('access.assetgroups'), 'value', 'text')
 			);
-		} 
-
-		// Set Type Name Selection
-		$this->typeNameOptions = JFormHelper::loadFieldType('Snippettype')->getOptions();
-		if ($this->typeNameOptions)
-		{
-			// Type Name Filter
-			JHtmlSidebar::addFilter(
-				'- Select '.JText::_('COM_COMPONENTBUILDER_SNIPPET_TYPE_LABEL').' -',
-				'filter_type',
-				JHtml::_('select.options', $this->typeNameOptions, 'value', 'text', $this->state->get('filter.type'))
-			);
-
-			if ($this->canBatch && $this->canCreate && $this->canEdit)
-			{
-				// Type Name Batch Selection
-				JHtmlBatch_::addListSelection(
-					'- Keep Original '.JText::_('COM_COMPONENTBUILDER_SNIPPET_TYPE_LABEL').' -',
-					'batch[type]',
-					JHtml::_('select.options', $this->typeNameOptions, 'value', 'text')
-				);
-			}
 		}
 
-		// Set Library Name Selection
-		$this->libraryNameOptions = JFormHelper::loadFieldType('Library')->getOptions();
-		if ($this->libraryNameOptions)
+		// Only load Type Name batch if create, edit, and batch is allowed
+		if ($this->canBatch && $this->canCreate && $this->canEdit)
 		{
-			// Library Name Filter
-			JHtmlSidebar::addFilter(
-				'- Select '.JText::_('COM_COMPONENTBUILDER_SNIPPET_LIBRARY_LABEL').' -',
-				'filter_library',
-				JHtml::_('select.options', $this->libraryNameOptions, 'value', 'text', $this->state->get('filter.library'))
-			);
-
-			if ($this->canBatch && $this->canCreate && $this->canEdit)
+			// Set Type Name Selection
+			$this->typeNameOptions = JFormHelper::loadFieldType('Snippettype')->options;
+			// We do some sanitation for Type Name filter
+			if (ComponentbuilderHelper::checkArray($this->typeNameOptions) &&
+				isset($this->typeNameOptions[0]->value) &&
+				!ComponentbuilderHelper::checkString($this->typeNameOptions[0]->value))
 			{
-				// Library Name Batch Selection
-				JHtmlBatch_::addListSelection(
-					'- Keep Original '.JText::_('COM_COMPONENTBUILDER_SNIPPET_LIBRARY_LABEL').' -',
-					'batch[library]',
-					JHtml::_('select.options', $this->libraryNameOptions, 'value', 'text')
-				);
+				unset($this->typeNameOptions[0]);
 			}
+			// Type Name Batch Selection
+			JHtmlBatch_::addListSelection(
+				'- Keep Original '.JText::_('COM_COMPONENTBUILDER_SNIPPET_TYPE_LABEL').' -',
+				'batch[type]',
+				JHtml::_('select.options', $this->typeNameOptions, 'value', 'text')
+			);
+		}
+
+		// Only load Library Name batch if create, edit, and batch is allowed
+		if ($this->canBatch && $this->canCreate && $this->canEdit)
+		{
+			// Set Library Name Selection
+			$this->libraryNameOptions = JFormHelper::loadFieldType('Library')->options;
+			// We do some sanitation for Library Name filter
+			if (ComponentbuilderHelper::checkArray($this->libraryNameOptions) &&
+				isset($this->libraryNameOptions[0]->value) &&
+				!ComponentbuilderHelper::checkString($this->libraryNameOptions[0]->value))
+			{
+				unset($this->libraryNameOptions[0]);
+			}
+			// Library Name Batch Selection
+			JHtmlBatch_::addListSelection(
+				'- Keep Original '.JText::_('COM_COMPONENTBUILDER_SNIPPET_LIBRARY_LABEL').' -',
+				'batch[library]',
+				JHtml::_('select.options', $this->libraryNameOptions, 'value', 'text')
+			);
 		}
 	}
 
@@ -297,7 +270,7 @@ class ComponentbuilderViewSnippets extends JViewLegacy
 	protected function getSortFields()
 	{
 		return array(
-			'a.sorting' => JText::_('JGRID_HEADING_ORDERING'),
+			'a.ordering' => JText::_('JGRID_HEADING_ORDERING'),
 			'a.published' => JText::_('JSTATUS'),
 			'a.name' => JText::_('COM_COMPONENTBUILDER_SNIPPET_NAME_LABEL'),
 			'a.url' => JText::_('COM_COMPONENTBUILDER_SNIPPET_URL_LABEL'),

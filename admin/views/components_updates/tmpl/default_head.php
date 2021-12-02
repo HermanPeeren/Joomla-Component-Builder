@@ -1,36 +1,22 @@
 <?php
-/*--------------------------------------------------------------------------------------------------------|  www.vdm.io  |------/
-    __      __       _     _____                 _                                  _     __  __      _   _               _
-    \ \    / /      | |   |  __ \               | |                                | |   |  \/  |    | | | |             | |
-     \ \  / /_ _ ___| |_  | |  | | _____   _____| | ___  _ __  _ __ ___   ___ _ __ | |_  | \  / | ___| |_| |__   ___   __| |
-      \ \/ / _` / __| __| | |  | |/ _ \ \ / / _ \ |/ _ \| '_ \| '_ ` _ \ / _ \ '_ \| __| | |\/| |/ _ \ __| '_ \ / _ \ / _` |
-       \  / (_| \__ \ |_  | |__| |  __/\ V /  __/ | (_) | |_) | | | | | |  __/ | | | |_  | |  | |  __/ |_| | | | (_) | (_| |
-        \/ \__,_|___/\__| |_____/ \___| \_/ \___|_|\___/| .__/|_| |_| |_|\___|_| |_|\__| |_|  |_|\___|\__|_| |_|\___/ \__,_|
-                                                        | |                                                                 
-                                                        |_| 				
-/-------------------------------------------------------------------------------------------------------------------------------/
-
-	@version		2.7.x
-	@created		30th April, 2015
-	@package		Component Builder
-	@subpackage		default_head.php
-	@author			Llewellyn van der Merwe <http://joomlacomponentbuilder.com>	
-	@github			Joomla Component Builder <https://github.com/vdm-io/Joomla-Component-Builder>
-	@copyright		Copyright (C) 2015. All Rights Reserved
-	@license		GNU/GPL Version 2 or later - http://www.gnu.org/licenses/gpl-2.0.html 
-	
-	Builds Complex Joomla Components 
-                                                             
-/-----------------------------------------------------------------------------------------------------------------------------*/
+/**
+ * @package    Joomla.Component.Builder
+ *
+ * @created    30th April, 2015
+ * @author     Llewellyn van der Merwe <http://www.joomlacomponentbuilder.com>
+ * @github     Joomla Component Builder <https://github.com/vdm-io/Joomla-Component-Builder>
+ * @copyright  Copyright (C) 2015 - 2020 Vast Development Method. All rights reserved.
+ * @license    GNU General Public License version 2 or later; see LICENSE.txt
+ */
 
 // No direct access to this file
-defined('_JEXEC') or die('Restricted access'); 
+defined('_JEXEC') or die('Restricted access');
 
 ?>
 <tr>
 	<?php if ($this->canEdit&& $this->canState): ?>
 		<th width="1%" class="nowrap center hidden-phone">
-			<?php echo JHtml::_('grid.sort', '<i class="icon-menu-2"></i>', 'ordering', $this->listDirn, $this->listOrder, null, 'asc', 'JGRID_HEADING_ORDERING'); ?>
+			<?php echo JHtml::_('searchtools.sort', '', 'a.ordering', $this->listDirn, $this->listOrder, null, 'asc', 'JGRID_HEADING_ORDERING', 'icon-menu-2'); ?>
 		</th>
 		<th width="20" class="nowrap center">
 			<?php echo JHtml::_('grid.checkall'); ?>
@@ -48,7 +34,7 @@ defined('_JEXEC') or die('Restricted access');
 	</th>
 	<?php if ($this->canState): ?>
 		<th width="10" class="nowrap center" >
-			<?php echo JHtml::_('grid.sort', 'COM_COMPONENTBUILDER_COMPONENT_UPDATES_STATUS', 'published', $this->listDirn, $this->listOrder); ?>
+			<?php echo JHtml::_('searchtools.sort', 'COM_COMPONENTBUILDER_COMPONENT_UPDATES_STATUS', 'a.published', $this->listDirn, $this->listOrder); ?>
 		</th>
 	<?php else: ?>
 		<th width="10" class="nowrap center" >
@@ -56,6 +42,6 @@ defined('_JEXEC') or die('Restricted access');
 		</th>
 	<?php endif; ?>
 	<th width="5" class="nowrap center hidden-phone" >
-			<?php echo JHtml::_('grid.sort', 'COM_COMPONENTBUILDER_COMPONENT_UPDATES_ID', 'id', $this->listDirn, $this->listOrder); ?>
+			<?php echo JHtml::_('searchtools.sort', 'COM_COMPONENTBUILDER_COMPONENT_UPDATES_ID', 'a.id', $this->listDirn, $this->listOrder); ?>
 	</th>
 </tr>

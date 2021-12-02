@@ -1,49 +1,46 @@
 <?php
-/*--------------------------------------------------------------------------------------------------------|  www.vdm.io  |------/
-    __      __       _     _____                 _                                  _     __  __      _   _               _
-    \ \    / /      | |   |  __ \               | |                                | |   |  \/  |    | | | |             | |
-     \ \  / /_ _ ___| |_  | |  | | _____   _____| | ___  _ __  _ __ ___   ___ _ __ | |_  | \  / | ___| |_| |__   ___   __| |
-      \ \/ / _` / __| __| | |  | |/ _ \ \ / / _ \ |/ _ \| '_ \| '_ ` _ \ / _ \ '_ \| __| | |\/| |/ _ \ __| '_ \ / _ \ / _` |
-       \  / (_| \__ \ |_  | |__| |  __/\ V /  __/ | (_) | |_) | | | | | |  __/ | | | |_  | |  | |  __/ |_| | | | (_) | (_| |
-        \/ \__,_|___/\__| |_____/ \___| \_/ \___|_|\___/| .__/|_| |_| |_|\___|_| |_|\__| |_|  |_|\___|\__|_| |_|\___/ \__,_|
-                                                        | |                                                                 
-                                                        |_| 				
-/-------------------------------------------------------------------------------------------------------------------------------/
-
-	@version		2.7.x
-	@created		30th April, 2015
-	@package		Component Builder
-	@subpackage		joomla_components.php
-	@author			Llewellyn van der Merwe <http://joomlacomponentbuilder.com>	
-	@github			Joomla Component Builder <https://github.com/vdm-io/Joomla-Component-Builder>
-	@copyright		Copyright (C) 2015. All Rights Reserved
-	@license		GNU/GPL Version 2 or later - http://www.gnu.org/licenses/gpl-2.0.html 
-	
-	Builds Complex Joomla Components 
-                                                             
-/-----------------------------------------------------------------------------------------------------------------------------*/
+/**
+ * @package    Joomla.Component.Builder
+ *
+ * @created    30th April, 2015
+ * @author     Llewellyn van der Merwe <http://www.joomlacomponentbuilder.com>
+ * @github     Joomla Component Builder <https://github.com/vdm-io/Joomla-Component-Builder>
+ * @copyright  Copyright (C) 2015 - 2020 Vast Development Method. All rights reserved.
+ * @license    GNU General Public License version 2 or later; see LICENSE.txt
+ */
 
 // No direct access to this file
 defined('_JEXEC') or die('Restricted access');
 
-// import Joomla controlleradmin library
-jimport('joomla.application.component.controlleradmin');
+use Joomla\Utilities\ArrayHelper;
 
 /**
  * Joomla_components Controller
  */
 class ComponentbuilderControllerJoomla_components extends JControllerAdmin
 {
-	protected $text_prefix = 'COM_COMPONENTBUILDER_JOOMLA_COMPONENTS';
 	/**
-	 * Proxy for getModel.
-	 * @since	2.5
+	 * The prefix to use with controller messages.
+	 *
+	 * @var    string
+	 * @since  1.6
 	 */
-	public function getModel($name = 'Joomla_component', $prefix = 'ComponentbuilderModel', $config = array())
+	protected $text_prefix = 'COM_COMPONENTBUILDER_JOOMLA_COMPONENTS';
+
+	/**
+	 * Method to get a model object, loading it if required.
+	 *
+	 * @param   string  $name    The model name. Optional.
+	 * @param   string  $prefix  The class prefix. Optional.
+	 * @param   array   $config  Configuration array for model. Optional.
+	 *
+	 * @return  JModelLegacy  The model.
+	 *
+	 * @since   1.6
+	 */
+	public function getModel($name = 'Joomla_component', $prefix = 'ComponentbuilderModel', $config = array('ignore_request' => true))
 	{
-		$model = parent::getModel($name, $prefix, array('ignore_request' => true));
-		
-		return $model;
+		return parent::getModel($name, $prefix, $config);
 	}
 
 	public function exportData()
@@ -58,7 +55,7 @@ class ComponentbuilderControllerJoomla_components extends JControllerAdmin
 			$input = JFactory::getApplication()->input;
 			$pks = $input->post->get('cid', array(), 'array');
 			// Sanitize the input
-			JArrayHelper::toInteger($pks);
+			$pks = ArrayHelper::toInteger($pks);
 			// Get the model
 			$model = $this->getModel('Joomla_components');
 			// get the data to export
@@ -107,13 +104,86 @@ class ComponentbuilderControllerJoomla_components extends JControllerAdmin
 		$message = JText::_('COM_COMPONENTBUILDER_IMPORT_FAILED');
 		$this->setRedirect(JRoute::_('index.php?option=com_componentbuilder&view=joomla_components', false), $message, 'error');
 		return;
-	}  
+	}
+
+
+	/**
+	 * Run the Expansion
+	 *
+	 * @return  void
+	 */
+	public function runExpansion()
+	{
+		// Check for request forgeries
+		JSession::checkToken() or jexit(JText::_('JINVALID_TOKEN'));
+		// check if user has the right
+		$user = JFactory::getUser();
+		// set page redirect
+		$redirect_url = JRoute::_('index.php?option=com_componentbuilder&view=joomla_components', false);
+		// set massage
+		$message = JText::_('COM_COMPONENTBUILDER_YOU_DO_NOT_HAVE_PERMISSION_TO_RUN_THE_EXPANSION_MODULE');
+		// check if this user has the right to run expansion
+		if($user->authorise('joomla_components.run_expansion', 'com_componentbuilder'))
+		{
+			// set massage
+			$message = JText::_('COM_COMPONENTBUILDER_EXPANSION_FAILED_PLEASE_CHECK_YOUR_SETTINGS_IN_THE_GLOBAL_OPTIONS_OF_JCB_UNDER_THE_DEVELOPMENT_METHOD_TAB');
+			// run expansion via API
+			$result = ComponentbuilderHelper::getFileContents(JURI::root() . 'index.php?option=com_componentbuilder&task=api.expand');
+			// is there a message returned
+			if (!is_numeric($result) && ComponentbuilderHelper::checkString($result))
+			{
+				$this->setRedirect($redirect_url, $result);
+				return true;
+			}
+			elseif (is_numeric($result) && 1 == $result)
+			{
+				$message = JText::_('COM_COMPONENTBUILDER_BTHE_EXPANSION_WAS_SUCCESSFULLYB_TO_SEE_MORE_INFORMATION_CHANGE_THE_BRETURN_OPTIONS_FOR_BUILDB_TO_BDISPLAY_MESSAGEB_IN_THE_GLOBAL_OPTIONS_OF_JCB_UNDER_THE_DEVELOPMENT_METHOD_TABB');
+				$this->setRedirect($redirect_url, $message, 'message');
+				return true;
+			}
+		}
+		$this->setRedirect($redirect_url, $message, 'error');
+		return false;
+	}
+
+
+	/**
+	 * Clear tmp folder
+	 *
+	 * @return  true on success
+	 */
+	public function clearTmp()
+	{
+		// Check for request forgeries
+		JSession::checkToken() or jexit(JText::_('JINVALID_TOKEN'));
+		// check if user has the right
+		$user = JFactory::getUser();
+		// set page redirect
+		$redirect_url = JRoute::_('index.php?option=com_componentbuilder&view=joomla_components', false);
+		$message = JText::_('COM_COMPONENTBUILDER_COULD_NOT_CLEAR_THE_TMP_FOLDER');
+		if($user->authorise('joomla_components.clear_tmp', 'com_componentbuilder') && $user->authorise('core.options', 'com_componentbuilder'))
+		{
+			// get the model
+			$model = $this->getModel('compiler');
+			// get tmp folder
+			$comConfig = JFactory::getConfig();
+			$tmp = $comConfig->get('tmp_path');
+			if ($model->emptyFolder($tmp))
+			{
+				$message = JText::_('COM_COMPONENTBUILDER_BTHE_TMP_FOLDER_HAS_BEEN_CLEAR_SUCCESSFULLYB');
+				$this->setRedirect($redirect_url, $message, 'message');
+				return true;
+			}
+		}
+		$this->setRedirect($redirect_url, $message, 'error');
+		return false;
+	}
 
 	public function smartImport()
 	{
 		// check if import is allowed for this user.
 		$user = JFactory::getUser();
-		if ($user->authorise('joomla_component.import', 'com_componentbuilder') && $user->authorise('core.import', 'com_componentbuilder'))
+		if ($user->authorise('joomla_component.import_jcb_packages', 'com_componentbuilder') && $user->authorise('core.import', 'com_componentbuilder'))
 		{
 			$session = JFactory::getSession();
 			$session->set('backto_VDM_IMPORT', 'joomla_components');
@@ -127,7 +197,7 @@ class ComponentbuilderControllerJoomla_components extends JControllerAdmin
 		$message = JText::_('COM_COMPONENTBUILDER_YOU_DO_NOT_HAVE_PERMISSION_TO_IMPORT_A_COMPONENT_PLEASE_CONTACT_YOUR_SYSTEM_ADMINISTRATOR_FOR_MORE_HELP');
 		$this->setRedirect(JRoute::_('index.php?option=com_componentbuilder&view=joomla_components', false), $message, 'error');
 		return;
-	}  
+	}
 
 	public function smartExport()
 	{
@@ -137,7 +207,7 @@ class ComponentbuilderControllerJoomla_components extends JControllerAdmin
 		$model = $this->getModel('Joomla_components');
 		// check if export is allowed for this user.
 		$model->user = JFactory::getUser();
-		if ($model->user->authorise('joomla_component.export', 'com_componentbuilder') && $model->user->authorise('core.export', 'com_componentbuilder'))
+		if ($model->user->authorise('joomla_component.export_jcb_packages', 'com_componentbuilder') && $model->user->authorise('core.export', 'com_componentbuilder'))
 		{
 			// Get the input
 			$input = JFactory::getApplication()->input;
@@ -218,13 +288,13 @@ class ComponentbuilderControllerJoomla_components extends JControllerAdmin
 		$model = componentbuilderHelper::getModel('joomla_components', JPATH_ADMINISTRATOR . '/components/com_componentbuilder');
 		// set user
 		$model->user = $this->getApiUser();
+		// make sure to set active type (adding this script from custom code :)
+		$model->activeType = 'manualBackup';
 		// check if export is allowed for this user. (we need this sorry)
-		if ($model->user->authorise('joomla_component.export', 'com_componentbuilder') && $model->user->authorise('core.export', 'com_componentbuilder'))
+		if ($model->user->authorise('joomla_component.export_jcb_packages', 'com_componentbuilder') && $model->user->authorise('core.export', 'com_componentbuilder'))
 		{
 			// get all component IDs to backup
 			$pks = componentbuilderHelper::getComponentIDs();
-			// make sure to set active type to backup
-			$model->activeType = 'manualBackup';
 			// set auto loader
 			ComponentbuilderHelper::autoLoader('smart');
 			// manual backup message
@@ -321,7 +391,7 @@ class ComponentbuilderControllerJoomla_components extends JControllerAdmin
 						$subject = JText::_('COM_COMPONENTBUILDER_JOOMLA_COMPONENT_BUILDER_BACKUP_KEY');
 						// email the message
 						componentbuilderEmail::send($email, $subject, componentbuilderEmail::setTableBody($message, $subject), $plainText, 1);
-						$backupNotice[] = JText::_('COM_COMPONENTBUILDER_EMAIL_WITH_THE_NEW_KEY_WAS_SEND');
+						$backupNotice[] = JText::_('COM_COMPONENTBUILDER_EMAIL_WITH_THE_NEW_KEY_WAS_SENT');
 					}
 					else
 					{
@@ -345,7 +415,7 @@ class ComponentbuilderControllerJoomla_components extends JControllerAdmin
 				}				
 			}
 			// quite only if auto backup (adding this script from custom code :)
-			if ('backup' === 'manualBackup')
+			if ('backup' === $model->activeType)
 			{
 				echo "# " . $backupNoticeStatus . "\n" .implode("\n", $backupNotice);
 				// clear session
@@ -356,9 +426,9 @@ class ComponentbuilderControllerJoomla_components extends JControllerAdmin
 			return;
 		}
 		// quite only if auto backup (adding this script from custom code :)
-		if ('backup' === 'manualBackup')
+		if ('backup' === $model->activeType)
 		{
-			echo "# Error\n".JText::_('COM_COMPONENTBUILDER_ACCESS_DENIED');
+			echo "# Error\n" . JText::_('COM_COMPONENTBUILDER_ACCESS_DENIED');
 			// clear session
 			JFactory::getApplication()->getSession()->destroy();
 			jexit();
@@ -369,11 +439,13 @@ class ComponentbuilderControllerJoomla_components extends JControllerAdmin
 
 	public function cloner()
 	{
+		// Check for request forgeries
+		JSession::checkToken() or die(JText::_('JINVALID_TOKEN'));
 		// Get the model
 		$model = $this->getModel('Joomla_components');
 		// check if export is allowed for this user.
 		$model->user = JFactory::getUser();
-		if ($model->user->authorise('joomla_component.cloner', 'com_componentbuilder') && $model->user->authorise('core.copy', 'com_componentbuilder'))
+		if ($model->user->authorise('joomla_component.clone', 'com_componentbuilder') && $model->user->authorise('core.copy', 'com_componentbuilder'))
 		{
 			// Get the input
 			$input = JFactory::getApplication()->input;

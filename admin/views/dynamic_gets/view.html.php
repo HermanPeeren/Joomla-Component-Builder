@@ -1,33 +1,16 @@
 <?php
-/*--------------------------------------------------------------------------------------------------------|  www.vdm.io  |------/
-    __      __       _     _____                 _                                  _     __  __      _   _               _
-    \ \    / /      | |   |  __ \               | |                                | |   |  \/  |    | | | |             | |
-     \ \  / /_ _ ___| |_  | |  | | _____   _____| | ___  _ __  _ __ ___   ___ _ __ | |_  | \  / | ___| |_| |__   ___   __| |
-      \ \/ / _` / __| __| | |  | |/ _ \ \ / / _ \ |/ _ \| '_ \| '_ ` _ \ / _ \ '_ \| __| | |\/| |/ _ \ __| '_ \ / _ \ / _` |
-       \  / (_| \__ \ |_  | |__| |  __/\ V /  __/ | (_) | |_) | | | | | |  __/ | | | |_  | |  | |  __/ |_| | | | (_) | (_| |
-        \/ \__,_|___/\__| |_____/ \___| \_/ \___|_|\___/| .__/|_| |_| |_|\___|_| |_|\__| |_|  |_|\___|\__|_| |_|\___/ \__,_|
-                                                        | |                                                                 
-                                                        |_| 				
-/-------------------------------------------------------------------------------------------------------------------------------/
-
-	@version		2.7.x
-	@created		30th April, 2015
-	@package		Component Builder
-	@subpackage		view.html.php
-	@author			Llewellyn van der Merwe <http://joomlacomponentbuilder.com>	
-	@github			Joomla Component Builder <https://github.com/vdm-io/Joomla-Component-Builder>
-	@copyright		Copyright (C) 2015. All Rights Reserved
-	@license		GNU/GPL Version 2 or later - http://www.gnu.org/licenses/gpl-2.0.html 
-	
-	Builds Complex Joomla Components 
-                                                             
-/-----------------------------------------------------------------------------------------------------------------------------*/
+/**
+ * @package    Joomla.Component.Builder
+ *
+ * @created    30th April, 2015
+ * @author     Llewellyn van der Merwe <http://www.joomlacomponentbuilder.com>
+ * @github     Joomla Component Builder <https://github.com/vdm-io/Joomla-Component-Builder>
+ * @copyright  Copyright (C) 2015 - 2020 Vast Development Method. All rights reserved.
+ * @license    GNU General Public License version 2 or later; see LICENSE.txt
+ */
 
 // No direct access to this file
 defined('_JEXEC') or die('Restricted access');
-
-// import Joomla view library
-jimport('joomla.application.component.view');
 
 /**
  * Componentbuilder View class for the Dynamic_gets
@@ -51,9 +34,16 @@ class ComponentbuilderViewDynamic_gets extends JViewLegacy
 		$this->pagination = $this->get('Pagination');
 		$this->state = $this->get('State');
 		$this->user = JFactory::getUser();
-		$this->listOrder = $this->escape($this->state->get('list.ordering'));
-		$this->listDirn = $this->escape($this->state->get('list.direction'));
-		$this->saveOrder = $this->listOrder == 'ordering';
+		// Load the filter form from xml.
+		$this->filterForm = $this->get('FilterForm');
+		// Load the active filters.
+		$this->activeFilters = $this->get('ActiveFilters');
+		// Add the list ordering clause.
+		$this->listOrder = $this->escape($this->state->get('list.ordering', 'a.id'));
+		$this->listDirn = $this->escape($this->state->get('list.direction', 'desc'));
+		$this->saveOrder = $this->listOrder == 'a.ordering';
+		// set the return here value
+		$this->return_here = urlencode(base64_encode((string) JUri::getInstance()));
 		// get global action permissions
 		$this->canDo = ComponentbuilderHelper::getActions('dynamic_get');
 		$this->canEdit = $this->canDo->get('dynamic_get.edit');
@@ -133,7 +123,7 @@ class ComponentbuilderViewDynamic_gets extends JViewLegacy
 				// add the button to the page
 				$dhtml = $layout->render(array('title' => $title));
 				$bar->appendButton('Custom', $dhtml, 'batch');
-			} 
+			}
 
 			if ($this->state->get('filter.published') == -2 && ($this->canState && $this->canDelete))
 			{
@@ -148,7 +138,12 @@ class ComponentbuilderViewDynamic_gets extends JViewLegacy
 			{
 				JToolBarHelper::custom('dynamic_gets.exportData', 'download', '', 'COM_COMPONENTBUILDER_EXPORT_DATA', true);
 			}
-		} 
+		}
+		if ($this->user->authorise('dynamic_get.run_expansion', 'com_componentbuilder'))
+		{
+			// add Run Expansion button.
+			JToolBarHelper::custom('dynamic_gets.runExpansion', 'expand-2 custom-button-runexpansion', '', 'COM_COMPONENTBUILDER_RUN_EXPANSION', false);
+		}
 
 		if ($this->canDo->get('core.import') && $this->canDo->get('dynamic_get.import'))
 		{
@@ -168,30 +163,17 @@ class ComponentbuilderViewDynamic_gets extends JViewLegacy
 			JToolBarHelper::preferences('com_componentbuilder');
 		}
 
-		if ($this->canState)
+		// Only load published batch if state and batch is allowed
+		if ($this->canState && $this->canBatch)
 		{
-			JHtmlSidebar::addFilter(
-				JText::_('JOPTION_SELECT_PUBLISHED'),
-				'filter_published',
-				JHtml::_('select.options', JHtml::_('jgrid.publishedOptions'), 'value', 'text', $this->state->get('filter.published'), true)
+			JHtmlBatch_::addListSelection(
+				JText::_('COM_COMPONENTBUILDER_KEEP_ORIGINAL_STATE'),
+				'batch[published]',
+				JHtml::_('select.options', JHtml::_('jgrid.publishedOptions', array('all' => false)), 'value', 'text', '', true)
 			);
-			// only load if batch allowed
-			if ($this->canBatch)
-			{
-				JHtmlBatch_::addListSelection(
-					JText::_('COM_COMPONENTBUILDER_KEEP_ORIGINAL_STATE'),
-					'batch[published]',
-					JHtml::_('select.options', JHtml::_('jgrid.publishedOptions', array('all' => false)), 'value', 'text', '', true)
-				);
-			}
 		}
 
-		JHtmlSidebar::addFilter(
-			JText::_('JOPTION_SELECT_ACCESS'),
-			'filter_access',
-			JHtml::_('select.options', JHtml::_('access.assetgroups'), 'value', 'text', $this->state->get('filter.access'))
-		);
-
+		// Only load access batch if create, edit and batch is allowed
 		if ($this->canBatch && $this->canCreate && $this->canEdit)
 		{
 			JHtmlBatch_::addListSelection(
@@ -199,50 +181,46 @@ class ComponentbuilderViewDynamic_gets extends JViewLegacy
 				'batch[access]',
 				JHtml::_('select.options', JHtml::_('access.assetgroups'), 'value', 'text')
 			);
-		} 
-
-		// Set Main Source Selection
-		$this->main_sourceOptions = $this->getTheMain_sourceSelections();
-		if ($this->main_sourceOptions)
-		{
-			// Main Source Filter
-			JHtmlSidebar::addFilter(
-				'- Select '.JText::_('COM_COMPONENTBUILDER_DYNAMIC_GET_MAIN_SOURCE_LABEL').' -',
-				'filter_main_source',
-				JHtml::_('select.options', $this->main_sourceOptions, 'value', 'text', $this->state->get('filter.main_source'))
-			);
-
-			if ($this->canBatch && $this->canCreate && $this->canEdit)
-			{
-				// Main Source Batch Selection
-				JHtmlBatch_::addListSelection(
-					'- Keep Original '.JText::_('COM_COMPONENTBUILDER_DYNAMIC_GET_MAIN_SOURCE_LABEL').' -',
-					'batch[main_source]',
-					JHtml::_('select.options', $this->main_sourceOptions, 'value', 'text')
-				);
-			}
 		}
 
-		// Set Gettype Selection
-		$this->gettypeOptions = $this->getTheGettypeSelections();
-		if ($this->gettypeOptions)
+		// Only load Main Source batch if create, edit, and batch is allowed
+		if ($this->canBatch && $this->canCreate && $this->canEdit)
 		{
-			// Gettype Filter
-			JHtmlSidebar::addFilter(
-				'- Select '.JText::_('COM_COMPONENTBUILDER_DYNAMIC_GET_GETTYPE_LABEL').' -',
-				'filter_gettype',
-				JHtml::_('select.options', $this->gettypeOptions, 'value', 'text', $this->state->get('filter.gettype'))
-			);
-
-			if ($this->canBatch && $this->canCreate && $this->canEdit)
+			// Set Main Source Selection
+			$this->main_sourceOptions = JFormHelper::loadFieldType('dynamicgetsfiltermainsource')->options;
+			// We do some sanitation for Main Source filter
+			if (ComponentbuilderHelper::checkArray($this->main_sourceOptions) &&
+				isset($this->main_sourceOptions[0]->value) &&
+				!ComponentbuilderHelper::checkString($this->main_sourceOptions[0]->value))
 			{
-				// Gettype Batch Selection
-				JHtmlBatch_::addListSelection(
-					'- Keep Original '.JText::_('COM_COMPONENTBUILDER_DYNAMIC_GET_GETTYPE_LABEL').' -',
-					'batch[gettype]',
-					JHtml::_('select.options', $this->gettypeOptions, 'value', 'text')
-				);
+				unset($this->main_sourceOptions[0]);
 			}
+			// Main Source Batch Selection
+			JHtmlBatch_::addListSelection(
+				'- Keep Original '.JText::_('COM_COMPONENTBUILDER_DYNAMIC_GET_MAIN_SOURCE_LABEL').' -',
+				'batch[main_source]',
+				JHtml::_('select.options', $this->main_sourceOptions, 'value', 'text')
+			);
+		}
+
+		// Only load Gettype batch if create, edit, and batch is allowed
+		if ($this->canBatch && $this->canCreate && $this->canEdit)
+		{
+			// Set Gettype Selection
+			$this->gettypeOptions = JFormHelper::loadFieldType('dynamicgetsfiltergettype')->options;
+			// We do some sanitation for Gettype filter
+			if (ComponentbuilderHelper::checkArray($this->gettypeOptions) &&
+				isset($this->gettypeOptions[0]->value) &&
+				!ComponentbuilderHelper::checkString($this->gettypeOptions[0]->value))
+			{
+				unset($this->gettypeOptions[0]);
+			}
+			// Gettype Batch Selection
+			JHtmlBatch_::addListSelection(
+				'- Keep Original '.JText::_('COM_COMPONENTBUILDER_DYNAMIC_GET_GETTYPE_LABEL').' -',
+				'batch[gettype]',
+				JHtml::_('select.options', $this->gettypeOptions, 'value', 'text')
+			);
 		}
 	}
 
@@ -287,84 +265,12 @@ class ComponentbuilderViewDynamic_gets extends JViewLegacy
 	protected function getSortFields()
 	{
 		return array(
-			'a.sorting' => JText::_('JGRID_HEADING_ORDERING'),
+			'a.ordering' => JText::_('JGRID_HEADING_ORDERING'),
 			'a.published' => JText::_('JSTATUS'),
 			'a.name' => JText::_('COM_COMPONENTBUILDER_DYNAMIC_GET_NAME_LABEL'),
 			'a.main_source' => JText::_('COM_COMPONENTBUILDER_DYNAMIC_GET_MAIN_SOURCE_LABEL'),
 			'a.gettype' => JText::_('COM_COMPONENTBUILDER_DYNAMIC_GET_GETTYPE_LABEL'),
 			'a.id' => JText::_('JGRID_HEADING_ID')
 		);
-	}
-
-	protected function getTheMain_sourceSelections()
-	{
-		// Get a db connection.
-		$db = JFactory::getDbo();
-
-		// Create a new query object.
-		$query = $db->getQuery(true);
-
-		// Select the text.
-		$query->select($db->quoteName('main_source'));
-		$query->from($db->quoteName('#__componentbuilder_dynamic_get'));
-		$query->order($db->quoteName('main_source') . ' ASC');
-
-		// Reset the query using our newly populated query object.
-		$db->setQuery($query);
-
-		$results = $db->loadColumn();
-
-		if ($results)
-		{
-			// get model
-			$model = $this->getModel();
-			$results = array_unique($results);
-			$_filter = array();
-			foreach ($results as $main_source)
-			{
-				// Translate the main_source selection
-				$text = $model->selectionTranslation($main_source,'main_source');
-				// Now add the main_source and its text to the options array
-				$_filter[] = JHtml::_('select.option', $main_source, JText::_($text));
-			}
-			return $_filter;
-		}
-		return false;
-	}
-
-	protected function getTheGettypeSelections()
-	{
-		// Get a db connection.
-		$db = JFactory::getDbo();
-
-		// Create a new query object.
-		$query = $db->getQuery(true);
-
-		// Select the text.
-		$query->select($db->quoteName('gettype'));
-		$query->from($db->quoteName('#__componentbuilder_dynamic_get'));
-		$query->order($db->quoteName('gettype') . ' ASC');
-
-		// Reset the query using our newly populated query object.
-		$db->setQuery($query);
-
-		$results = $db->loadColumn();
-
-		if ($results)
-		{
-			// get model
-			$model = $this->getModel();
-			$results = array_unique($results);
-			$_filter = array();
-			foreach ($results as $gettype)
-			{
-				// Translate the gettype selection
-				$text = $model->selectionTranslation($gettype,'gettype');
-				// Now add the gettype and its text to the options array
-				$_filter[] = JHtml::_('select.option', $gettype, JText::_($text));
-			}
-			return $_filter;
-		}
-		return false;
 	}
 }

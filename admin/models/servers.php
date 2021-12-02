@@ -1,33 +1,18 @@
 <?php
-/*--------------------------------------------------------------------------------------------------------|  www.vdm.io  |------/
-    __      __       _     _____                 _                                  _     __  __      _   _               _
-    \ \    / /      | |   |  __ \               | |                                | |   |  \/  |    | | | |             | |
-     \ \  / /_ _ ___| |_  | |  | | _____   _____| | ___  _ __  _ __ ___   ___ _ __ | |_  | \  / | ___| |_| |__   ___   __| |
-      \ \/ / _` / __| __| | |  | |/ _ \ \ / / _ \ |/ _ \| '_ \| '_ ` _ \ / _ \ '_ \| __| | |\/| |/ _ \ __| '_ \ / _ \ / _` |
-       \  / (_| \__ \ |_  | |__| |  __/\ V /  __/ | (_) | |_) | | | | | |  __/ | | | |_  | |  | |  __/ |_| | | | (_) | (_| |
-        \/ \__,_|___/\__| |_____/ \___| \_/ \___|_|\___/| .__/|_| |_| |_|\___|_| |_|\__| |_|  |_|\___|\__|_| |_|\___/ \__,_|
-                                                        | |                                                                 
-                                                        |_| 				
-/-------------------------------------------------------------------------------------------------------------------------------/
-
-	@version		2.7.x
-	@created		30th April, 2015
-	@package		Component Builder
-	@subpackage		servers.php
-	@author			Llewellyn van der Merwe <http://joomlacomponentbuilder.com>	
-	@github			Joomla Component Builder <https://github.com/vdm-io/Joomla-Component-Builder>
-	@copyright		Copyright (C) 2015. All Rights Reserved
-	@license		GNU/GPL Version 2 or later - http://www.gnu.org/licenses/gpl-2.0.html 
-	
-	Builds Complex Joomla Components 
-                                                             
-/-----------------------------------------------------------------------------------------------------------------------------*/
+/**
+ * @package    Joomla.Component.Builder
+ *
+ * @created    30th April, 2015
+ * @author     Llewellyn van der Merwe <http://www.joomlacomponentbuilder.com>
+ * @github     Joomla Component Builder <https://github.com/vdm-io/Joomla-Component-Builder>
+ * @copyright  Copyright (C) 2015 - 2020 Vast Development Method. All rights reserved.
+ * @license    GNU General Public License version 2 or later; see LICENSE.txt
+ */
 
 // No direct access to this file
 defined('_JEXEC') or die('Restricted access');
 
-// import the Joomla modellist library
-jimport('joomla.application.component.modellist');
+use Joomla\Utilities\ArrayHelper;
 
 /**
  * Servers Model
@@ -41,6 +26,7 @@ class ComponentbuilderModelServers extends JModelList
 			$config['filter_fields'] = array(
 				'a.id','id',
 				'a.published','published',
+				'a.access','access',
 				'a.ordering','ordering',
 				'a.created_by','created_by',
 				'a.modified_by','modified_by',
@@ -51,11 +37,17 @@ class ComponentbuilderModelServers extends JModelList
 
 		parent::__construct($config);
 	}
-	
+
 	/**
 	 * Method to auto-populate the model state.
 	 *
+	 * Note. Calling getState in this method will result in recursion.
+	 *
+	 * @param   string  $ordering   An optional ordering field.
+	 * @param   string  $direction  An optional direction (asc|desc).
+	 *
 	 * @return  void
+	 *
 	 */
 	protected function populateState($ordering = null, $direction = null)
 	{
@@ -66,29 +58,45 @@ class ComponentbuilderModelServers extends JModelList
 		{
 			$this->context .= '.' . $layout;
 		}
-		$name = $this->getUserStateFromRequest($this->context . '.filter.name', 'filter_name');
-		$this->setState('filter.name', $name);
 
-		$protocol = $this->getUserStateFromRequest($this->context . '.filter.protocol', 'filter_protocol');
-		$this->setState('filter.protocol', $protocol);
-        
-		$sorting = $this->getUserStateFromRequest($this->context . '.filter.sorting', 'filter_sorting', 0, 'int');
-		$this->setState('filter.sorting', $sorting);
-        
+		// Check if the form was submitted
+		$formSubmited = $app->input->post->get('form_submited');
+
 		$access = $this->getUserStateFromRequest($this->context . '.filter.access', 'filter_access', 0, 'int');
-		$this->setState('filter.access', $access);
-        
-		$search = $this->getUserStateFromRequest($this->context . '.filter.search', 'filter_search');
-		$this->setState('filter.search', $search);
+		if ($formSubmited)
+		{
+			$access = $app->input->post->get('access');
+			$this->setState('filter.access', $access);
+		}
 
 		$published = $this->getUserStateFromRequest($this->context . '.filter.published', 'filter_published', '');
 		$this->setState('filter.published', $published);
-        
+
 		$created_by = $this->getUserStateFromRequest($this->context . '.filter.created_by', 'filter_created_by', '');
 		$this->setState('filter.created_by', $created_by);
 
 		$created = $this->getUserStateFromRequest($this->context . '.filter.created', 'filter_created');
 		$this->setState('filter.created', $created);
+
+		$sorting = $this->getUserStateFromRequest($this->context . '.filter.sorting', 'filter_sorting', 0, 'int');
+		$this->setState('filter.sorting', $sorting);
+
+		$search = $this->getUserStateFromRequest($this->context . '.filter.search', 'filter_search');
+		$this->setState('filter.search', $search);
+
+		$name = $this->getUserStateFromRequest($this->context . '.filter.name', 'filter_name');
+		if ($formSubmited)
+		{
+			$name = $app->input->post->get('name');
+			$this->setState('filter.name', $name);
+		}
+
+		$protocol = $this->getUserStateFromRequest($this->context . '.filter.protocol', 'filter_protocol');
+		if ($formSubmited)
+		{
+			$protocol = $app->input->post->get('protocol');
+			$this->setState('filter.protocol', $protocol);
+		}
 
 		// List state information.
 		parent::populateState($ordering, $direction);
@@ -100,20 +108,24 @@ class ComponentbuilderModelServers extends JModelList
 	 * @return  mixed  An array of data items on success, false on failure.
 	 */
 	public function getItems()
-	{ 
+	{
 		// check in items
 		$this->checkInNow();
 
 		// load parent items
 		$items = parent::getItems();
 
-		// set values to display correctly.
+		// Set values to display correctly.
 		if (ComponentbuilderHelper::checkArray($items))
 		{
-			// get user object.
-			$user = JFactory::getUser();
+			// Get the user object if not set.
+			if (!isset($user) || !ComponentbuilderHelper::checkObject($user))
+			{
+				$user = JFactory::getUser();
+			}
 			foreach ($items as $nr => &$item)
 			{
+				// Remove items the user can't access.
 				$access = ($user->authorise('server.access', 'com_componentbuilder.server.' . (int) $item->id) && $user->authorise('server.access', 'com_componentbuilder'));
 				if (!$access)
 				{
@@ -122,7 +134,7 @@ class ComponentbuilderModelServers extends JModelList
 				}
 
 			}
-		} 
+		}
 
 		// set selection value to a translatable value
 		if (ComponentbuilderHelper::checkArray($items))
@@ -133,17 +145,17 @@ class ComponentbuilderModelServers extends JModelList
 				$item->protocol = $this->selectionTranslation($item->protocol, 'protocol');
 			}
 		}
- 
+
         
 		// return items
 		return $items;
 	}
 
 	/**
-	* Method to convert selection values to translatable string.
-	*
-	* @return translatable string
-	*/
+	 * Method to convert selection values to translatable string.
+	 *
+	 * @return translatable string
+	 */
 	public function selectionTranslation($value,$name)
 	{
 		// Array of protocol language strings
@@ -197,9 +209,17 @@ class ComponentbuilderModelServers extends JModelList
 		$query->select('ag.title AS access_level');
 		$query->join('LEFT', '#__viewlevels AS ag ON ag.id = a.access');
 		// Filter by access level.
-		if ($access = $this->getState('filter.access'))
+		$_access = $this->getState('filter.access');
+		if ($_access && is_numeric($_access))
 		{
-			$query->where('a.access = ' . (int) $access);
+			$query->where('a.access = ' . (int) $_access);
+		}
+		elseif (ComponentbuilderHelper::checkArray($_access))
+		{
+			// Secure the array for the query
+			$_access = ArrayHelper::toInteger($_access);
+			// Filter by the Access Array.
+			$query->where('a.access IN (' . implode(',', $_access) . ')');
 		}
 		// Implement View Level Access
 		if (!$user->authorise('core.options', 'com_componentbuilder'))
@@ -223,19 +243,43 @@ class ComponentbuilderModelServers extends JModelList
 		}
 
 		// Filter by Name.
-		if ($name = $this->getState('filter.name'))
+		$_name = $this->getState('filter.name');
+		if (is_numeric($_name))
 		{
-			$query->where('a.name = ' . $db->quote($db->escape($name)));
+			if (is_float($_name))
+			{
+				$query->where('a.name = ' . (float) $_name);
+			}
+			else
+			{
+				$query->where('a.name = ' . (int) $_name);
+			}
+		}
+		elseif (ComponentbuilderHelper::checkString($_name))
+		{
+			$query->where('a.name = ' . $db->quote($db->escape($_name)));
 		}
 		// Filter by Protocol.
-		if ($protocol = $this->getState('filter.protocol'))
+		$_protocol = $this->getState('filter.protocol');
+		if (is_numeric($_protocol))
 		{
-			$query->where('a.protocol = ' . $db->quote($db->escape($protocol)));
+			if (is_float($_protocol))
+			{
+				$query->where('a.protocol = ' . (float) $_protocol);
+			}
+			else
+			{
+				$query->where('a.protocol = ' . (int) $_protocol);
+			}
+		}
+		elseif (ComponentbuilderHelper::checkString($_protocol))
+		{
+			$query->where('a.protocol = ' . $db->quote($db->escape($_protocol)));
 		}
 
 		// Add the list ordering clause.
 		$orderCol = $this->state->get('list.ordering', 'a.id');
-		$orderDirn = $this->state->get('list.direction', 'asc');	
+		$orderDirn = $this->state->get('list.direction', 'desc');
 		if ($orderCol != '')
 		{
 			$query->order($db->escape($orderCol . ' ' . $orderDirn));
@@ -245,19 +289,25 @@ class ComponentbuilderModelServers extends JModelList
 	}
 
 	/**
-	* Method to get list export data.
-	*
-	* @return mixed  An array of data items on success, false on failure.
-	*/
-	public function getExportData($pks)
+	 * Method to get list export data.
+	 *
+	 * @param   array  $pks  The ids of the items to get
+	 * @param   JUser  $user  The user making the request
+	 *
+	 * @return mixed  An array of data items on success, false on failure.
+	 */
+	public function getExportData($pks, $user = null)
 	{
 		// setup the query
-		if (ComponentbuilderHelper::checkArray($pks))
+		if (($pks_size = ComponentbuilderHelper::checkArray($pks)) !== false || 'bulk' === $pks)
 		{
-			// Set a value to know this is exporting method.
+			// Set a value to know this is export method. (USE IN CUSTOM CODE TO ALTER OUTCOME)
 			$_export = true;
-			// Get the user object.
-			$user = JFactory::getUser();
+			// Get the user object if not set.
+			if (!isset($user) || !ComponentbuilderHelper::checkObject($user))
+			{
+				$user = JFactory::getUser();
+			}
 			// Create a new query object.
 			$db = JFactory::getDBO();
 			$query = $db->getQuery(true);
@@ -267,7 +317,24 @@ class ComponentbuilderModelServers extends JModelList
 
 			// From the componentbuilder_server table
 			$query->from($db->quoteName('#__componentbuilder_server', 'a'));
-			$query->where('a.id IN (' . implode(',',$pks) . ')');
+			// The bulk export path
+			if ('bulk' === $pks)
+			{
+				$query->where('a.id > 0');
+			}
+			// A large array of ID's will not work out well
+			elseif ($pks_size > 500)
+			{
+				// Use lowest ID
+				$query->where('a.id >= ' . (int) min($pks));
+				// Use highest ID
+				$query->where('a.id <= ' . (int) max($pks));
+			}
+			// The normal default path
+			else
+			{
+				$query->where('a.id IN (' . implode(',',$pks) . ')');
+			}
 			// Implement View Level Access
 			if (!$user->authorise('core.options', 'com_componentbuilder'))
 			{
@@ -290,13 +357,12 @@ class ComponentbuilderModelServers extends JModelList
 				// Get the encryption object.
 				$basic = new FOFEncryptAes($basickey);
 
-				// set values to display correctly.
+				// Set values to display correctly.
 				if (ComponentbuilderHelper::checkArray($items))
 				{
-					// get user object.
-					$user = JFactory::getUser();
 					foreach ($items as $nr => &$item)
 					{
+						// Remove items the user can't access.
 						$access = ($user->authorise('server.access', 'com_componentbuilder.server.' . (int) $item->id) && $user->authorise('server.access', 'com_componentbuilder'));
 						if (!$access)
 						{
@@ -392,7 +458,7 @@ class ComponentbuilderModelServers extends JModelList
 			return $headers;
 		}
 		return false;
-	} 
+	}
 	
 	/**
 	 * Method to get a store id based on model configuration state.
@@ -406,6 +472,18 @@ class ComponentbuilderModelServers extends JModelList
 		$id .= ':' . $this->getState('filter.id');
 		$id .= ':' . $this->getState('filter.search');
 		$id .= ':' . $this->getState('filter.published');
+		// Check if the value is an array
+		$_access = $this->getState('filter.access');
+		if (ComponentbuilderHelper::checkArray($_access))
+		{
+			$id .= ':' . implode(':', $_access);
+		}
+		// Check if this is only an number or string
+		elseif (is_numeric($_access)
+		 || ComponentbuilderHelper::checkString($_access))
+		{
+			$id .= ':' . $_access;
+		}
 		$id .= ':' . $this->getState('filter.ordering');
 		$id .= ':' . $this->getState('filter.created_by');
 		$id .= ':' . $this->getState('filter.modified_by');
@@ -416,16 +494,16 @@ class ComponentbuilderModelServers extends JModelList
 	}
 
 	/**
-	* Build an SQL query to checkin all items left checked out longer then a set time.
-	*
-	* @return  a bool
-	*
-	*/
+	 * Build an SQL query to checkin all items left checked out longer then a set time.
+	 *
+	 * @return  a bool
+	 *
+	 */
 	protected function checkInNow()
 	{
 		// Get set check in time
 		$time = JComponentHelper::getParams('com_componentbuilder')->get('check_in');
-		
+
 		if ($time)
 		{
 
