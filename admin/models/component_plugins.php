@@ -5,7 +5,7 @@
  * @created    30th April, 2015
  * @author     Llewellyn van der Merwe <http://www.joomlacomponentbuilder.com>
  * @github     Joomla Component Builder <https://github.com/vdm-io/Joomla-Component-Builder>
- * @copyright  Copyright (C) 2015 - 2020 Vast Development Method. All rights reserved.
+ * @copyright  Copyright (C) 2015 Vast Development Method. All rights reserved.
  * @license    GNU General Public License version 2 or later; see LICENSE.txt
  */
 
@@ -106,12 +106,6 @@ class ComponentbuilderModelComponent_plugins extends JModelAdmin
 				$addjoomla_plugins = new Registry;
 				$addjoomla_plugins->loadString($item->addjoomla_plugins);
 				$item->addjoomla_plugins = $addjoomla_plugins->toArray();
-			}
-			
-			if (!empty($item->id))
-			{
-				$item->tags = new JHelperTags;
-				$item->tags->getTagIds($item->id, 'com_componentbuilder.component_plugins');
 			}
 		}
 
@@ -236,7 +230,7 @@ class ComponentbuilderModelComponent_plugins extends JModelAdmin
 	 */
 	public function getScript()
 	{
-		return 'administrator/components/com_componentbuilder/models/forms/component_plugins.js';
+		return 'media/com_componentbuilder/js/component_plugins.js';
 	}
     
 	/**

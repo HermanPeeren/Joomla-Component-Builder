@@ -5,7 +5,7 @@
  * @created    30th April, 2015
  * @author     Llewellyn van der Merwe <http://www.joomlacomponentbuilder.com>
  * @github     Joomla Component Builder <https://github.com/vdm-io/Joomla-Component-Builder>
- * @copyright  Copyright (C) 2015 - 2020 Vast Development Method. All rights reserved.
+ * @copyright  Copyright (C) 2015 Vast Development Method. All rights reserved.
  * @license    GNU General Public License version 2 or later; see LICENSE.txt
  */
 
@@ -317,11 +317,19 @@ class ComponentbuilderModelAjax extends JModelList
 		return ComponentbuilderHelper::getClassCode($id, $type);
 	}
 
-	public function getClassCodeIds($id, $type)
+	public function getClassCodeIds($id, $type, $key)
 	{
 		if ('property' === $type || 'method' === $type)
 		{
-			return ComponentbuilderHelper::getVars('class_' . $type, $id, 'joomla_plugin_group', 'id');
+			// we get the plugin group, or the powers
+			if ($key == 1)
+			{
+				return ComponentbuilderHelper::getVars('class_' . $type, $id, 'joomla_plugin_group', 'id');
+			}
+			elseif ($key == 2)
+			{
+				return ComponentbuilderHelper::getVars('class_' . $type, 'powers', 'extension_type', 'id');
+			}
 		}
 		elseif ('joomla_plugin_group' === $type)
 		{
@@ -385,6 +393,37 @@ class ComponentbuilderModelAjax extends JModelList
 						foreach($fields as $field)
 						{
 							if (isset($field['alias']) && $field['alias'] == 1)
+							{
+								return true;
+							}
+						}
+					}
+				}
+			}
+		}
+		return false;
+	}
+
+	public function checkCategoryField($type)
+	{
+		// get the view name & id
+		$values = $this->getViewID();
+		if (!is_null($values['a_id']) && $values['a_id'] > 0 && strlen($values['a_view']) && in_array($values['a_view'], $this->allowedViewsArray))
+		{
+			// get the fields
+			if ($fields = ComponentbuilderHelper::getVar('admin_fields', $values['a_id'], 'admin_view', 'addfields'))
+			{
+				// open the fields
+				if (ComponentbuilderHelper::checkJson($fields))
+				{
+					$fields = json_decode($fields, true);
+					if (ComponentbuilderHelper::checkArray($fields))
+					{
+						foreach($fields as $field)
+						{
+							if (isset($field['field']) &&
+								($field_values = ComponentbuilderHelper::getFieldNameAndType($field['field'])) !== false && 
+								$field_values['type'] === 'category' )
 							{
 								return true;
 							}
@@ -573,7 +612,7 @@ class ComponentbuilderModelAjax extends JModelList
 			'before' => array('table' => 'admin_view', 'tables' => 'admin_views', 'id' => 'id', 'name' => 'system_name', 'text' => 'Admin View')	
 		);
 
-	protected function checkRepeatableConversion(&$fieldsData, $fieldsArrayType, $id, $linked_id_name)
+	protected function checkRepeatableConversion($type, &$fieldsData, $fieldsArrayType, $id, $linked_id_name)
 	{
 		if (ComponentbuilderHelper::checkJson($fieldsData) && isset($this->conversionCheck[$fieldsArrayType]))
 		{
@@ -593,7 +632,7 @@ class ComponentbuilderModelAjax extends JModelList
 				$objectUpdate = new stdClass();
 				$objectUpdate->{$linked_id_name} = (int) $id;
 				$objectUpdate->{$fieldsArrayType} = $fieldsData;
-				JFactory::getDbo()->updateObject('#__componentbuilder_'.$type, $objectUpdate, 'admin_view');
+				JFactory::getDbo()->updateObject('#__componentbuilder_' . $type, $objectUpdate, 'admin_view');
 			}
 		}
 	}
@@ -1702,7 +1741,7 @@ class ComponentbuilderModelAjax extends JModelList
 			// check repeatable conversion
 			if (method_exists(__CLASS__, 'checkRepeatableConversion'))
 			{
-				$this->checkRepeatableConversion($fieldsData, $fieldName, $id, $idName);
+				$this->checkRepeatableConversion($type, $fieldsData, $fieldName, $id, $idName);
 			}
 			// get the table
 			$table = $this->getSubformTable($type, $fieldsData);
@@ -2149,8 +2188,8 @@ class ComponentbuilderModelAjax extends JModelList
 		{
 			// reset the buttons bucket
 			$buttons = array();
-			// some helper for some fields
-			$helper = array('xml' => 'note_select_field_type');
+			// some helper for some fields (I am sorry)
+			$helper = array('xml' => 'note_filter_information');
 			// get input
 			$jinput = JFactory::getApplication()->input;
 			$return_here = $jinput->get('return_here', null, 'base64');
@@ -2204,10 +2243,14 @@ class ComponentbuilderModelAjax extends JModelList
 						// check if field has string length
 						if (ComponentbuilderHelper::checkString($value))
 						{
-							$buttons[$key] = array();
+							// see if the field needs some help :)
+							$_key = (isset($helper[$key])) ? $helper[$key] : $key;
+
+							// build the buttons
+							$buttons[$_key] = array();
 							if (($button = $this->getButton('custom_code', 3)) && ComponentbuilderHelper::checkString($button))
 							{
-								$buttons[$key]['_create'] = $button;
+								$buttons[$_key]['_create'] = $button;
 							}
 						}
 					}
@@ -2217,15 +2260,16 @@ class ComponentbuilderModelAjax extends JModelList
 				{
 					foreach ($bucket as $field => $customcodes)
 					{
-						$edit_icon = '<span class="icon-edit" aria-hidden="true"></span> ';
 						// see if the field needs some help :)
-						if (isset($helper[$field]))
-						{
-							$field = $helper[$field];
-						}
+						$field = (isset($helper[$field])) ? $helper[$field] : $field;
+						// set the edit icon
+						$edit_icon = '<span class="icon-edit" aria-hidden="true"></span> ';
+						// load the buttons found
 						foreach ($customcodes as $customcode)
 						{
+							// get the customcode name
 							$key = (array) explode('+', $customcode);
+							// see if we can get the button
 							if (!isset($buttons[$field][$key[0]]) && ($_id = ComponentbuilderHelper::getVar('custom_code', $key[0], 'function_name')) !== false
 								&& ($button = ComponentbuilderHelper::getEditTextButton($edit_icon . $key[0], $_id, 'custom_code', 'custom_codes', $return_here, 'com_componentbuilder', false, 'btn btn-small button-edit" style="margin: 0 0 5px 0;')) 
 								&& ComponentbuilderHelper::checkString($button))
@@ -2622,6 +2666,13 @@ class ComponentbuilderModelAjax extends JModelList
 			'search' => array('id', 'name', 'code', 'comment'),
 			'views' => 'class_methods',
 			'not_base64' => array(),
+			'name' => 'name'
+		),
+		// #__componentbuilder_power (v)
+		'class_method' => array(
+			'search' => array('id', 'name', 'description', 'head', 'head', 'main_class_code'),
+			'views' => 'powers',
+			'not_base64' => array('description'),
 			'name' => 'name'
 		)
 	);
@@ -3194,15 +3245,23 @@ class ComponentbuilderModelAjax extends JModelList
 		{
 			// first check field type
 			$_fieldType = ComponentbuilderHelper::getVar('field', $global['a_id'], 'id', 'fieldtype');
-			// only continue if field type is the same
-			if ($fieldtype == $_fieldType)
+			$xmlDB = ComponentbuilderHelper::getVar('field', $global['a_id'], 'id', 'xml');
+			// check if it is a string
+			if (ComponentbuilderHelper::checkString($xmlDB))
 			{
-				$xmlDB = ComponentbuilderHelper::getVar('field', $global['a_id'], 'id', 'xml');
-				// check if it is a string
-				if (ComponentbuilderHelper::checkString($xmlDB))
-				{
-					$xml = json_decode($xmlDB);
-				}
+				$xml = json_decode($xmlDB);
+			}
+			// remove the field type if not the same
+			if ($xml && $fieldtype != $_fieldType)
+			{
+				// unset some stuff
+				$pattern = array();
+				$pattern[] = '/type=".+?"/i'; // to force the new type to be set
+				$pattern[] = '/class=".+?"/i'; // to remove all classes
+				$pattern[] = '/type_php.+?".+?"/i'; // to remove any PHP code stuff
+
+				// also add a special switch to force adding all properties of the new type
+				$xml = preg_replace($pattern, '..__FORCE_LOAD_ALL_PROPERTIES__..', $xml);
 			}
 		}
 		return $xml;

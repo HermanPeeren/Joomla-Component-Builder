@@ -5,7 +5,7 @@
  * @created    30th April, 2015
  * @author     Llewellyn van der Merwe <http://www.joomlacomponentbuilder.com>
  * @github     Joomla Component Builder <https://github.com/vdm-io/Joomla-Component-Builder>
- * @copyright  Copyright (C) 2015 - 2020 Vast Development Method. All rights reserved.
+ * @copyright  Copyright (C) 2015 Vast Development Method. All rights reserved.
  * @license    GNU General Public License version 2 or later; see LICENSE.txt
  */
 
@@ -163,6 +163,7 @@ class ComponentbuilderModelClass_extendings extends JModelList
 		{
 			$extension_typeArray = array(
 				0 => 'COM_COMPONENTBUILDER_CLASS_EXTENDS_SELECT_AN_OPTION',
+				'powers' => 'COM_COMPONENTBUILDER_CLASS_EXTENDS_POWERS',
 				'components' => 'COM_COMPONENTBUILDER_CLASS_EXTENDS_COMPONENTS',
 				'plugins' => 'COM_COMPONENTBUILDER_CLASS_EXTENDS_PLUGINS',
 				'modules' => 'COM_COMPONENTBUILDER_CLASS_EXTENDS_MODULES'

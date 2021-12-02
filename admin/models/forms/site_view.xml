@@ -84,6 +84,14 @@
 			readonly="true"
 			filter="unset"
 		/>
+		<!-- Was added due to Permissions JS needing a Title field -->
+		<!-- Let us know at gh-629 should this change -->
+		<!-- https://github.com/vdm-io/Joomla-Component-Builder/issues/629#issuecomment-750117235 -->
+		<field
+			name="title"
+			type="hidden"
+			default="componentbuilder site_view"
+		/>
 		<!-- Dynamic Fields. -->
 		<!-- System_name Field. Type: Text. (joomla) -->
 		<field
@@ -108,8 +116,6 @@
 			maxlength="150"
 			description="COM_COMPONENTBUILDER_SITE_VIEW_NAME_DESCRIPTION"
 			class="text_area"
-			readonly="false"
-			disabled="false"
 			required="true"
 			filter="STRING"
 			message="COM_COMPONENTBUILDER_SITE_VIEW_NAME_MESSAGE"
@@ -200,8 +206,8 @@
 			filter="raw"
 			validate="code"
 		/>
-		<!-- Note_add_language_string Field. Type: Note. A None Database Field. (joomla) -->
-		<field type="note" name="note_add_language_string" label="COM_COMPONENTBUILDER_SITE_VIEW_NOTE_ADD_LANGUAGE_STRING_LABEL" description="COM_COMPONENTBUILDER_SITE_VIEW_NOTE_ADD_LANGUAGE_STRING_DESCRIPTION" heading="h4" class="note_add_language_string" />
+		<!-- Note_add_php_language_string Field. Type: Note. A None Database Field. (joomla) -->
+		<field type="note" name="note_add_php_language_string" label="COM_COMPONENTBUILDER_SITE_VIEW_NOTE_ADD_PHP_LANGUAGE_STRING_LABEL" description="COM_COMPONENTBUILDER_SITE_VIEW_NOTE_ADD_PHP_LANGUAGE_STRING_DESCRIPTION" heading="h4" class="note_add_php_language_string" />
 		<!-- Codename Field. Type: Text. (joomla) -->
 		<field
 			type="text"
@@ -1131,8 +1137,6 @@
 					maxlength="150"
 					description="COM_COMPONENTBUILDER_SITE_VIEW_NAME_DESCRIPTION"
 					class="text_area"
-					readonly="false"
-					disabled="false"
 					required="true"
 					filter="STRING"
 					message="COM_COMPONENTBUILDER_SITE_VIEW_NAME_MESSAGE"

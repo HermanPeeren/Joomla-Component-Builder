@@ -5,7 +5,7 @@
  * @created    30th April, 2015
  * @author     Llewellyn van der Merwe <http://www.joomlacomponentbuilder.com>
  * @github     Joomla Component Builder <https://github.com/vdm-io/Joomla-Component-Builder>
- * @copyright  Copyright (C) 2015 - 2020 Vast Development Method. All rights reserved.
+ * @copyright  Copyright (C) 2015 Vast Development Method. All rights reserved.
  * @license    GNU General Public License version 2 or later; see LICENSE.txt
  */
 
@@ -133,20 +133,21 @@ JHtml::_('behavior.keepalive');
 
 // Add spindle-wheel for importations:
 jQuery(document).ready(function($) {
-	var outerDiv = $('body');
 
-	$('<div id="loading"></div>')
-		.css("background", "rgba(255, 255, 255, .8) url('components/com_componentbuilder/assets/images/import.gif') 50% 15% no-repeat")
-		.css("top", outerDiv.position().top - $(window).scrollTop())
-		.css("left", outerDiv.position().left - $(window).scrollLeft())
-		.css("width", outerDiv.width())
-		.css("height", outerDiv.height())
-		.css("position", "fixed")
-		.css("opacity", "0.80")
-		.css("-ms-filter", "progid:DXImageTransform.Microsoft.Alpha(Opacity = 80)")
-		.css("filter", "alpha(opacity = 80)")
-		.css("display", "none")
-		.appendTo(outerDiv);
+// waiting spinner
+var outerDiv = jQuery('body');
+jQuery('<div id="loading"></div>')
+	.css("background", "rgba(255, 255, 255, .8) url('components/com_componentbuilder/assets/images/import.gif') 50% 15% no-repeat")
+	.css("top", outerDiv.position().top - jQuery(window).scrollTop())
+	.css("left", outerDiv.position().left - jQuery(window).scrollLeft())
+	.css("width", outerDiv.width())
+	.css("height", outerDiv.height())
+	.css("position", "fixed")
+	.css("opacity", "0.80")
+	.css("-ms-filter", "progid:DXImageTransform.Microsoft.Alpha(Opacity = 80)")
+	.css("filter", "alpha(opacity = 80)")
+	.css("display", "none")
+	.appendTo(outerDiv);
 });
 </script>
 
@@ -467,6 +468,7 @@ function getJCBpackageInfo_server(url){
 }
 <?php endif; ?>
 
+
 var noticeboard = "https://www.vdm.io/componentbuilder-noticeboard-md";
 jQuery(document).ready(function () {
 	jQuery.get(noticeboard)
@@ -489,20 +491,20 @@ jQuery(document).ready(function () {
 });
 // to check is READ/NEW
 function getIS(type,notice){
-	if (type == 1) {
-		var getUrl = JRouter("index.php?option=com_componentbuilder&task=ajax.isNew&format=json");
+	if(type == 1){
+		var getUrl = JRouter("index.php?option=com_componentbuilder&task=ajax.isNew&format=json&raw=true");
 	} else if (type == 2) {
-		var getUrl = JRouter("index.php?option=com_componentbuilder&task=ajax.isRead&format=json");
+		var getUrl = JRouter("index.php?option=com_componentbuilder&task=ajax.isRead&format=json&raw=true");
 	}	
 	if(token.length > 0 && notice.length){
-		var request = "token="+token+"&notice="+notice;
+		var request = token+"=1&notice="+notice;
 	}
 	return jQuery.ajax({
 		type: "POST",
 		url: getUrl,
-		dataType: "jsonp",
+		dataType: "json",
 		data: request,
-		jsonp: "callback"
+		jsonp: false
 	});
 }
 

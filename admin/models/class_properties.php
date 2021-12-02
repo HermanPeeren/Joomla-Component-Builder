@@ -5,7 +5,7 @@
  * @created    30th April, 2015
  * @author     Llewellyn van der Merwe <http://www.joomlacomponentbuilder.com>
  * @github     Joomla Component Builder <https://github.com/vdm-io/Joomla-Component-Builder>
- * @copyright  Copyright (C) 2015 - 2020 Vast Development Method. All rights reserved.
+ * @copyright  Copyright (C) 2015 Vast Development Method. All rights reserved.
  * @license    GNU General Public License version 2 or later; see LICENSE.txt
  */
 
@@ -174,7 +174,10 @@ class ComponentbuilderModelClass_properties extends JModelList
 			$visibilityArray = array(
 				'public' => 'COM_COMPONENTBUILDER_CLASS_PROPERTY_PUBLIC',
 				'protected' => 'COM_COMPONENTBUILDER_CLASS_PROPERTY_PROTECTED',
-				'private' => 'COM_COMPONENTBUILDER_CLASS_PROPERTY_PRIVATE'
+				'private' => 'COM_COMPONENTBUILDER_CLASS_PROPERTY_PRIVATE',
+				'public static' => 'COM_COMPONENTBUILDER_CLASS_PROPERTY_PUBLIC_STATIC',
+				'protected static' => 'COM_COMPONENTBUILDER_CLASS_PROPERTY_PROTECTED_STATIC',
+				'private static' => 'COM_COMPONENTBUILDER_CLASS_PROPERTY_PRIVATE_STATIC'
 			);
 			// Now check if value is found in this array
 			if (isset($visibilityArray[$value]) && ComponentbuilderHelper::checkString($visibilityArray[$value]))
@@ -187,6 +190,7 @@ class ComponentbuilderModelClass_properties extends JModelList
 		{
 			$extension_typeArray = array(
 				0 => 'COM_COMPONENTBUILDER_CLASS_PROPERTY_SELECT_AN_OPTION',
+				'powers' => 'COM_COMPONENTBUILDER_CLASS_PROPERTY_POWERS',
 				'components' => 'COM_COMPONENTBUILDER_CLASS_PROPERTY_COMPONENTS',
 				'plugins' => 'COM_COMPONENTBUILDER_CLASS_PROPERTY_PLUGINS',
 				'modules' => 'COM_COMPONENTBUILDER_CLASS_PROPERTY_MODULES'

@@ -5,7 +5,7 @@
  * @created    30th April, 2015
  * @author     Llewellyn van der Merwe <http://www.joomlacomponentbuilder.com>
  * @github     Joomla Component Builder <https://github.com/vdm-io/Joomla-Component-Builder>
- * @copyright  Copyright (C) 2015 - 2020 Vast Development Method. All rights reserved.
+ * @copyright  Copyright (C) 2015 Vast Development Method. All rights reserved.
  * @license    GNU General Public License version 2 or later; see LICENSE.txt
  */
 
@@ -53,6 +53,7 @@ class JFormFieldListfields extends JFormFieldList
 			// get the admin view ID
 			$adminView = $jinput->getInt('refid', 0);
 		}
+		// make sure we have the admin view ID
 		if (is_numeric($adminView) && $adminView >= 1)
 		{
 			// get all the fields linked to the admin view

@@ -5,13 +5,15 @@
  * @created    30th April, 2015
  * @author     Llewellyn van der Merwe <http://www.joomlacomponentbuilder.com>
  * @github     Joomla Component Builder <https://github.com/vdm-io/Joomla-Component-Builder>
- * @copyright  Copyright (C) 2015 - 2020 Vast Development Method. All rights reserved.
+ * @copyright  Copyright (C) 2015 Vast Development Method. All rights reserved.
  * @license    GNU General Public License version 2 or later; see LICENSE.txt
  */
 
 // No direct access to this file
 defined('_JEXEC') or die('Restricted access');
 
+use Joomla\CMS\Filesystem\File;
+use Joomla\CMS\Filesystem\Folder;
 use Joomla\Utilities\ArrayHelper;
 use PhpOffice\PhpSpreadsheet\IOFactory;
 
@@ -222,7 +224,7 @@ class ComponentbuilderModelImport extends JModelLegacy
 
 		// Move uploaded file
 		jimport('joomla.filesystem.file');
-		$p_file = JFile::upload($tmp_src, $tmp_dest, $this->use_streams, $this->allow_unsafe, $this->safeFileOptions);
+		$p_file = File::upload($tmp_src, $tmp_dest, $this->use_streams, $this->allow_unsafe, $this->safeFileOptions);
 
 		// Was the package downloaded?
 		if (!$p_file)
@@ -400,12 +402,12 @@ class ComponentbuilderModelImport extends JModelLegacy
 		// Is the package file a valid file?
 		if (is_file($package))
 		{
-			JFile::delete($package);
+			File::delete($package);
 		}
 		elseif (is_file(JPath::clean($package)))
 		{
 			// It might also be just a base filename
-			JFile::delete(JPath::clean($package));
+			File::delete(JPath::clean($package));
 		}
 	}
 

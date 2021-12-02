@@ -5,7 +5,7 @@
  * @created    30th April, 2015
  * @author     Llewellyn van der Merwe <http://www.joomlacomponentbuilder.com>
  * @github     Joomla Component Builder <https://github.com/vdm-io/Joomla-Component-Builder>
- * @copyright  Copyright (C) 2015 - 2020 Vast Development Method. All rights reserved.
+ * @copyright  Copyright (C) 2015 Vast Development Method. All rights reserved.
  * @license    GNU General Public License version 2 or later; see LICENSE.txt
  */
 
@@ -35,6 +35,93 @@ class ComponentbuilderModelLanguage_translations extends JModelList
 		}
 
 		parent::__construct($config);
+	}
+
+	/**
+	 * Get the filter form - Override the parent method
+	 *
+	 * @param   array    $data      data
+	 * @param   boolean  $loadData  load current data
+	 *
+	 * @return  \JForm|boolean  The \JForm object or false on error
+	 *
+	 * @since   JCB 2.12.5
+	 */
+	public function getFilterForm($data = array(), $loadData = true)
+	{
+		// load form from the parent class
+		$form = parent::getFilterForm($data, $loadData);
+
+		// Create the "extension" filter
+		$form->setField(new SimpleXMLElement(
+			ComponentbuilderHelper::getExtensionGroupedListXml()
+			),'filter');
+		$form->setValue(
+			'extension',
+			'filter',
+			$this->state->get("filter.extension")
+		);
+		array_push($this->filter_fields, 'extension');
+
+		// Create the "translated in" filter
+		$attributes = array(
+			'name' => 'translated',
+			'type' => 'list',
+			'onchange' => 'this.form.submit();',
+		);
+		// no languages found notice
+		$options = array(
+			'' => '-  ' . JText::_('COM_COMPONENTBUILDER_NO_LANGUAGES_FOUND') . '  -'
+		);
+		// check if we have languages set
+		if (($languages = ComponentbuilderHelper::getAvailableLanguages()) !== false)
+		{
+			$options = array(
+				'' => '-  ' . JText::_('COM_COMPONENTBUILDER_TRANSLATED_IN') . '  -',
+				'all' => JText::_('COM_COMPONENTBUILDER_EVERY_LANGUAGE')
+			);
+
+			$options = array_merge($options, $languages);
+		}
+
+		$form->setField(ComponentbuilderHelper::getFieldXML($attributes, $options),'filter');
+		$form->setValue(
+			'translated',
+			'filter',
+			$this->state->get("filter.translated")
+		);
+		array_push($this->filter_fields, 'translated');
+
+		// Create the "not translated in" filter
+		$attributes = array(
+			'name' => 'not_translated',
+			'type' => 'list',
+			'onchange' => 'this.form.submit();',
+		);
+		// no languages found notice
+		$options = array(
+			'' => '-  ' . JText::_('COM_COMPONENTBUILDER_NO_LANGUAGES_FOUND') . '  -'
+		);
+		// check if we have languages set
+		if ($languages)
+		{
+			$options = array(
+				'' => '- ' . JText::_('COM_COMPONENTBUILDER_NOT_TRANSLATED_IN') . ' -',
+				'none' => JText::_('COM_COMPONENTBUILDER_ANY_LANGUAGE')
+			);
+
+			$options = array_merge($options, $languages);
+		}
+
+		$form->setField(ComponentbuilderHelper::getFieldXML($attributes, $options),'filter');
+		$form->setValue(
+			'not_translated',
+			'filter',
+			$this->state->get("filter.not_translated")
+		);
+		array_push($this->filter_fields, 'not_translated');
+
+		return $form;
 	}
 
 	/**
@@ -205,6 +292,57 @@ class ComponentbuilderModelLanguage_translations extends JModelList
 		// From the componentbuilder_item table
 		$query->from($db->quoteName('#__componentbuilder_language_translation', 'a'));
 
+		// do not use these filters in the export method
+		if (!isset($_export) || !$_export)
+		{
+			// Filtering "translated in"
+			$filter_translated = $this->state->get("filter.translated");
+			if ($filter_translated !== null && !empty($filter_translated))
+			{
+				if (($ids = ComponentbuilderHelper::getTranslationIds($filter_translated)) !== false)
+				{
+					$query->where($db->quoteName('a.id') . ' IN (' . implode(',', $ids) . ')');
+				}
+				else
+				{
+					// there is none
+					$query->where($db->quoteName('a.id') . ' = ' . 0);
+				}
+			}
+
+			// Filtering "not translated in"
+			$filter_not_translated = $this->state->get("filter.not_translated");
+			if ($filter_not_translated !== null && !empty($filter_not_translated))
+			{
+				if (($ids = ComponentbuilderHelper::getTranslationIds($filter_not_translated, false)) !== false)
+				{
+					$query->where($db->quoteName('a.id') . ' IN (' . implode(',',$ids) . ')');
+				}
+				else
+				{
+					// there is none
+					$query->where($db->quoteName('a.id') . ' = ' . 0);
+				}
+			}
+
+			// Filtering "extension"
+			$filter_extension = $this->state->get("filter.extension");
+			if ($filter_extension !== null && !empty($filter_extension))
+			{
+				// column name, and id
+				$type_extension = explode('__', $filter_extension);
+				if (($ids = ComponentbuilderHelper::getTranslationExtensionsIds($type_extension[1], $type_extension[0])) !== false)
+				{
+					$query->where($db->quoteName('a.id') . ' IN (' . implode(',', $ids) . ')');
+				}
+				else
+				{
+					// there is none
+					$query->where($db->quoteName('a.id') . ' = ' . 0);
+				}
+			}
+		}
+
 		// Filter by published state
 		$published = $this->getState('filter.published');
 		if (is_numeric($published))
@@ -249,7 +387,7 @@ class ComponentbuilderModelLanguage_translations extends JModelList
 			else
 			{
 				$search = $db->quote('%' . $db->escape($search) . '%');
-				$query->where('(a.source LIKE '.$search.')');
+				$query->where('(a.source LIKE '.$search.' OR a.translation LIKE '.$search.')');
 			}
 		}
 
@@ -312,6 +450,57 @@ class ComponentbuilderModelLanguage_translations extends JModelList
 			{
 				$query->where('a.id IN (' . implode(',',$pks) . ')');
 			}
+
+			// do not use these filters in the export method
+		if (!isset($_export) || !$_export)
+		{
+			// Filtering "translated in"
+			$filter_translated = $this->state->get("filter.translated");
+			if ($filter_translated !== null && !empty($filter_translated))
+			{
+				if (($ids = ComponentbuilderHelper::getTranslationIds($filter_translated)) !== false)
+				{
+					$query->where($db->quoteName('a.id') . ' IN (' . implode(',', $ids) . ')');
+				}
+				else
+				{
+					// there is none
+					$query->where($db->quoteName('a.id') . ' = ' . 0);
+				}
+			}
+
+			// Filtering "not translated in"
+			$filter_not_translated = $this->state->get("filter.not_translated");
+			if ($filter_not_translated !== null && !empty($filter_not_translated))
+			{
+				if (($ids = ComponentbuilderHelper::getTranslationIds($filter_not_translated, false)) !== false)
+				{
+					$query->where($db->quoteName('a.id') . ' IN (' . implode(',',$ids) . ')');
+				}
+				else
+				{
+					// there is none
+					$query->where($db->quoteName('a.id') . ' = ' . 0);
+				}
+			}
+
+			// Filtering "extension"
+			$filter_extension = $this->state->get("filter.extension");
+			if ($filter_extension !== null && !empty($filter_extension))
+			{
+				// column name, and id
+				$type_extension = explode('__', $filter_extension);
+				if (($ids = ComponentbuilderHelper::getTranslationExtensionsIds($type_extension[1], $type_extension[0])) !== false)
+				{
+					$query->where($db->quoteName('a.id') . ' IN (' . implode(',', $ids) . ')');
+				}
+				else
+				{
+					// there is none
+					$query->where($db->quoteName('a.id') . ' = ' . 0);
+				}
+			}
+		}
 			// Implement View Level Access
 			if (!$user->authorise('core.options', 'com_componentbuilder'))
 			{

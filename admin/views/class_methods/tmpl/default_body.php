@@ -5,12 +5,12 @@
  * @created    30th April, 2015
  * @author     Llewellyn van der Merwe <http://www.joomlacomponentbuilder.com>
  * @github     Joomla Component Builder <https://github.com/vdm-io/Joomla-Component-Builder>
- * @copyright  Copyright (C) 2015 - 2020 Vast Development Method. All rights reserved.
+ * @copyright  Copyright (C) 2015 Vast Development Method. All rights reserved.
  * @license    GNU General Public License version 2 or later; see LICENSE.txt
  */
 
 // No direct access to this file
-defined('_JEXEC') or die('Restricted access'); 
+defined('_JEXEC') or die('Restricted access');
 
 $edit = "index.php?option=com_componentbuilder&view=class_methods&task=class_method.edit";
 
@@ -58,22 +58,23 @@ $edit = "index.php?option=com_componentbuilder&view=class_methods&task=class_met
 		<?php endif; ?>
 		</td>
 		<td class="nowrap">
-			<div class="name">
-				<?php if ($canDo->get('class_method.edit')): ?>
-					<a href="<?php echo $edit; ?>&id=<?php echo $item->id; ?>"><?php echo $this->escape($item->name); ?></a>
-					<?php if ($item->checked_out): ?>
-						<?php echo JHtml::_('jgrid.checkedout', $i, $userChkOut->name, $item->checked_out_time, 'class_methods.', $canCheckin); ?>
-					<?php endif; ?>
-				<?php else: ?>
-					<?php echo $this->escape($item->name); ?>
+			<div>
+			<?php if ($canDo->get('class_method.edit')): ?>
+				<a href="<?php echo $edit; ?>&id=<?php echo $item->id; ?>"><?php echo $this->escape($item->name); ?></a>
+				<?php if ($item->checked_out): ?>
+					<?php echo JHtml::_('jgrid.checkedout', $i, $userChkOut->name, $item->checked_out_time, 'class_methods.', $canCheckin); ?>
 				<?php endif; ?>
+			<?php else: ?>
+				<?php echo $this->escape($item->name); ?>
+			<?php endif; ?>(
+			<?php echo $this->escape($item->arguments); ?>)
 			</div>
 		</td>
 		<td class="hidden-phone">
 			<?php echo JText::_($item->visibility); ?>
 		</td>
 		<td class="hidden-phone">
-			<div><?php if (isset($item->joomla_plugin_group) && ComponentbuilderHelper::checkString($item->joomla_plugin_group)): ?>
+			<div><?php if (isset($item->joomla_plugin_group) && $item->joomla_plugin_group > 0): ?>
 	
 			<?php echo JText::_($item->extension_type); ?> <?php echo JText::_('COM_COMPONENTBUILDER_GROUP'); ?>: <b>
 			<?php echo $this->escape($item->joomla_plugin_group_name); ?></b>

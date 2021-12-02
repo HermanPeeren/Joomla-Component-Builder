@@ -5,7 +5,7 @@
  * @created    30th April, 2015
  * @author     Llewellyn van der Merwe <http://www.joomlacomponentbuilder.com>
  * @github     Joomla Component Builder <https://github.com/vdm-io/Joomla-Component-Builder>
- * @copyright  Copyright (C) 2015 - 2020 Vast Development Method. All rights reserved.
+ * @copyright  Copyright (C) 2015 Vast Development Method. All rights reserved.
  * @license    GNU General Public License version 2 or later; see LICENSE.txt
  */
 
@@ -30,7 +30,9 @@ $fields = $displayData->get($fields_tab_layout) ?: array(
 	'alias_builder_type',
 	'note_alias_builder_custom',
 	'note_alias_builder_default',
-	'alias_builder'
+	'alias_builder',
+	'note_category_menu_switch',
+	'add_category_submenu'
 );
 
 $hiddenFields = $displayData->get('hidden_fields') ?: array();

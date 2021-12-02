@@ -5,7 +5,7 @@
  * @created    30th April, 2015
  * @author     Llewellyn van der Merwe <http://www.joomlacomponentbuilder.com>
  * @github     Joomla Component Builder <https://github.com/vdm-io/Joomla-Component-Builder>
- * @copyright  Copyright (C) 2015 - 2020 Vast Development Method. All rights reserved.
+ * @copyright  Copyright (C) 2015 Vast Development Method. All rights reserved.
  * @license    GNU General Public License version 2 or later; see LICENSE.txt
  */
 
@@ -187,7 +187,7 @@ class ComponentbuilderViewCustom_codes extends JViewLegacy
 		if ($this->canBatch && $this->canCreate && $this->canEdit)
 		{
 			// Set Component System Name Selection
-			$this->componentSystem_nameOptions = JFormHelper::loadFieldType('Component')->options;
+			$this->componentSystem_nameOptions = JFormHelper::loadFieldType('Joomlacomponent')->options;
 			// We do some sanitation for Component System Name filter
 			if (ComponentbuilderHelper::checkArray($this->componentSystem_nameOptions) &&
 				isset($this->componentSystem_nameOptions[0]->value) &&

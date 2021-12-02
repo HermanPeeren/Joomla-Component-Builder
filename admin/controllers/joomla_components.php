@@ -5,7 +5,7 @@
  * @created    30th April, 2015
  * @author     Llewellyn van der Merwe <http://www.joomlacomponentbuilder.com>
  * @github     Joomla Component Builder <https://github.com/vdm-io/Joomla-Component-Builder>
- * @copyright  Copyright (C) 2015 - 2020 Vast Development Method. All rights reserved.
+ * @copyright  Copyright (C) 2015 Vast Development Method. All rights reserved.
  * @license    GNU General Public License version 2 or later; see LICENSE.txt
  */
 
@@ -161,7 +161,7 @@ class ComponentbuilderControllerJoomla_components extends JControllerAdmin
 		// set page redirect
 		$redirect_url = JRoute::_('index.php?option=com_componentbuilder&view=joomla_components', false);
 		$message = JText::_('COM_COMPONENTBUILDER_COULD_NOT_CLEAR_THE_TMP_FOLDER');
-		if($user->authorise('joomla_components.clear_tmp', 'com_componentbuilder') && $user->authorise('core.options', 'com_componentbuilder'))
+		if($user->authorise('joomla_components.clear_tmp', 'com_componentbuilder') && $user->authorise('core.manage', 'com_componentbuilder'))
 		{
 			// get the model
 			$model = $this->getModel('compiler');
@@ -172,6 +172,14 @@ class ComponentbuilderControllerJoomla_components extends JControllerAdmin
 			{
 				$message = JText::_('COM_COMPONENTBUILDER_BTHE_TMP_FOLDER_HAS_BEEN_CLEAR_SUCCESSFULLYB');
 				$this->setRedirect($redirect_url, $message, 'message');
+				// get application
+				$app = JFactory::getApplication();
+				// wipe out the user c-m-p since we are done with them all
+				$app->setUserState('com_componentbuilder.component_folder_name', '');
+				$app->setUserState('com_componentbuilder.modules_folder_name', '');
+				$app->setUserState('com_componentbuilder.plugins_folder_name', '');
+				$app->setUserState('com_componentbuilder.success_message', '');
+
 				return true;
 			}
 		}

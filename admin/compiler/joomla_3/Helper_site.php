@@ -5,7 +5,7 @@
  * @created    30th April, 2015
  * @author     Llewellyn van der Merwe <http://www.joomlacomponentbuilder.com>
  * @github     Joomla Component Builder <https://github.com/vdm-io/Joomla-Component-Builder>
- * @copyright  Copyright (C) 2015 - 2018 Vast Development Method. All rights reserved.
+ * @copyright  Copyright (C) 2015 Vast Development Method. All rights reserved.
  * @license    GNU General Public License version 2 or later; see LICENSE.txt
  */
 
@@ -17,10 +17,7 @@ defined('_JEXEC') or die('Restricted access');
 // No direct access to this file
 defined('_JEXEC') or die('Restricted access');
 
-use Joomla\CMS\Language\Language;
-use Joomla\Registry\Registry;
-use Joomla\String\StringHelper;
-use Joomla\Utilities\ArrayHelper;###SITE_HELPER_CLASS_HEADER###
+###SITE_HELPER_CLASS_HEADER###
 
 /**
  * ###Component### component helper
@@ -204,12 +201,12 @@ abstract class ###Component###Helper
 			$filePath = $path . '/' . $name . '.php';
 			$fullPathModel = $fullPathModels . '/' . $name . '.php';
 			// check if it exists
-			if (JFile::exists($filePath))
+			if (File::exists($filePath))
 			{
 				// get the file
 				require_once $filePath;
 			}
-			elseif (JFile::exists($fullPathModel))
+			elseif (File::exists($fullPathModel))
 			{
 				// get the file
 				require_once $fullPathModel;

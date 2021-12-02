@@ -280,7 +280,7 @@
 					"type": "single"
 				},
 				"module_forms.js": {
-					"path": "c0mp0n3nt/admin/models/forms",
+					"path": "c0mp0n3nt/media/js",
 					"rename": "module_forms",
 					"type": "single"
 				},
@@ -385,6 +385,11 @@
 					"path": "c0mp0n3nt/admin/layouts",
 					"rename": "layout_admin",
 					"type": "layout"
+				},
+				"layoutoverride.php": {
+					"path": "c0mp0n3nt/admin/layouts/VIEW",
+					"rename": "layoutoverride",
+					"type": "layoutoverride"
 				},
 				"layoutitems.php": {
 					"path": "c0mp0n3nt/admin/layouts/VIEW",
@@ -575,6 +580,11 @@
 					"path": "c0mp0n3nt/site/layouts",
 					"rename": "layout_site",
 					"type": "layout"
+				},
+				"layoutoverride.php": {
+					"path": "c0mp0n3nt/site/layouts/VIEW",
+					"rename": "layoutoverride",
+					"type": "layoutoverride"
 				},
 				"layoutitems.php": {
 					"path": "c0mp0n3nt/site/layouts/VIEW",

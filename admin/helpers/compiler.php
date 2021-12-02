@@ -5,13 +5,15 @@
  * @created    30th April, 2015
  * @author     Llewellyn van der Merwe <http://www.joomlacomponentbuilder.com>
  * @github     Joomla Component Builder <https://github.com/vdm-io/Joomla-Component-Builder>
- * @copyright  Copyright (C) 2015 - 2020 Vast Development Method. All rights reserved.
+ * @copyright  Copyright (C) 2015 Vast Development Method. All rights reserved.
  * @license    GNU General Public License version 2 or later; see LICENSE.txt
  */
 
 // No direct access to this file
 defined('_JEXEC') or die('Restricted access');
 
+use Joomla\CMS\Filesystem\File;
+use Joomla\CMS\Filesystem\Folder;
 // Use the component builder autoloader
 ComponentbuilderHelper::autoLoader();
 
@@ -391,7 +393,7 @@ class Compiler extends Infusion
 			// first we do the static files
 			foreach ($this->newFiles['static'] as $static)
 			{
-				if (JFile::exists($static['path']))
+				if (File::exists($static['path']))
 				{
 					$this->setFileContent(
 						$static['name'], $static['path'], $bom
@@ -410,7 +412,7 @@ class Compiler extends Infusion
 					{
 						if ($file['view'] == $view)
 						{
-							if (JFile::exists($file['path']))
+							if (File::exists($file['path']))
 							{
 								$this->setFileContent(
 									$file['name'], $file['path'], $bom,
@@ -492,7 +494,7 @@ class Compiler extends Infusion
 						// update the module files
 						foreach ($this->newFiles[$module->key] as $module_file)
 						{
-							if (JFile::exists($module_file['path']))
+							if (File::exists($module_file['path']))
 							{
 								$this->setFileContent(
 									$module_file['name'], $module_file['path'],
@@ -573,7 +575,7 @@ class Compiler extends Infusion
 						// update the plugin files
 						foreach ($this->newFiles[$plugin->key] as $plugin_file)
 						{
-							if (JFile::exists($plugin_file['path']))
+							if (File::exists($plugin_file['path']))
 							{
 								$this->setFileContent(
 									$plugin_file['name'], $plugin_file['path'],
@@ -674,7 +676,7 @@ class Compiler extends Infusion
 			$update_server_xml_path = $this->componentPath . '/'
 				. $this->updateServerFileName . '.xml';
 			// make sure we have the correct file
-			if (JFile::exists($update_server_xml_path)
+			if (File::exists($update_server_xml_path)
 				&& isset($this->componentData->update_server))
 			{
 				// move to server
@@ -685,7 +687,40 @@ class Compiler extends Infusion
 					$this->componentData->update_server_protocol
 				);
 				// remove the local file
-				JFile::delete($update_server_xml_path);
+				File::delete($update_server_xml_path);
+			}
+		}
+		// move the modules update server to host
+		if (ComponentbuilderHelper::checkArray($this->joomlaModules))
+		{
+			foreach ($this->joomlaModules as $module)
+			{
+				if (ComponentbuilderHelper::checkObject($module)
+					&& isset($module->add_update_server)
+					&& $module->add_update_server == 1
+					&& isset($module->update_server_target)
+					&& $module->update_server_target == 1
+					&& isset($module->update_server)
+					&& is_numeric($module->update_server)
+					&& $module->update_server > 0
+					&& isset($module->update_server_xml_path)
+					&& File::exists($module->update_server_xml_path)
+					&& isset($module->update_server_xml_file_name)
+					&& ComponentbuilderHelper::checkString(
+						$module->update_server_xml_file_name
+					))
+				{
+					// move to server
+					ComponentbuilderHelper::moveToServer(
+						$module->update_server_xml_path,
+						$module->update_server_xml_file_name,
+						(int) $module->update_server,
+						$module->update_server_protocol
+					);
+					// remove the local file
+					File::delete($module->update_server_xml_path);
+				}
+				// var_dump($module->update_server_xml_path);exit;
 			}
 		}
 		// move the plugins update server to host
@@ -702,7 +737,7 @@ class Compiler extends Infusion
 					&& is_numeric($plugin->update_server)
 					&& $plugin->update_server > 0
 					&& isset($plugin->update_server_xml_path)
-					&& JFile::exists($plugin->update_server_xml_path)
+					&& File::exists($plugin->update_server_xml_path)
 					&& isset($plugin->update_server_xml_file_name)
 					&& ComponentbuilderHelper::checkString(
 						$plugin->update_server_xml_file_name
@@ -716,13 +751,13 @@ class Compiler extends Infusion
 						$plugin->update_server_protocol
 					);
 					// remove the local file
-					JFile::delete($plugin->update_server_xml_path);
+					File::delete($plugin->update_server_xml_path);
 				}
 			}
 		}
 	}
 
-	// link canges made to views into the file license
+	// link changes made to views into the file license
 	protected function fixLicenseValues($data)
 	{
 		// check if these files have its own config data)
@@ -810,7 +845,7 @@ class Compiler extends Infusion
 			if (('README.md' === $static['name']
 					|| 'README.txt' === $static['name'])
 				&& $this->componentData->addreadme
-				&& JFile::exists($static['path']))
+				&& File::exists($static['path']))
 			{
 				$this->setReadMe($static['path']);
 				$two++;
@@ -934,7 +969,7 @@ class Compiler extends Infusion
 			// remove old data
 			$this->removeFolder($repoFullPath, $this->componentData->toignore);
 			// set the new data
-			JFolder::copy($this->componentPath, $repoFullPath, '', true);
+			Folder::copy($this->componentPath, $repoFullPath, '', true);
 			// Trigger Event: jcb_ce_onAfterUpdateRepo
 			$this->triggerEvent(
 				'jcb_ce_onAfterUpdateRepo',
@@ -967,7 +1002,7 @@ class Compiler extends Infusion
 							$repoFullPath, $this->componentData->toignore
 						);
 						// set the new data
-						JFolder::copy(
+						Folder::copy(
 							$module->folder_path, $repoFullPath, '', true
 						);
 						// Trigger Event: jcb_ce_onAfterUpdateRepo
@@ -1004,7 +1039,7 @@ class Compiler extends Infusion
 							$repoFullPath, $this->componentData->toignore
 						);
 						// set the new data
-						JFolder::copy(
+						Folder::copy(
 							$plugin->folder_path, $repoFullPath, '', true
 						);
 						// Trigger Event: jcb_ce_onAfterUpdateRepo
@@ -1050,13 +1085,12 @@ class Compiler extends Infusion
 					                                  &$this->componentData)
 				);
 				// copy the zip to backup path
-				JFile::copy(
+				File::copy(
 					$this->filepath['component'],
 					$this->backupPath . '/' . $this->componentBackupName
 					. '.zip'
 				);
 			}
-
 			// move to sales server host
 			if ($this->componentData->add_sales_server == 1
 				&& $this->dynamicIntegration)
@@ -1145,7 +1179,7 @@ class Compiler extends Infusion
 								      &$module)
 							);
 							// copy the zip to backup path
-							JFile::copy(
+							File::copy(
 								$this->filepath['modules'][$module->id],
 								$this->backupPath . '/' . $module->zip_name
 								. '.zip'
@@ -1239,7 +1273,7 @@ class Compiler extends Infusion
 								      &$plugin)
 							);
 							// copy the zip to backup path
-							JFile::copy(
+							File::copy(
 								$this->filepath['plugins'][$plugin->id],
 								$this->backupPath . '/' . $plugin->zip_name
 								. '.zip'
@@ -1325,7 +1359,7 @@ class Compiler extends Infusion
 				}
 				$counter = 0;
 				// check if file exist			
-				if (JFile::exists($file))
+				if (File::exists($file))
 				{
 					foreach (
 						new SplFileObject($file) as $lineNumber => $lineContent

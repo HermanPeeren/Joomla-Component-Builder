@@ -5,7 +5,7 @@
  * @created    30th April, 2015
  * @author     Llewellyn van der Merwe <http://www.joomlacomponentbuilder.com>
  * @github     Joomla Component Builder <https://github.com/vdm-io/Joomla-Component-Builder>
- * @copyright  Copyright (C) 2015 - 2020 Vast Development Method. All rights reserved.
+ * @copyright  Copyright (C) 2015 Vast Development Method. All rights reserved.
  * @license    GNU General Public License version 2 or later; see LICENSE.txt
  */
 
@@ -45,6 +45,13 @@ class Fields extends Structure
 	 * @var    array
 	 */
 	public $layoutBuilder = array();
+
+	/**
+	 * permissions builder
+	 *
+	 * @var    array
+	 */
+	public $hasPermissions = array();
 
 	/**
 	 * used to fix the zero order
@@ -863,6 +870,41 @@ class Fields extends Structure
 				$this->fieldCount++;
 			}
 		}
+		// fix the permissions field "title" issue gh-629
+		// check if the the title is not already set
+		if (!isset($this->fieldsNames[$nameSingleCode]['title'])
+			&& $this->hasPermissionsSet($view, $nameSingleCode))
+		{
+			// set the field/tab name
+			$field_name = "title";
+			$tab_name   = "publishing";
+			$fieldSet[] = $this->_t(2) . "<!--" . $this->setLine(__LINE__)
+				. " Was added due to Permissions JS needing a Title field -->";
+			$fieldSet[] = $this->_t(2) . "<!--" . $this->setLine(__LINE__)
+				. " Let us know at gh-629 should this change -->";
+			$fieldSet[] = $this->_t(2) . "<!--" . $this->setLine(__LINE__)
+				. " https://github.com/vdm-io/Joomla-Component-Builder/issues/629#issuecomment-750117235 -->";
+			// at this point we know that we must add a hidden title field
+			// and make sure it does not get stored to the database
+			$fieldSet[] = $this->_t(2) . "<field";
+			$fieldSet[] = $this->_t(3) . "name=" . '"' . $field_name . '"';
+			$fieldSet[] = $this->_t(3)
+				. 'type="hidden"';
+			$fieldSet[] = $this->_t(3) . 'default="' . $component . ' '
+				. $nameSingleCode . '"';
+			$fieldSet[] = $this->_t(2) . "/>";
+			// count the static field created
+			$this->fieldCount++;
+			// setup needed field values for layout
+			$field_array               = array();
+			$field_array['order_edit'] = 0;
+			$field_array['tab']        = 15;
+			$field_array['alignment']  = 1;
+			// make sure it gets added to view
+			$this->setLayoutBuilder(
+				$nameSingleCode, $tab_name, $field_name, $field_array
+			);
+		}
 		// load the dynamic fields now
 		if (ComponentbuilderHelper::checkString($dynamicFields))
 		{
@@ -1263,6 +1305,49 @@ class Fields extends Structure
 				$this->fieldCount++;
 			}
 		}
+		// fix the permissions field "title" issue gh-629
+		// check if the the title is not already set
+		if (!isset($this->fieldsNames[$nameSingleCode]['title'])
+			&& $this->hasPermissionsSet($view, $nameSingleCode))
+		{
+			// set the field/tab name
+			$field_name = "title";
+			$tab_name   = "publishing";
+
+			$attributes = array(
+				'name'    => $field_name,
+				'type'    => 'hidden',
+				'default' => $component . ' ' . $nameSingleCode
+			);
+			ComponentbuilderHelper::xmlComment(
+				$fieldSetXML,
+				$this->setLine(__LINE__)
+				. " Was added due to Permissions JS needing a Title field"
+			);
+			ComponentbuilderHelper::xmlComment(
+				$fieldSetXML,
+				$this->setLine(__LINE__)
+				. " Let us know at gh-629 should this change"
+			);
+			ComponentbuilderHelper::xmlComment(
+				$fieldSetXML,
+				$this->setLine(__LINE__)
+				. " https://github.com/vdm-io/Joomla-Component-Builder/issues/629#issuecomment-750117235"
+			);
+			$fieldXML = $fieldSetXML->addChild('field');
+			ComponentbuilderHelper::xmlAddAttributes($fieldXML, $attributes);
+			// count the static field created
+			$this->fieldCount++;
+			// setup needed field values for layout
+			$field_array               = array();
+			$field_array['order_edit'] = 0;
+			$field_array['tab']        = 15;
+			$field_array['alignment']  = 1;
+			// make sure it gets added to view
+			$this->setLayoutBuilder(
+				$nameSingleCode, $tab_name, $field_name, $field_array
+			);
+		}
 		// load the dynamic fields now
 		if (count((array) $dynamicFieldsXML))
 		{
@@ -1380,6 +1465,85 @@ class Fields extends Structure
 
 		// return the set
 		return $this->xmlPrettyPrint($XML, 'fieldset');
+	}
+
+	/**
+	 * Check to see if a view has permissions
+	 *
+	 * @param   array   $view            View details
+	 * @param   string  $nameSingleCode  View Single Code Name
+	 *
+	 * @return  boolean true if it has permisssions
+	 *
+	 */
+	protected function hasPermissionsSet(&$view, &$nameSingleCode)
+	{
+		// first check if we have checked this already
+		if (!isset($this->hasPermissions[$nameSingleCode]))
+		{
+			// default is false
+			$this->hasPermissions[$nameSingleCode] = false;
+			// when a view has history, it has permissions
+			// since it tracks the version access
+			if (isset($view['history']) && $view['history'] == 1)
+			{
+				// set the permission for later
+				$this->hasPermissions[$nameSingleCode] = true;
+
+				// break out here
+				return true;
+			}
+			// check if the view has permissions
+			if (isset($view['settings'])
+				&& ComponentbuilderHelper::checkArray(
+					$view['settings']->permissions, true
+				))
+			{
+				foreach ($view['settings']->permissions as $per)
+				{
+					// check if the permission targets the view
+					// 1 = view
+					// 3 = both view & component
+					if (isset($per['implementation'])
+						&& (
+							$per['implementation'] == 1
+							|| $per['implementation'] == 3
+						))
+					{
+						// set the permission for later
+						$this->hasPermissions[$nameSingleCode] = true;
+
+						// break out here
+						return true;
+					}
+				}
+			}
+			// check if the fields has permissions
+			if (isset($view['settings'])
+				&& ComponentbuilderHelper::checkArray(
+					$view['settings']->fields, true
+				))
+			{
+				foreach ($view['settings']->fields as $field)
+				{
+					// if a field has any permissions
+					// the a view has permissions
+					if (isset($field['permission'])
+						&& ComponentbuilderHelper::checkArray(
+							$field['permission'], true
+						))
+					{
+						// set the permission for later
+						$this->hasPermissions[$nameSingleCode] = true;
+
+						// break out here
+						return true;
+					}
+				}
+			}
+		}
+
+		return $this->hasPermissions[$nameSingleCode];
 	}
 
 	/**
@@ -4414,17 +4578,18 @@ class Fields extends Structure
 		$nameListCode, $name, $view, $field, $typeName, $multiple,
 		$custom = false, $options = false
 	) {
+		// check if this is a tag field
+		if ($typeName === 'tag')
+		{
+			// set tags for this view but don't load to DB
+			$this->tagsBuilder[$nameSingleCode] = $nameSingleCode;
+		}
 		// dbSwitch
 		$dbSwitch = true;
 		if (isset($field['list']) && $field['list'] == 2)
 		{
 			// do not add this field to the database
 			$dbSwitch = false;
-		}
-		elseif ($typeName === 'tag')
-		{
-			// set tags for this view but don't load to DB
-			$this->tagsBuilder[$nameSingleCode] = $nameSingleCode;
 		}
 		elseif (isset($field['settings']->datatype))
 		{
@@ -4568,19 +4733,40 @@ class Fields extends Structure
 		}
 		else
 		{
-			// set lang (just in case)
-			$listLangName = $langView . '_'
-				. ComponentbuilderHelper::safeFieldName($name, true);
-			// set field name
-			$listFieldName = ComponentbuilderHelper::safeString($name, 'W');
-			// add to lang array
-			$this->setLangContent(
-				$this->lang, $listLangName, $listFieldName
-			);
 			// if label was set use instead
 			if (ComponentbuilderHelper::checkString($langLabel))
 			{
 				$listLangName = $langLabel;
+				// get field label from the lang label
+				if (isset($this->langContent[$this->lang][$langLabel]))
+				{
+					$listFieldName
+						= $this->langContent[$this->lang][$langLabel];
+				}
+				else
+				{
+					// get it from the field xml string
+					$listFieldName = (string) $this->setPlaceholders(
+						ComponentbuilderHelper::getBetween(
+							$field['settings']->xml, 'label="',
+							'"'
+						), $this->placeholders
+					);
+				}
+				// make sure there is no html in the list field name
+				$listFieldName = strip_tags($listFieldName);
+			}
+			else
+			{
+				// set lang (just in case)
+				$listLangName = $langView . '_'
+					. ComponentbuilderHelper::safeFieldName($name, true);
+				// set field name
+				$listFieldName = ComponentbuilderHelper::safeString($name, 'W');
+				// add to lang array
+				$this->setLangContent(
+					$this->lang, $listLangName, $listFieldName
+				);
 			}
 		}
 		// build the list values
@@ -4652,7 +4838,7 @@ class Fields extends Structure
 			}
 		}
 		// set the hidden field of this view
-		if ($typeName === 'hidden')
+		if ($dbSwitch && $typeName === 'hidden')
 		{
 			if (!isset($this->hiddenFieldsBuilder[$nameSingleCode]))
 			{
@@ -4673,7 +4859,7 @@ class Fields extends Structure
 			$this->intFieldsBuilder[$nameSingleCode] .= ',"' . $name . '"';
 		}
 		// set all dynamic field of this view
-		if ($typeName != 'category' && $typeName != 'repeatable'
+		if ($dbSwitch && $typeName != 'category' && $typeName != 'repeatable'
 			&& $typeName != 'subform'
 			&& !in_array($name, $this->defaultFields))
 		{
@@ -4803,7 +4989,8 @@ class Fields extends Structure
 			// load the category builder - TODO must move all to single view
 			$this->categoryBuilder[$nameListCode] = array('code'      => $name,
 			                                              'name'      => $listLangName,
-			                                              'extension' => $_extension);
+			                                              'extension' => $_extension,
+			                                              'filter'    => $field['filter']);
 			// also set code name for title alias fix
 			$this->catCodeBuilder[$nameSingleCode] = array('code'  => $name,
 			                                               'views' => $otherViews,
@@ -4855,7 +5042,7 @@ class Fields extends Structure
 					);
 					break;
 				case 4:
-					// WHMCS_ENCRYPTION_VDMKEY
+					// WHMCS_ENCRYPTION_VDMKEY (DUE REMOVAL)
 					$this->whmcsFieldModeling[$nameSingleCode][] = $name;
 					// Site settings of each field if needed
 					$this->buildSiteFieldData(
@@ -5622,7 +5809,9 @@ class Fields extends Structure
 				&& ComponentbuilderHelper::checkArray(
 					$this->categoryBuilder[$nameListCode]
 				)
-				&& isset($this->categoryBuilder[$nameListCode]['extension']))
+				&& isset($this->categoryBuilder[$nameListCode]['extension'])
+				&& isset($this->categoryBuilder[$nameListCode]['filter'])
+				&& $this->categoryBuilder[$nameListCode]['filter'] >= 1)
 			{
 				$field_filter_sets[] = $this->_t(2) . '<field';
 				$field_filter_sets[] = $this->_t(3) . 'type="category"';
@@ -5947,7 +6136,7 @@ class Fields extends Structure
 			{
 				$fieldData['component'] = $local_component;
 			}
-			// check that the componet has the com_ value in it
+			// check that the component has the com_ value in it
 			if (strpos($fieldData['component'], 'com_') === false
 				|| strpos(
 					$fieldData['component'], '='

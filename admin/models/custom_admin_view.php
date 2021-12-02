@@ -5,7 +5,7 @@
  * @created    30th April, 2015
  * @author     Llewellyn van der Merwe <http://www.joomlacomponentbuilder.com>
  * @github     Joomla Component Builder <https://github.com/vdm-io/Joomla-Component-Builder>
- * @copyright  Copyright (C) 2015 - 2020 Vast Development Method. All rights reserved.
+ * @copyright  Copyright (C) 2015 Vast Development Method. All rights reserved.
  * @license    GNU General Public License version 2 or later; see LICENSE.txt
  */
 
@@ -34,7 +34,7 @@ class ComponentbuilderModelCustom_admin_view extends JModelAdmin
 				'description',
 				'note_libraries_selection',
 				'libraries',
-				'note_add_language_string'
+				'note_add_php_language_string'
 			),
 			'right' => array(
 				'icon',
@@ -371,12 +371,6 @@ class ComponentbuilderModelCustom_admin_view extends JModelAdmin
 				// be sure to update the table if we found repeatable fields that are still not converted
 				$this->_db->updateObject('#__componentbuilder_custom_admin_view', $objectUpdate, 'id');
 			}
-			
-			if (!empty($item->id))
-			{
-				$item->tags = new JHelperTags;
-				$item->tags->getTagIds($item->id, 'com_componentbuilder.custom_admin_view');
-			}
 		}
 
 		return $item;
@@ -522,7 +516,7 @@ class ComponentbuilderModelCustom_admin_view extends JModelAdmin
 	 */
 	public function getScript()
 	{
-		return 'administrator/components/com_componentbuilder/models/forms/custom_admin_view.js';
+		return 'media/com_componentbuilder/js/custom_admin_view.js';
 	}
     
 	/**

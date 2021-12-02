@@ -5,7 +5,7 @@
  * @created    30th April, 2015
  * @author     Llewellyn van der Merwe <http://www.joomlacomponentbuilder.com>
  * @github     Joomla Component Builder <https://github.com/vdm-io/Joomla-Component-Builder>
- * @copyright  Copyright (C) 2015 - 2020 Vast Development Method. All rights reserved.
+ * @copyright  Copyright (C) 2015 Vast Development Method. All rights reserved.
  * @license    GNU General Public License version 2 or later; see LICENSE.txt
  */
 
@@ -25,7 +25,7 @@ class ComponentbuilderModelComponentbuilder extends JModelList
 		$icons  = array();
 		// view groups array
 		$viewGroups = array(
-			'main' => array('png.compiler', 'png.joomla_components', 'png.joomla_modules', 'png.joomla_plugins', 'png||importjcbpackages||index.php?option=com_componentbuilder&view=joomla_components&task=joomla_components.smartImport', 'png.admin_view.add', 'png.admin_views', 'png.custom_admin_view.add', 'png.custom_admin_views', 'png.site_view.add', 'png.site_views', 'png.template.add', 'png.templates', 'png.layouts', 'png.dynamic_get.add', 'png.dynamic_gets', 'png.custom_codes', 'png.placeholders', 'png.libraries', 'png.snippets', 'png.get_snippets', 'png.validation_rules', 'png.field.add', 'png.fields', 'png.fields.catid_qpo0O0oqp_com_componentbuilder_po0O0oq_field', 'png.fieldtypes', 'png.fieldtypes.catid_qpo0O0oqp_com_componentbuilder_po0O0oq_fieldtype', 'png.language_translations', 'png.servers', 'png.help_documents')
+			'main' => array('png.compiler', 'png.joomla_components', 'png.joomla_modules', 'png.joomla_plugins', 'png||importjcbpackages||index.php?option=com_componentbuilder&view=joomla_components&task=joomla_components.smartImport', 'png.admin_view.add', 'png.admin_views', 'png.custom_admin_view.add', 'png.custom_admin_views', 'png.site_view.add', 'png.site_views', 'png.template.add', 'png.templates', 'png.layouts', 'png.dynamic_get.add', 'png.dynamic_gets', 'png.custom_codes', 'png.placeholders', 'png.libraries', 'png.snippets', 'png.get_snippets', 'png.validation_rules', 'png.fields', 'png.fields.catid_qpo0O0oqp_com_componentbuilder_po0O0oq_field', 'png.fieldtypes', 'png.fieldtypes.catid_qpo0O0oqp_com_componentbuilder_po0O0oq_fieldtype', 'png.language_translations', 'png.servers', 'png.help_documents')
 		);
 		// view access array
 		$viewAccess = array(
@@ -114,7 +114,6 @@ class ComponentbuilderModelComponentbuilder extends JModelList
 			'field.access' => 'field.access',
 			'fields.submenu' => 'field.submenu',
 			'fields.dashboard_list' => 'field.dashboard_list',
-			'field.dashboard_add' => 'field.dashboard_add',
 			'fieldtype.create' => 'fieldtype.create',
 			'fieldtypes.access' => 'fieldtype.access',
 			'fieldtype.access' => 'fieldtype.access',
@@ -560,7 +559,7 @@ class ComponentbuilderModelComponentbuilder extends JModelList
 				var getUrl = "index.php?option=com_componentbuilder&task=ajax.isRead&format=json&raw=true";
 			}	
 			if(token.length > 0 && notice.length){
-				var request = "token="+token+"&notice="+notice;
+				var request = token+"=1&notice="+notice;
 			}
 			return jQuery.ajax({
 				type: "POST",

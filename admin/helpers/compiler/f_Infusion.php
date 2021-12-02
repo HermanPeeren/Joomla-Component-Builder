@@ -5,12 +5,15 @@
  * @created    30th April, 2015
  * @author     Llewellyn van der Merwe <http://www.joomlacomponentbuilder.com>
  * @github     Joomla Component Builder <https://github.com/vdm-io/Joomla-Component-Builder>
- * @copyright  Copyright (C) 2015 - 2020 Vast Development Method. All rights reserved.
+ * @copyright  Copyright (C) 2015 Vast Development Method. All rights reserved.
  * @license    GNU General Public License version 2 or later; see LICENSE.txt
  */
 
 // No direct access to this file
 defined('_JEXEC') or die('Restricted access');
+
+use Joomla\CMS\Filesystem\File;
+use Joomla\CMS\Filesystem\Folder;
 
 /**
  * Infusion class
@@ -634,21 +637,28 @@ class Infusion extends Interpretation
 						// SITE_ADMIN_VIEW_CONTROLLER_HEADER <<<DYNAMIC>>> add the header details for the controller
 						$this->fileContentDynamic[$nameSingleCode][$this->hhh
 						. 'SITE_ADMIN_VIEW_CONTROLLER_HEADER' . $this->hhh]
-							= $this->setClassHeaders(
+							= $this->setFileHeader(
 							'site.admin.view.controller',
 							$nameSingleCode
 						);
 						// SITE_ADMIN_VIEW_MODEL_HEADER <<<DYNAMIC>>> add the header details for the model
 						$this->fileContentDynamic[$nameSingleCode][$this->hhh
 						. 'SITE_ADMIN_VIEW_MODEL_HEADER' . $this->hhh]
-							= $this->setClassHeaders(
+							= $this->setFileHeader(
 							'site.admin.view.model',
+							$nameSingleCode
+						);
+						// SITE_ADMIN_VIEW_HTML_HEADER <<<DYNAMIC>>> add the header details for the view
+						$this->fileContentDynamic[$nameSingleCode][$this->hhh
+						. 'SITE_ADMIN_VIEW_HTML_HEADER' . $this->hhh]
+							= $this->setFileHeader(
+							'site.admin.view.html',
 							$nameSingleCode
 						);
 						// SITE_ADMIN_VIEW_HEADER <<<DYNAMIC>>> add the header details for the view
 						$this->fileContentDynamic[$nameSingleCode][$this->hhh
 						. 'SITE_ADMIN_VIEW_HEADER' . $this->hhh]
-							= $this->setClassHeaders(
+							= $this->setFileHeader(
 							'site.admin.view',
 							$nameSingleCode
 						);
@@ -664,20 +674,26 @@ class Infusion extends Interpretation
 					// ADMIN_VIEW_CONTROLLER_HEADER <<<DYNAMIC>>> add the header details for the controller
 					$this->fileContentDynamic[$nameSingleCode][$this->hhh
 					. 'ADMIN_VIEW_CONTROLLER_HEADER' . $this->hhh]
-						= $this->setClassHeaders(
+						= $this->setFileHeader(
 						'admin.view.controller',
 						$nameSingleCode
 					);
 					// ADMIN_VIEW_MODEL_HEADER <<<DYNAMIC>>> add the header details for the model
 					$this->fileContentDynamic[$nameSingleCode][$this->hhh
 					. 'ADMIN_VIEW_MODEL_HEADER' . $this->hhh]
-						= $this->setClassHeaders(
+						= $this->setFileHeader(
 						'admin.view.model', $nameSingleCode
+					);
+					// ADMIN_VIEW_HTML_HEADER <<<DYNAMIC>>> add the header details for the view
+					$this->fileContentDynamic[$nameSingleCode][$this->hhh
+					. 'ADMIN_VIEW_HTML_HEADER' . $this->hhh]
+						= $this->setFileHeader(
+						'admin.view.html', $nameSingleCode
 					);
 					// ADMIN_VIEW_HEADER <<<DYNAMIC>>> add the header details for the view
 					$this->fileContentDynamic[$nameSingleCode][$this->hhh
 					. 'ADMIN_VIEW_HEADER' . $this->hhh]
-						= $this->setClassHeaders(
+						= $this->setFileHeader(
 						'admin.view', $nameSingleCode
 					);
 
@@ -1036,20 +1052,26 @@ class Infusion extends Interpretation
 					// ADMIN_VIEWS_CONTROLLER_HEADER <<<DYNAMIC>>> add the header details for the controller
 					$this->fileContentDynamic[$nameListCode][$this->hhh
 					. 'ADMIN_VIEWS_CONTROLLER_HEADER' . $this->hhh]
-						= $this->setClassHeaders(
+						= $this->setFileHeader(
 						'admin.views.controller',
 						$nameListCode
 					);
 					// ADMIN_VIEWS_MODEL_HEADER <<<DYNAMIC>>> add the header details for the model
 					$this->fileContentDynamic[$nameListCode][$this->hhh
 					. 'ADMIN_VIEWS_MODEL_HEADER' . $this->hhh]
-						= $this->setClassHeaders(
+						= $this->setFileHeader(
 						'admin.views.model', $nameListCode
+					);
+					// ADMIN_VIEWS_HTML_HEADER <<<DYNAMIC>>> add the header details for the views
+					$this->fileContentDynamic[$nameListCode][$this->hhh
+					. 'ADMIN_VIEWS_HTML_HEADER' . $this->hhh]
+						= $this->setFileHeader(
+						'admin.views.html', $nameListCode
 					);
 					// ADMIN_VIEWS_HEADER <<<DYNAMIC>>> add the header details for the views
 					$this->fileContentDynamic[$nameListCode][$this->hhh
 					. 'ADMIN_VIEWS_HEADER' . $this->hhh]
-						= $this->setClassHeaders(
+						= $this->setFileHeader(
 						'admin.views', $nameListCode
 					);
 
@@ -1263,21 +1285,6 @@ class Infusion extends Interpretation
 
 			// setup the layouts
 			$this->setCustomViewLayouts();
-
-			// ADMIN_HELPER_CLASS_HEADER
-			$this->fileContentStatic[$this->hhh . 'ADMIN_HELPER_CLASS_HEADER'
-			. $this->hhh]
-				= $this->setHelperClassHeader('admin');
-
-			// SITE_HELPER_CLASS_HEADER
-			$this->fileContentStatic[$this->hhh . 'SITE_HELPER_CLASS_HEADER'
-			. $this->hhh]
-				= $this->setHelperClassHeader('site');
-
-			// HELPER_EXEL
-			$this->fileContentStatic[$this->hhh . 'HELPER_EXEL'
-			. $this->hhh]
-				= $this->setHelperExelMethods();
 
 			// setup custom_admin_views and all needed stuff for the site
 			if (isset($this->componentData->custom_admin_views)
@@ -1512,20 +1519,26 @@ class Infusion extends Interpretation
 						// CUSTOM_ADMIN_VIEW_CONTROLLER_HEADER <<<DYNAMIC>>> add the header details for the controller
 						$this->fileContentDynamic[$view['settings']->code][$this->hhh
 						. 'CUSTOM_ADMIN_VIEW_CONTROLLER_HEADER' . $this->hhh]
-							= $this->setClassHeaders(
+							= $this->setFileHeader(
 							'custom.admin.view.controller',
 							$view['settings']->code
 						);
 						// CUSTOM_ADMIN_VIEW_MODEL_HEADER <<<DYNAMIC>>> add the header details for the model
 						$this->fileContentDynamic[$view['settings']->code][$this->hhh
 						. 'CUSTOM_ADMIN_VIEW_MODEL_HEADER' . $this->hhh]
-							= $this->setClassHeaders(
+							= $this->setFileHeader(
 							'custom.admin.view.model', $view['settings']->code
+						);
+						// CUSTOM_ADMIN_VIEW_HTML_HEADER <<<DYNAMIC>>> add the header details for the view
+						$this->fileContentDynamic[$view['settings']->code][$this->hhh
+						. 'CUSTOM_ADMIN_VIEW_HTML_HEADER' . $this->hhh]
+							= $this->setFileHeader(
+							'custom.admin.view.html', $view['settings']->code
 						);
 						// CUSTOM_ADMIN_VIEW_HEADER <<<DYNAMIC>>> add the header details for the view
 						$this->fileContentDynamic[$view['settings']->code][$this->hhh
 						. 'CUSTOM_ADMIN_VIEW_HEADER' . $this->hhh]
-							= $this->setClassHeaders(
+							= $this->setFileHeader(
 							'custom.admin.view', $view['settings']->code
 						);
 					}
@@ -1534,20 +1547,26 @@ class Infusion extends Interpretation
 						// CUSTOM_ADMIN_VIEWS_CONTROLLER_HEADER <<<DYNAMIC>>> add the header details for the controller
 						$this->fileContentDynamic[$view['settings']->code][$this->hhh
 						. 'CUSTOM_ADMIN_VIEWS_CONTROLLER_HEADER' . $this->hhh]
-							= $this->setClassHeaders(
+							= $this->setFileHeader(
 							'custom.admin.views.controller',
 							$view['settings']->code
 						);
 						// CUSTOM_ADMIN_VIEWS_MODEL_HEADER <<<DYNAMIC>>> add the header details for the model
 						$this->fileContentDynamic[$view['settings']->code][$this->hhh
 						. 'CUSTOM_ADMIN_VIEWS_MODEL_HEADER' . $this->hhh]
-							= $this->setClassHeaders(
+							= $this->setFileHeader(
 							'custom.admin.views.model', $view['settings']->code
+						);
+						// CUSTOM_ADMIN_VIEWS_HTML_HEADER <<<DYNAMIC>>> add the header details for the view
+						$this->fileContentDynamic[$view['settings']->code][$this->hhh
+						. 'CUSTOM_ADMIN_VIEWS_HTML_HEADER' . $this->hhh]
+							= $this->setFileHeader(
+							'custom.admin.views.html', $view['settings']->code
 						);
 						// CUSTOM_ADMIN_VIEWS_HEADER <<<DYNAMIC>>> add the header details for the view
 						$this->fileContentDynamic[$view['settings']->code][$this->hhh
 						. 'CUSTOM_ADMIN_VIEWS_HEADER' . $this->hhh]
-							= $this->setClassHeaders(
+							= $this->setFileHeader(
 							'custom.admin.views', $view['settings']->code
 						);
 					}
@@ -1566,6 +1585,39 @@ class Infusion extends Interpretation
 				// setup the layouts
 				$this->setCustomViewLayouts();
 			}
+
+			// ADMIN_HELPER_CLASS_HEADER
+			$this->fileContentStatic[$this->hhh . 'ADMIN_HELPER_CLASS_HEADER'
+			. $this->hhh]
+				= $this->setFileHeader(
+				'admin.helper', 'admin'
+			);
+
+			// ADMIN_COMPONENT_HEADER
+			$this->fileContentStatic[$this->hhh . 'ADMIN_COMPONENT_HEADER'
+			. $this->hhh]
+				= $this->setFileHeader(
+				'admin.component', 'admin'
+			);
+
+			// SITE_HELPER_CLASS_HEADER
+			$this->fileContentStatic[$this->hhh . 'SITE_HELPER_CLASS_HEADER'
+			. $this->hhh]
+				= $this->setFileHeader(
+				'site.helper', 'site'
+			);
+
+			// SITE_COMPONENT_HEADER
+			$this->fileContentStatic[$this->hhh . 'SITE_COMPONENT_HEADER'
+			. $this->hhh]
+				= $this->setFileHeader(
+				'site.component', 'site'
+			);
+
+			// HELPER_EXEL
+			$this->fileContentStatic[$this->hhh . 'HELPER_EXEL'
+			. $this->hhh]
+				= $this->setHelperExelMethods();
 
 			// VIEWARRAY
 			$this->fileContentStatic[$this->hhh . 'VIEWARRAY' . $this->hhh]
@@ -1995,20 +2047,26 @@ class Infusion extends Interpretation
 							// SITE_VIEW_CONTROLLER_HEADER <<<DYNAMIC>>> add the header details for the model
 							$this->fileContentDynamic[$view['settings']->code][$this->hhh
 							. 'SITE_VIEW_CONTROLLER_HEADER' . $this->hhh]
-								= $this->setClassHeaders(
+								= $this->setFileHeader(
 								'site.view.controller', $view['settings']->code
 							);
 						}
 						// SITE_VIEW_MODEL_HEADER <<<DYNAMIC>>> add the header details for the model
 						$this->fileContentDynamic[$view['settings']->code][$this->hhh
 						. 'SITE_VIEW_MODEL_HEADER' . $this->hhh]
-							= $this->setClassHeaders(
+							= $this->setFileHeader(
 							'site.view.model', $view['settings']->code
+						);
+						// SITE_VIEW_HTML_HEADER <<<DYNAMIC>>> add the header details for the view
+						$this->fileContentDynamic[$view['settings']->code][$this->hhh
+						. 'SITE_VIEW_HTML_HEADER' . $this->hhh]
+							= $this->setFileHeader(
+							'site.view.html', $view['settings']->code
 						);
 						// SITE_VIEW_HEADER <<<DYNAMIC>>> add the header details for the view
 						$this->fileContentDynamic[$view['settings']->code][$this->hhh
 						. 'SITE_VIEW_HEADER' . $this->hhh]
-							= $this->setClassHeaders(
+							= $this->setFileHeader(
 							'site.view', $view['settings']->code
 						);
 					}
@@ -2023,20 +2081,26 @@ class Infusion extends Interpretation
 							// SITE_VIEW_CONTROLLER_HEADER <<<DYNAMIC>>> add the header details for the model
 							$this->fileContentDynamic[$view['settings']->code][$this->hhh
 							. 'SITE_VIEW_CONTROLLER_HEADER' . $this->hhh]
-								= $this->setClassHeaders(
+								= $this->setFileHeader(
 								'site.views.controller', $view['settings']->code
 							);
 						}
 						// SITE_VIEWS_MODEL_HEADER <<<DYNAMIC>>> add the header details for the model
 						$this->fileContentDynamic[$view['settings']->code][$this->hhh
 						. 'SITE_VIEWS_MODEL_HEADER' . $this->hhh]
-							= $this->setClassHeaders(
+							= $this->setFileHeader(
 							'site.views.model', $view['settings']->code
+						);
+						// SITE_VIEWS_HTML_HEADER <<<DYNAMIC>>> add the header details for the view
+						$this->fileContentDynamic[$view['settings']->code][$this->hhh
+						. 'SITE_VIEWS_HTML_HEADER' . $this->hhh]
+							= $this->setFileHeader(
+							'site.views.html', $view['settings']->code
 						);
 						// SITE_VIEWS_HEADER <<<DYNAMIC>>> add the header details for the view
 						$this->fileContentDynamic[$view['settings']->code][$this->hhh
 						. 'SITE_VIEWS_HEADER' . $this->hhh]
-							= $this->setClassHeaders(
+							= $this->setFileHeader(
 							'site.views', $view['settings']->code
 						);
 					}
@@ -2602,14 +2666,14 @@ class Infusion extends Interpretation
 						// build the path to place the lang file
 						$path = $this->componentPath . '/' . $p . '/language/'
 							. $tag . '/';
-						if (!JFolder::exists($path))
+						if (!Folder::exists($path))
 						{
-							JFolder::create($path);
+							Folder::create($path);
 							// count the folder created
 							$this->folderCount++;
 						}
 						// move the file to its place
-						JFile::copy($getPAth, $path . $file_name);
+						File::copy($getPAth, $path . $file_name);
 						// count the file created
 						$this->fileCount++;
 						// add content to it

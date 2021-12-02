@@ -5,7 +5,7 @@
  * @created    30th April, 2015
  * @author     Llewellyn van der Merwe <http://www.joomlacomponentbuilder.com>
  * @github     Joomla Component Builder <https://github.com/vdm-io/Joomla-Component-Builder>
- * @copyright  Copyright (C) 2015 - 2020 Vast Development Method. All rights reserved.
+ * @copyright  Copyright (C) 2015 Vast Development Method. All rights reserved.
  * @license    GNU General Public License version 2 or later; see LICENSE.txt
  */
 
@@ -34,7 +34,9 @@ class ComponentbuilderModelJoomla_components extends JModelList
 				'a.author','author',
 				'a.system_name','system_name',
 				'a.name_code','name_code',
-				'a.short_description','short_description'
+				'a.short_description','short_description',
+				'a.created','created',
+				'a.modified','modified'
 			);
 		}
 
@@ -676,14 +678,56 @@ class ComponentbuilderModelJoomla_components extends JModelList
 		$this->_db->execute();
 		if ($this->_db->getNumRows())
 		{
+			// get the items
 			$items = $this->_db->loadObjectList();
+			// reset the search array (only search for template/layouts)
+			$searchTLArray = array();
 			// check if we have items
 			if (ComponentbuilderHelper::checkArray($items))
 			{
-				// set search array
+				// set search array if site/custom admin view
 				if ('site_view' === $table || 'custom_admin_view' === $table)
 				{
-					$searchArray = array('php_view', 'php_jview', 'php_jview_display', 'php_document', 'js_document', 'css_document', 'css');
+					$searchTLArray = array(
+						'default' => 'force_it',
+						'php_view' => 'add_php_view',
+						'php_jview' => 'add_php_jview',
+						'php_jview_display' => 'add_php_jview_display',
+						'php_document' => 'add_php_document',
+						'javascript_file' => 'add_javascript_file',
+						'js_document' => 'add_js_document',
+						'css_document' => 'add_css_document',
+						'css' => 'add_css'
+					);
+				}
+				// set search array if admin view
+				if ('admin_view' === $table)
+				{
+					$searchTLArray = array(
+						'php_getitem' => 'add_php_getitem',
+						'php_before_save' => 'add_php_before_save',
+						'php_save' => 'add_php_save',
+						'php_getform' => 'add_php_getform',
+						'php_postsavehook' => 'add_php_postsavehook',
+						'php_getitems' => 'add_php_getitems',
+						'php_getitems_after_all' => 'add_php_getitems_after_all',
+						'php_getlistquery' => 'add_php_getlistquery',
+						'php_allowadd' => 'add_php_allowadd',
+						'php_allowedit' => 'add_php_allowedit',
+						'php_before_cancel' => 'add_php_before_cancel',
+						'php_after_cancel' => 'add_php_after_cancel',
+						'php_before_delete' => 'add_php_before_delete',
+						'php_after_delete' => 'add_php_after_delete',
+						'php_before_publish' => 'add_php_before_publish',
+						'php_after_publish' => 'add_php_after_publish',
+						'php_batchcopy' => 'add_php_batchcopy',
+						'php_batchmove' => 'add_php_batchmove',
+						'php_document' => 'add_php_document',
+						'php_model' => 'add_custom_button',
+						'php_controller' => 'add_custom_button',
+						'php_model_list' => 'add_custom_button',
+						'php_controller_list' => 'add_custom_button'
+					);
 				}
 				// reset the global array
 				if ('template' === $table)
@@ -911,19 +955,21 @@ class ComponentbuilderModelJoomla_components extends JModelList
 							}
 						}
 					}
-					// actions to take if table is site_view and custom_admin_view
-					if ('site_view' === $table || 'custom_admin_view' === $table)
-					{
-						// search for templates & layouts
-						$this->getTemplateLayout(base64_decode($item->default));
+					// check if a search is required
+					if (isset($searchTLArray) && ComponentbuilderHelper::checkArray($searchTLArray)){
+
 						// add search array templates and layouts
-						foreach ($searchArray as $scripter)
+						foreach ($searchTLArray as $scripter => $add)
 						{
-							if (isset($item->{'add_'.$scripter}) && $item->{'add_'.$scripter} == 1)
+							if ($add === 'force_it' || (isset($item->{$add}) && $item->{$add} == 1))
 							{
 								$this->getTemplateLayout($item->{$scripter});
 							}
 						}
+					}
+					// actions to take if table is site_view and custom_admin_view
+					if ('site_view' === $table || 'custom_admin_view' === $table)
+					{
 						// add dynamic gets
 						$this->setSmartIDs($item->main_get, 'dynamic_get');
 						$this->setSmartIDs($item->custom_get, 'dynamic_get');
@@ -949,7 +995,7 @@ class ComponentbuilderModelJoomla_components extends JModelList
 							$this->setSmartIDs((int) $item->snippet, 'snippet');
 						}
 						// search for templates & layouts
-						$this->getTemplateLayout(base64_decode($item->$table), $this->user);
+						$this->getTemplateLayout($item->$table, $this->user);
 						// add search array templates and layouts
 						if (isset($item->add_php_view) && $item->add_php_view == 1)
 						{
@@ -1418,6 +1464,11 @@ class ComponentbuilderModelJoomla_components extends JModelList
 	 */
 	protected function getTemplateLayout($default, $user = false)
 	{
+		// check if we have base64 encoding
+		if (base64_encode(base64_decode($default, true)) === $default)
+		{
+			$default = base64_decode($default);
+		}
 		// set the Template data
 		$temp1 = ComponentbuilderHelper::getAllBetween($default, "\$this->loadTemplate('","')");
 		$temp2 = ComponentbuilderHelper::getAllBetween($default, '$this->loadTemplate("','")');
@@ -2022,6 +2073,13 @@ class ComponentbuilderModelJoomla_components extends JModelList
 			'views' => 'class_methods',
 			'not_base64' => array(),
 			'name' => 'name'
+		),
+		// #__componentbuilder_power (v)
+		'class_method' => array(
+			'search' => array('id', 'name', 'description', 'head', 'head', 'main_class_code'),
+			'views' => 'powers',
+			'not_base64' => array('description'),
+			'name' => 'name'
 		)
 	);
 
@@ -2114,9 +2172,6 @@ class ComponentbuilderModelJoomla_components extends JModelList
 		$created_by = $this->getUserStateFromRequest($this->context . '.filter.created_by', 'filter_created_by', '');
 		$this->setState('filter.created_by', $created_by);
 
-		$created = $this->getUserStateFromRequest($this->context . '.filter.created', 'filter_created');
-		$this->setState('filter.created', $created);
-
 		$sorting = $this->getUserStateFromRequest($this->context . '.filter.sorting', 'filter_sorting', 0, 'int');
 		$this->setState('filter.sorting', $sorting);
 
@@ -2156,6 +2211,20 @@ class ComponentbuilderModelJoomla_components extends JModelList
 		{
 			$short_description = $app->input->post->get('short_description');
 			$this->setState('filter.short_description', $short_description);
+		}
+
+		$created = $this->getUserStateFromRequest($this->context . '.filter.created', 'filter_created');
+		if ($formSubmited)
+		{
+			$created = $app->input->post->get('created');
+			$this->setState('filter.created', $created);
+		}
+
+		$modified = $this->getUserStateFromRequest($this->context . '.filter.modified', 'filter_modified');
+		if ($formSubmited)
+		{
+			$modified = $app->input->post->get('modified');
+			$this->setState('filter.modified', $modified);
 		}
 
 		// List state information.
@@ -2284,6 +2353,29 @@ class ComponentbuilderModelJoomla_components extends JModelList
 		{
 			$query->where('a.companyname = ' . $db->quote($db->escape($_companyname)));
 		}
+		elseif (ComponentbuilderHelper::checkArray($_companyname))
+		{
+			// Secure the array for the query
+			$_companyname = array_map( function ($val) use(&$db) {
+				if (is_numeric($val))
+				{
+					if (is_float($val))
+					{
+						return (float) $val;
+					}
+					else
+					{
+						return (int) $val;
+					}
+				}
+				elseif (ComponentbuilderHelper::checkString($val))
+				{
+					return $db->quote($db->escape($val));
+				}
+			}, $_companyname);
+			// Filter by the Companyname Array.
+			$query->where('a.companyname IN (' . implode(',', $_companyname) . ')');
+		}
 		// Filter by Author.
 		$_author = $this->getState('filter.author');
 		if (is_numeric($_author))
@@ -2300,6 +2392,29 @@ class ComponentbuilderModelJoomla_components extends JModelList
 		elseif (ComponentbuilderHelper::checkString($_author))
 		{
 			$query->where('a.author = ' . $db->quote($db->escape($_author)));
+		}
+		elseif (ComponentbuilderHelper::checkArray($_author))
+		{
+			// Secure the array for the query
+			$_author = array_map( function ($val) use(&$db) {
+				if (is_numeric($val))
+				{
+					if (is_float($val))
+					{
+						return (float) $val;
+					}
+					else
+					{
+						return (int) $val;
+					}
+				}
+				elseif (ComponentbuilderHelper::checkString($val))
+				{
+					return $db->quote($db->escape($val));
+				}
+			}, $_author);
+			// Filter by the Author Array.
+			$query->where('a.author IN (' . implode(',', $_author) . ')');
 		}
 
 		// Add the list ordering clause.
@@ -2395,35 +2510,35 @@ class ComponentbuilderModelJoomla_components extends JModelList
 							continue;
 						}
 
-						// decode php_site_event
-						$item->php_site_event = base64_decode($item->php_site_event);
-						// decode css_admin
-						$item->css_admin = base64_decode($item->css_admin);
-						// decode php_helper_both
-						$item->php_helper_both = base64_decode($item->php_helper_both);
 						// decode php_admin_event
 						$item->php_admin_event = base64_decode($item->php_admin_event);
-						// decode sql_uninstall
-						$item->sql_uninstall = base64_decode($item->sql_uninstall);
-						// decode php_postflight_install
-						$item->php_postflight_install = base64_decode($item->php_postflight_install);
+						// decode php_site_event
+						$item->php_site_event = base64_decode($item->php_site_event);
+						// decode php_helper_both
+						$item->php_helper_both = base64_decode($item->php_helper_both);
 						// decode php_preflight_install
 						$item->php_preflight_install = base64_decode($item->php_preflight_install);
 						// decode php_method_uninstall
 						$item->php_method_uninstall = base64_decode($item->php_method_uninstall);
+						// decode css_admin
+						$item->css_admin = base64_decode($item->css_admin);
+						// decode php_postflight_install
+						$item->php_postflight_install = base64_decode($item->php_postflight_install);
+						// decode sql_uninstall
+						$item->sql_uninstall = base64_decode($item->sql_uninstall);
 						// decode php_helper_admin
 						$item->php_helper_admin = base64_decode($item->php_helper_admin);
 						// decode php_helper_site
 						$item->php_helper_site = base64_decode($item->php_helper_site);
-						// decode javascript
-						$item->javascript = base64_decode($item->javascript);
-						// decode css_site
-						$item->css_site = base64_decode($item->css_site);
 						if ($basickey && !is_numeric($item->whmcs_key) && $item->whmcs_key === base64_encode(base64_decode($item->whmcs_key, true)))
 						{
 							// decrypt whmcs_key
 							$item->whmcs_key = $basic->decryptString($item->whmcs_key);
 						}
+						// decode javascript
+						$item->javascript = base64_decode($item->javascript);
+						// decode css_site
+						$item->css_site = base64_decode($item->css_site);
 						// decode php_preflight_update
 						$item->php_preflight_update = base64_decode($item->php_preflight_update);
 						// decode php_postflight_update
@@ -2526,11 +2641,35 @@ class ComponentbuilderModelJoomla_components extends JModelList
 		$id .= ':' . $this->getState('filter.ordering');
 		$id .= ':' . $this->getState('filter.created_by');
 		$id .= ':' . $this->getState('filter.modified_by');
-		$id .= ':' . $this->getState('filter.companyname');
-		$id .= ':' . $this->getState('filter.author');
+		// Check if the value is an array
+		$_companyname = $this->getState('filter.companyname');
+		if (ComponentbuilderHelper::checkArray($_companyname))
+		{
+			$id .= ':' . implode(':', $_companyname);
+		}
+		// Check if this is only an number or string
+		elseif (is_numeric($_companyname)
+		 || ComponentbuilderHelper::checkString($_companyname))
+		{
+			$id .= ':' . $_companyname;
+		}
+		// Check if the value is an array
+		$_author = $this->getState('filter.author');
+		if (ComponentbuilderHelper::checkArray($_author))
+		{
+			$id .= ':' . implode(':', $_author);
+		}
+		// Check if this is only an number or string
+		elseif (is_numeric($_author)
+		 || ComponentbuilderHelper::checkString($_author))
+		{
+			$id .= ':' . $_author;
+		}
 		$id .= ':' . $this->getState('filter.system_name');
 		$id .= ':' . $this->getState('filter.name_code');
 		$id .= ':' . $this->getState('filter.short_description');
+		$id .= ':' . $this->getState('filter.created');
+		$id .= ':' . $this->getState('filter.modified');
 
 		return parent::getStoreId($id);
 	}

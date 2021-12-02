@@ -5,7 +5,7 @@
  * @created    30th April, 2015
  * @author     Llewellyn van der Merwe <http://www.joomlacomponentbuilder.com>
  * @github     Joomla Component Builder <https://github.com/vdm-io/Joomla-Component-Builder>
- * @copyright  Copyright (C) 2015 - 2018 Vast Development Method. All rights reserved.
+ * @copyright  Copyright (C) 2015 Vast Development Method. All rights reserved.
  * @license    GNU General Public License version 2 or later; see LICENSE.txt
  */
 
@@ -56,7 +56,7 @@ class ###Component###Router extends JComponentRouterBase
 		{
 			$view = $query['view'];
 
-			if (empty($query['Itemid']))
+			if (empty($query['Itemid']) && !(isset($view) && isset($query['id']) && ###ROUTER_BUILD_VIEWS###))
 			{
 				$segments[] = $query['view'];
 			}

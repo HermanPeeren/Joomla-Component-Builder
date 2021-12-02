@@ -5,7 +5,7 @@
  * @created    30th April, 2015
  * @author     Llewellyn van der Merwe <http://www.joomlacomponentbuilder.com>
  * @github     Joomla Component Builder <https://github.com/vdm-io/Joomla-Component-Builder>
- * @copyright  Copyright (C) 2015 - 2020 Vast Development Method. All rights reserved.
+ * @copyright  Copyright (C) 2015 Vast Development Method. All rights reserved.
  * @license    GNU General Public License version 2 or later; see LICENSE.txt
  */
 
@@ -111,7 +111,7 @@ class ComponentbuilderModelJoomla_plugins extends JModelList
 							// extract the boilerplate class comment
 							$class['comment'] = ComponentbuilderHelper::extractBoilerplateClassComment($fooClass, $classExtends, 'plugins');
 							// set the extension type
-							$class['extension_type'] = 'plugins';
+							$class['target_type'] = 'plugins';
 							// store the class
 							$this->storePluginBoilerplate($tables['e'], $models['e'], $class, $app);
 							// work around

@@ -5,7 +5,7 @@
  * @created    30th April, 2015
  * @author     Llewellyn van der Merwe <http://www.joomlacomponentbuilder.com>
  * @github     Joomla Component Builder <https://github.com/vdm-io/Joomla-Component-Builder>
- * @copyright  Copyright (C) 2015 - 2020 Vast Development Method. All rights reserved.
+ * @copyright  Copyright (C) 2015 Vast Development Method. All rights reserved.
  * @license    GNU General Public License version 2 or later; see LICENSE.txt
  */
 
@@ -141,6 +141,8 @@ class ComponentbuilderModelClass_methods extends JModelList
 					continue;
 				}
 
+				// decode arguments
+				$item->arguments = base64_decode($item->arguments);
 			}
 		}
 
@@ -174,7 +176,10 @@ class ComponentbuilderModelClass_methods extends JModelList
 			$visibilityArray = array(
 				'public' => 'COM_COMPONENTBUILDER_CLASS_METHOD_PUBLIC',
 				'protected' => 'COM_COMPONENTBUILDER_CLASS_METHOD_PROTECTED',
-				'private' => 'COM_COMPONENTBUILDER_CLASS_METHOD_PRIVATE'
+				'private' => 'COM_COMPONENTBUILDER_CLASS_METHOD_PRIVATE',
+				'public static' => 'COM_COMPONENTBUILDER_CLASS_METHOD_PUBLIC_STATIC',
+				'protected static' => 'COM_COMPONENTBUILDER_CLASS_METHOD_PROTECTED_STATIC',
+				'private static' => 'COM_COMPONENTBUILDER_CLASS_METHOD_PRIVATE_STATIC'
 			);
 			// Now check if value is found in this array
 			if (isset($visibilityArray[$value]) && ComponentbuilderHelper::checkString($visibilityArray[$value]))
@@ -187,6 +192,7 @@ class ComponentbuilderModelClass_methods extends JModelList
 		{
 			$extension_typeArray = array(
 				0 => 'COM_COMPONENTBUILDER_CLASS_METHOD_SELECT_AN_OPTION',
+				'powers' => 'COM_COMPONENTBUILDER_CLASS_METHOD_POWERS',
 				'components' => 'COM_COMPONENTBUILDER_CLASS_METHOD_COMPONENTS',
 				'plugins' => 'COM_COMPONENTBUILDER_CLASS_METHOD_PLUGINS',
 				'modules' => 'COM_COMPONENTBUILDER_CLASS_METHOD_MODULES'

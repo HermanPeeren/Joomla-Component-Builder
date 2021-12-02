@@ -84,6 +84,14 @@
 			readonly="true"
 			filter="unset"
 		/>
+		<!-- Was added due to Permissions JS needing a Title field -->
+		<!-- Let us know at gh-629 should this change -->
+		<!-- https://github.com/vdm-io/Joomla-Component-Builder/issues/629#issuecomment-750117235 -->
+		<field
+			name="title"
+			type="hidden"
+			default="componentbuilder language_translation"
+		/>
 		<!-- Dynamic Fields. -->
 		<!-- Source Field. Type: Textarea. (joomla) -->
 		<field
@@ -119,9 +127,9 @@
 			default="0"
 			button="true"
 		/>
-		<!-- Components Field. Type: Components. (custom) -->
+		<!-- Components Field. Type: Joomlacomponents. (custom) -->
 		<field
-			type="components"
+			type="joomlacomponents"
 			name="components"
 			label="COM_COMPONENTBUILDER_LANGUAGE_TRANSLATION_COMPONENTS_LABEL"
 			class="list_class span12"

@@ -1,16 +1,19 @@
 <?php
-/**
+ /**
  * @package    Joomla.Component.Builder
  *
  * @created    30th April, 2015
  * @author     Llewellyn van der Merwe <http://www.joomlacomponentbuilder.com>
  * @github     Joomla Component Builder <https://github.com/vdm-io/Joomla-Component-Builder>
- * @copyright  Copyright (C) 2015 - 2020 Vast Development Method. All rights reserved.
+ * @copyright  Copyright (C) 2015 Vast Development Method. All rights reserved.
  * @license    GNU General Public License version 2 or later; see LICENSE.txt
  */
 
 // No direct access to this file
 defined('_JEXEC') or die('Restricted access');
+
+use Joomla\CMS\Filesystem\File;
+use Joomla\CMS\Filesystem\Folder;
 
 /**
  * Get class as the main compilers class
@@ -173,12 +176,12 @@ class Get
 	 *    New Replace Code    = /xxx[REPLACE<>$$$$]xxx/               /xxx[/REPLACE<>$$$$]xxx/
 	 *
 	 *    //////////////////////////////// when JCB adds it back //////////////////////////////////
-	 *    JCB Add Inserted Code    = /xxx[INSERTED$$$$]xxx//x23x/          /xxx[/INSERTED$$$$]xxx/
-	 *    JCB Add Replaced Code    = /xxx[REPLACED$$$$]xxx//x25x/          /xxx[/REPLACED$$$$]xxx/
+	 *    JCB Add Inserted Code    = /xxx[INSERTED$$$$]xxx//xx23xx/          /xxx[/INSERTED$$$$]xxx/
+	 *    JCB Add Replaced Code    = /xxx[REPLACED$$$$]xxx//xx25xx/          /xxx[/REPLACED$$$$]xxx/
 	 *
 	 *    /////////////////////////////// changeing existing custom code /////////////////////////
-	 *    Update Inserted Code    = /xxx[INSERTED<>$$$$]xxx//x23x/        /xxx[/INSERTED<>$$$$]xxx/
-	 *    Update Replaced Code    = /xxx[REPLACED<>$$$$]xxx//x25x/        /xxx[/REPLACED<>$$$$]xxx/
+	 *    Update Inserted Code    = /xxx[INSERTED<>$$$$]xxx//xx23xx/        /xxx[/INSERTED<>$$$$]xxx/
+	 *    Update Replaced Code    = /xxx[REPLACED<>$$$$]xxx//xx25xx/        /xxx[/REPLACED<>$$$$]xxx/
 	 *
 	 *    The custom script placeholders - we use the (==) to avoid detection it should be (--)
 	 *    ###################################--->  HTML  <---#####################################
@@ -786,6 +789,13 @@ class Get
 	 * @var    array
 	 */
 	public $updateSQL = array();
+
+	/**
+	 * The data by alias keys
+	 *
+	 * @var    array
+	 */
+	protected $dataWithAliasKeys = array();
 
 	/**
 	 * The Library Manager
@@ -5238,6 +5248,8 @@ class Get
 			{
 				$script = $this->setGuiCodePlaceholder($script, $config);
 			}
+			// add Dynamic HASHING option of a file/string
+			$script = $this->setDynamicHASHING($script);
 			// add base64 locking option of a string
 			$script = $this->setBase64LOCK($script);
 			// load the script
@@ -5788,40 +5800,49 @@ class Get
 	/**
 	 * Set Template and Layout Data
 	 *
-	 * @param   string  $default  The content to check
-	 * @param   string  $view     The view code name
+	 * @param   string   $default    The content to check
+	 * @param   string   $view       The view code name
+	 * @param   boolean  $found      The proof that something was found
+	 * @param   array    $templates  The option to pass templates keys (to avoid search)
+	 * @param   array    $layouts    The option to pass layout keys (to avoid search)
 	 *
-	 * @return  void
+	 * @return  boolean if something was found true
 	 *
 	 */
-	public function setTemplateAndLayoutData($default, $view)
-	{
-		// set the Tempale date
-		$temp1     = ComponentbuilderHelper::getAllBetween(
-			$default, "\$this->loadTemplate('", "')"
-		);
-		$temp2     = ComponentbuilderHelper::getAllBetween(
-			$default, '$this->loadTemplate("', '")'
-		);
-		$templates = array();
-		$again     = array();
-		if (ComponentbuilderHelper::checkArray($temp1)
-			&& ComponentbuilderHelper::checkArray($temp2))
+	public function setTemplateAndLayoutData($default, $view, $found = false,
+		$templates = array(), $layouts = array()
+	) {
+		// to check inside the templates
+		$again = array();
+		// check if template keys were passed
+		if (!ComponentbuilderHelper::checkArray($templates))
 		{
-			$templates = array_merge($temp1, $temp2);
-		}
-		else
-		{
-			if (ComponentbuilderHelper::checkArray($temp1))
+			// set the Template data
+			$temp1 = ComponentbuilderHelper::getAllBetween(
+				$default, "\$this->loadTemplate('", "')"
+			);
+			$temp2 = ComponentbuilderHelper::getAllBetween(
+				$default, '$this->loadTemplate("', '")'
+			);
+			if (ComponentbuilderHelper::checkArray($temp1)
+				&& ComponentbuilderHelper::checkArray($temp2))
 			{
-				$templates = $temp1;
+				$templates = array_merge($temp1, $temp2);
 			}
-			elseif (ComponentbuilderHelper::checkArray($temp2))
+			else
 			{
-				$templates = $temp2;
+				if (ComponentbuilderHelper::checkArray($temp1))
+				{
+					$templates = $temp1;
+				}
+				elseif (ComponentbuilderHelper::checkArray($temp2))
+				{
+					$templates = $temp2;
+				}
 			}
 		}
-		if (ComponentbuilderHelper::checkArray($templates))
+		// check if we found templates
+		if (ComponentbuilderHelper::checkArray($templates, true))
 		{
 			foreach ($templates as $template)
 			{
@@ -5835,6 +5856,7 @@ class Get
 					);
 					if (ComponentbuilderHelper::checkArray($data))
 					{
+						// load it to the template data array
 						$this->templateData[$this->target][$view][$template]
 							= $data;
 						// call self to get child data
@@ -5842,33 +5864,51 @@ class Get
 						$again[] = array($data['php_view'], $view);
 					}
 				}
+				// check if we have the template set (and nothing yet found)
+				if (!$found
+					&& isset($this->templateData[$this->target][$view][$template]))
+				{
+					// something was found
+					$found = true;
+				}
 			}
 		}
-		// set  the layout data
-		$lay1 = ComponentbuilderHelper::getAllBetween(
-			$default, "JLayoutHelper::render('", "',"
-		);
-		$lay2 = ComponentbuilderHelper::getAllBetween(
-			$default, 'JLayoutHelper::render("', '",'
-		);;
-		if (ComponentbuilderHelper::checkArray($lay1)
-			&& ComponentbuilderHelper::checkArray($lay2))
+		// check if layout keys were passed
+		if (!ComponentbuilderHelper::checkArray($layouts))
 		{
-			$layouts = array_merge($lay1, $lay2);
-		}
-		else
-		{
-			if (ComponentbuilderHelper::checkArray($lay1))
+			// set the Layout data
+			$lay1 = ComponentbuilderHelper::getAllBetween(
+				$default, "JLayoutHelper::render('", "',"
+			);
+			$lay2 = ComponentbuilderHelper::getAllBetween(
+				$default, 'JLayoutHelper::render("', '",'
+			);
+			if (ComponentbuilderHelper::checkArray($lay1)
+				&& ComponentbuilderHelper::checkArray($lay2))
 			{
-				$layouts = $lay1;
+				$layouts = array_merge($lay1, $lay2);
 			}
-			elseif (ComponentbuilderHelper::checkArray($lay2))
+			else
 			{
-				$layouts = $lay2;
+				if (ComponentbuilderHelper::checkArray($lay1))
+				{
+					$layouts = $lay1;
+				}
+				elseif (ComponentbuilderHelper::checkArray($lay2))
+				{
+					$layouts = $lay2;
+				}
 			}
 		}
-		if (isset($layouts) && ComponentbuilderHelper::checkArray($layouts))
+		// check if we found layouts
+		if (ComponentbuilderHelper::checkArray($layouts, true))
 		{
+			// get the other target if both
+			$_target = null;
+			if ($this->lang === 'both')
+			{
+				$_target = ($this->target === 'admin') ? 'site' : 'admin';
+			}
 			foreach ($layouts as $layout)
 			{
 				if (!isset($this->layoutData[$this->target])
@@ -5882,21 +5922,39 @@ class Get
 					$data = $this->getDataWithAlias($layout, 'layout', $view);
 					if (ComponentbuilderHelper::checkArray($data))
 					{
+						// load it to the layout data array
 						$this->layoutData[$this->target][$layout] = $data;
+						// check if other target is set
+						if ($this->lang === 'both' && $_target)
+						{
+							$this->layoutData[$_target][$layout] = $data;
+						}
 						// call self to get child data
 						$again[] = array($data['html'], $view);
 						$again[] = array($data['php_view'], $view);
 					}
 				}
+				// check if we have the layout set (and nothing yet found)
+				if (!$found && isset($this->layoutData[$this->target][$layout]))
+				{
+					// something was found
+					$found = true;
+				}
 			}
 		}
+		// check again
 		if (ComponentbuilderHelper::checkArray($again))
 		{
 			foreach ($again as $go)
 			{
-				$this->setTemplateAndLayoutData($go[0], $go[1]);
+				$found = $this->setTemplateAndLayoutData(
+					$go[0], $go[1], $found
+				);
 			}
 		}
+
+		// return the proof that something was found
+		return $found;
 	}
 
 	/**
@@ -5909,159 +5967,217 @@ class Get
 	 * @return  array The data found with the alias
 	 *
 	 */
-	public function getDataWithAlias($n_ame, $table, $view)
+	protected function getDataWithAlias($n_ame, $table, $view)
 	{
+		// if not set, get all keys in table and set by ID
+		$this->setDataWithAliasKeys($table);
+		// now check if key is found
+		$name = preg_replace("/[^A-Za-z]/", '', $n_ame);
+		if (isset($this->dataWithAliasKeys[$table][$name]))
+		{
+			$ID = $this->dataWithAliasKeys[$table][$name];
+		}
+		elseif (isset($this->dataWithAliasKeys[$table][$n_ame]))
+		{
+			$ID = $this->dataWithAliasKeys[$table][$n_ame];
+		}
+		else
+		{
+			return false;
+		}
 		// Create a new query object.
 		$query = $this->db->getQuery(true);
 		$query->select('a.*');
 		$query->from('#__componentbuilder_' . $table . ' AS a');
-		$this->db->setQuery($query);
-		$rows = $this->db->loadObjectList();
-		foreach ($rows as $row)
+		$query->where(
+		$this->db->quoteName('a.id') . ' = ' . (int) $ID
+		);
+		// get the other target if both
+		$_targets = array($this->target);
+		if ($this->lang === 'both')
 		{
-			$k_ey = ComponentbuilderHelper::safeString($row->alias);
-			$key  = preg_replace("/[^A-Za-z]/", '', $k_ey);
-			$name = preg_replace("/[^A-Za-z]/", '', $n_ame);
-			if ($k_ey == $n_ame || $key == $name)
+			$_targets = array('site', 'admin');
+		}
+		$this->db->setQuery($query);
+		// get the row
+		$row = $this->db->loadObject();
+		// we load this layout
+		$php_view = '';
+		if ($row->add_php_view == 1
+			&& ComponentbuilderHelper::checkString($row->php_view))
+		{
+			$php_view = $this->setGuiCodePlaceholder(
+				$this->setDynamicValues(base64_decode($row->php_view)),
+				array(
+					'table' => $table,
+					'field' => 'php_view',
+					'id'    => (int) $row->id,
+					'type'  => 'php')
+			);
+		}
+		$contnent = $this->setGuiCodePlaceholder(
+			$this->setDynamicValues(base64_decode($row->{$table})),
+			array(
+				'table' => $table,
+				'field' => $table,
+				'id'    => (int) $row->id,
+				'type'  => 'html')
+		);
+		// load all targets
+		foreach ($_targets as $_target)
+		{
+			// load the library
+			if (!isset($this->libManager[$_target]))
 			{
-				$php_view = '';
-				if ($row->add_php_view == 1
-					&& ComponentbuilderHelper::checkString($row->php_view))
+				$this->libManager[$_target] = array();
+			}
+			if (!isset($this->libManager[$_target][$view]))
+			{
+				$this->libManager[$_target][$view] = array();
+			}
+			// make sure json become array
+			if (ComponentbuilderHelper::checkJson($row->libraries))
+			{
+				$row->libraries = json_decode($row->libraries, true);
+			}
+			// if we have an array add it
+			if (ComponentbuilderHelper::checkArray($row->libraries))
+			{
+				foreach ($row->libraries as $library)
 				{
-					$php_view = $this->setGuiCodePlaceholder(
-						$this->setDynamicValues(base64_decode($row->php_view)),
-						array(
-							'table' => $table,
-							'field' => 'php_view',
-							'id'    => (int) $row->id,
-							'type'  => 'php')
-					);
-				}
-				$contnent = $this->setGuiCodePlaceholder(
-					$this->setDynamicValues(base64_decode($row->{$table})),
-					array(
-						'table' => $table,
-						'field' => $table,
-						'id'    => (int) $row->id,
-						'type'  => 'html')
-				);
-				// load the library
-				if (!isset($this->libManager[$this->target]))
-				{
-					$this->libManager[$this->target] = array();
-				}
-				if (!isset($this->libManager[$this->target][$view]))
-				{
-					$this->libManager[$this->target][$view] = array();
-				}
-				// make sure json become array
-				if (ComponentbuilderHelper::checkJson($row->libraries))
-				{
-					$row->libraries = json_decode($row->libraries, true);
-				}
-				// if we have an array add it
-				if (ComponentbuilderHelper::checkArray($row->libraries))
-				{
-					foreach ($row->libraries as $library)
+					if (!isset($this->libManager[$_target][$view][$library]))
 					{
-						if (!isset($this->libManager[$this->target][$view][$library]))
+						if ($this->getMediaLibrary((int) $library))
 						{
-							if ($this->getMediaLibrary((int) $library))
-							{
-								$this->libManager[$this->target][$view][(int) $library]
-									= true;
-							}
+							$this->libManager[$_target][$view][(int) $library]
+								= true;
 						}
 					}
 				}
-				elseif (is_numeric($row->libraries)
-					&& !isset($this->libManager[$this->target][$view][(int) $row->libraries]))
+			}
+			elseif (is_numeric($row->libraries)
+				&& !isset($this->libManager[$_target][$view][(int) $row->libraries]))
+			{
+				if ($this->getMediaLibrary((int) $row->libraries))
 				{
-					if ($this->getMediaLibrary((int) $row->libraries))
-					{
-						$this->libManager[$this->target][$view][(int) $row->libraries]
-							= true;
-					}
+					$this->libManager[$_target][$view][(int) $row->libraries]
+						= true;
 				}
-				// load UIKIT if needed
-				if (2 == $this->uikit || 1 == $this->uikit)
+			}
+			// set footable to views and turn it on
+			if (!isset($this->footableScripts[$_target][$view])
+				|| !$this->footableScripts[$_target][$view])
+			{
+				$foundFoo = $this->getFootableScripts($contnent);
+				if ($foundFoo)
 				{
-					if (!isset($this->uikitComp[$view]))
-					{
-						$this->uikitComp[$view] = array();
-					}
-					// set uikit to views
-					$this->uikitComp[$view]
-						= ComponentbuilderHelper::getUikitComp(
-						$contnent, $this->uikitComp[$view]
-					);
+					$this->footableScripts[$_target][$view] = true;
 				}
-				// set footable to views and turn it on
-				if (!isset($this->footableScripts[$this->target][$view])
-					|| !$this->footableScripts[$this->target][$view])
+				if ($foundFoo && !$this->footable)
 				{
-					$foundFoo = $this->getFootableScripts($contnent);
-					if ($foundFoo)
-					{
-						$this->footableScripts[$this->target][$view] = true;
-					}
-					if ($foundFoo && !$this->footable)
-					{
-						$this->footable = true;
-					}
+					$this->footable = true;
 				}
-				// set google charts to views and turn it on
-				if (!isset($this->googleChart[$this->target][$view])
-					|| !$this->googleChart[$this->target][$view])
+			}
+			// set google charts to views and turn it on
+			if (!isset($this->googleChart[$_target][$view])
+				|| !$this->googleChart[$_target][$view])
+			{
+				$foundA = $this->getGoogleChart($php_view);
+				$foundB = $this->getGoogleChart($contnent);
+				if ($foundA || $foundB)
 				{
-					$foundA = $this->getGoogleChart($php_view);
-					$foundB = $this->getGoogleChart($contnent);
-					if ($foundA || $foundB)
-					{
-						$this->googleChart[$this->target][$view] = true;
-					}
-					if ($foundA || $foundB && !$this->googlechart)
-					{
-						$this->googlechart = true;
-					}
+					$this->googleChart[$_target][$view] = true;
 				}
-				// check for get module
-				if (!isset($this->getModule[$this->target][$view])
-					|| !$this->getModule[$this->target][$view])
+				if ($foundA || $foundB && !$this->googlechart)
 				{
-					$foundA = $this->getGetModule($php_view);
-					$foundB = $this->getGetModule($contnent);
-					if ($foundA || $foundB)
-					{
-						$this->getModule[$this->target][$view] = true;
-					}
+					$this->googlechart = true;
 				}
-
-				return array(
-					'id'       => $row->id,
-					'html'     => $this->setGuiCodePlaceholder(
-						$contnent,
-						array(
-							'table' => $table,
-							'field' => $table,
-							'id'    => $row->id,
-							'type'  => 'html'
-						)
-					),
-					'php_view' => $this->setGuiCodePlaceholder(
-						$php_view,
-						array(
-							'table' => $table,
-							'field' => 'php_view',
-							'id'    => $row->id,
-							'type'  => 'php'
-						)
-					)
-				);
+			}
+			// check for get module
+			if (!isset($this->getModule[$_target][$view])
+				|| !$this->getModule[$_target][$view])
+			{
+				$foundA = $this->getGetModule($php_view);
+				$foundB = $this->getGetModule($contnent);
+				if ($foundA || $foundB)
+				{
+					$this->getModule[$_target][$view] = true;
+				}
 			}
 		}
+		// load UIKIT if needed
+		if (2 == $this->uikit || 1 == $this->uikit)
+		{
+			if (!isset($this->uikitComp[$view]))
+			{
+				$this->uikitComp[$view] = array();
+			}
+			// set uikit to views
+			$this->uikitComp[$view]
+				= ComponentbuilderHelper::getUikitComp(
+				$contnent, $this->uikitComp[$view]
+			);
+		}
 
-		return false;
+		return array(
+			'id'       => $row->id,
+			'html'     => $this->setGuiCodePlaceholder(
+				$contnent,
+				array(
+					'table' => $table,
+					'field' => $table,
+					'id'    => $row->id,
+					'type'  => 'html'
+				)
+			),
+			'php_view' => $this->setGuiCodePlaceholder(
+				$php_view,
+				array(
+					'table' => $table,
+					'field' => 'php_view',
+					'id'    => $row->id,
+					'type'  => 'php'
+				)
+			)
+		);
+	}
+
+	/**
+	 * set Data With Alias Keys
+	 *
+	 * @param   string  $table  The table where to find the alias
+	 *
+	 * @return  void
+	 *
+	 */
+	protected function setDataWithAliasKeys($table)
+	{
+		// now check if key is found
+		if (!isset($this->dataWithAliasKeys[$table]))
+		{
+			// load this table keys
+			$this->dataWithAliasKeys[$table] = array();
+			// Create a new query object.
+			$query = $this->db->getQuery(true);
+			$query->select(array('a.id', 'a.alias'));
+			$query->from('#__componentbuilder_' . $table . ' AS a');
+			$this->db->setQuery($query);
+			$rows = $this->db->loadObjectList();
+			// check if we have an array
+			if (ComponentbuilderHelper::checkArray($rows))
+			{
+				foreach ($rows as $row)
+				{
+					// build the key
+					$k_ey = ComponentbuilderHelper::safeString($row->alias);
+					$key  = preg_replace("/[^A-Za-z]/", '', $k_ey);
+					// set the keys
+					$this->dataWithAliasKeys[$table][$row->alias] = $row->id;
+					$this->dataWithAliasKeys[$table][$k_ey] = $row->id;
+					$this->dataWithAliasKeys[$table][$key] = $row->id;
+				}
+			}
+		}
 	}
 
 	/**
@@ -6074,7 +6190,6 @@ class Get
 	 */
 	protected function getMediaLibrary($id)
 	{
-
 		// check if the lib has already been set
 		if (!isset($this->libraries[$id]))
 		{
@@ -6496,7 +6611,8 @@ class Get
 	public function setLang($string)
 	{
 		// this is there to insure we dont break already added Language strings
-		if (ComponentbuilderHelper::safeString($string, 'U') === $string)
+		if (ComponentbuilderHelper::safeString($string, 'U', '_', false, false)
+			=== $string)
 		{
 			return false;
 		}
@@ -7135,7 +7251,7 @@ class Get
 						if ((!filter_var($target, FILTER_VALIDATE_URL) === false
 								&& ComponentbuilderHelper::urlExists($target))
 							|| (JPath::clean($target) === $target
-								&& JFile::exists($target)))
+								&& File::exists($target)))
 						{
 							$this->getExternalCodeString($target, $bucket);
 						}
@@ -9988,7 +10104,7 @@ class Get
 					else
 					{
 						$plugin->{$server} = 0;
-						// only change this for sales server (update server can be added loacaly to the zip file)
+						// only change this for sales server (update server can be added locally to the zip file)
 						if ('sales_server' === $server)
 						{
 							$plugin->{'add_' . $server} = 0;
@@ -10226,12 +10342,12 @@ class Get
 
 		foreach ($paths as $target => $path)
 		{
-			// we are changing the working directory to the componet path
+			// we are changing the working directory to the component path
 			chdir($path);
 			foreach ($fileTypes as $type)
 			{
 				// get a list of files in the current directory tree (only PHP, JS and XML for now)
-				$files = JFolder::files('.', $type, true, true);
+				$files = Folder::files('.', $type, true, true);
 				// check if files found
 				if (ComponentbuilderHelper::checkArray($files))
 				{
@@ -10683,6 +10799,67 @@ class Get
 					. $this->db->quote($hashendtarget);
 			}
 		}
+	}
+
+	/**
+	 * Set a hash of a file and/or string
+	 *
+	 * @param   string  $string  The code string
+	 *
+	 * @return  string
+	 *
+	 */
+	protected function setDynamicHASHING($script)
+	{
+		// check if we should hash a string
+		if (strpos($script, 'HASHSTRING((((') !== false)
+		{
+			// get the strings
+			$values = ComponentbuilderHelper::getAllBetween(
+				$script, 'HASHSTRING((((', '))))'
+			);
+			$locker = array();
+			// convert them
+			foreach ($values as $value)
+			{
+				$locker['HASHSTRING((((' . $value . '))))']
+					= md5($value);
+			}
+
+			// update the script
+			return $this->setPlaceholders($script, $locker);
+		}
+		// check if we should hash a file
+		if (strpos($script, 'HASHFILE((((') !== false)
+		{
+			// get the strings
+			$values = ComponentbuilderHelper::getAllBetween(
+				$script, 'HASHFILE((((', '))))'
+			);
+			$locker = array();
+			// convert them
+			foreach ($values as $path)
+			{
+				// we first get the file if it exist
+				if ($value = ComponentbuilderHelper::getFileContents($path))
+				{
+					// now we hash the file content
+					$locker['HASHFILE((((' . $path . '))))']
+						= md5($value);
+				}
+				else
+				{
+					// could not retrieve the file so we show error
+					$locker['HASHFILE((((' . $path . '))))']
+						= 'ERROR';
+				}
+			}
+
+			// update the script
+			return $this->setPlaceholders($script, $locker);
+		}
+
+		return $script;
 	}
 
 	/**
@@ -11246,11 +11423,11 @@ class Get
 		switch ($type)
 		{
 			case 11:
-				//***[REPLACED$$$$]***//*1*/
+				//***[REPLACED$$$$]***//**1**/
 				if ($this->addPlaceholders === true)
 				{
 					return array(
-						'start' => '/***[REPLACED$$$$]***//*' . $id . '*/',
+						'start' => '/***[REPLACED$$$$]***//**' . $id . '**/',
 						'end'   => '/***[/REPLACED$$$$]***/');
 				}
 				else
@@ -11261,11 +11438,11 @@ class Get
 				}
 				break;
 			case 12:
-				//***[INSERTED$$$$]***//*1*/
+				//***[INSERTED$$$$]***//**1**/
 				if ($this->addPlaceholders === true)
 				{
 					return array(
-						'start' => '/***[INSERTED$$$$]***//*' . $id . '*/',
+						'start' => '/***[INSERTED$$$$]***//**' . $id . '**/',
 						'end'   => '/***[/INSERTED$$$$]***/');
 				}
 				else
@@ -11366,7 +11543,7 @@ class Get
 		// check if the local install is found
 		foreach ($localPaths as $key => $localPath)
 		{
-			if (!JFolder::exists($localPath))
+			if (!Folder::exists($localPath))
 			{
 				unset($localPaths[$key]);
 			}

@@ -5,7 +5,7 @@
  * @created    30th April, 2015
  * @author     Llewellyn van der Merwe <http://www.joomlacomponentbuilder.com>
  * @github     Joomla Component Builder <https://github.com/vdm-io/Joomla-Component-Builder>
- * @copyright  Copyright (C) 2015 - 2020 Vast Development Method. All rights reserved.
+ * @copyright  Copyright (C) 2015 Vast Development Method. All rights reserved.
  * @license    GNU General Public License version 2 or later; see LICENSE.txt
  */
 
@@ -43,6 +43,62 @@ class ComponentbuilderModelFields extends JModelList
 		}
 
 		parent::__construct($config);
+	}
+
+	/**
+	 * Get the filter form - Override the parent method
+	 *
+	 * @param   array    $data      data
+	 * @param   boolean  $loadData  load current data
+	 *
+	 * @return  \JForm|boolean  The \JForm object or false on error
+	 *
+	 * @since   JCB 2.12.5
+	 */
+	public function getFilterForm($data = array(), $loadData = true)
+	{
+		// load form from the parent class
+		$form = parent::getFilterForm($data, $loadData);
+
+		// Create the "extension" filter
+		$form->setField(new SimpleXMLElement(
+			ComponentbuilderHelper::getExtensionGroupedListXml()
+			),'filter');
+		$form->setValue(
+			'extension',
+			'filter',
+			$this->state->get("filter.extension")
+		);
+		array_push($this->filter_fields, 'extension');
+
+		// Create the "admin_view" filter
+		$attributes = array(
+			'name' => 'admin_view',
+			'type' => 'list',
+			'onchange' => 'this.form.submit();',
+		);
+		$options = array(
+			'' => '-  ' . JText::_('COM_COMPONENTBUILDER_NO_ADMIN_VIEWS_FOUND') . '  -'
+		);
+		// check if we have admin views (and limit to an extension if it is set)
+		if (($admin_views = ComponentbuilderHelper::getByTypeTheIdsSystemNames('admin_view', $this->state->get("filter.extension"))) !== false)
+		{
+			$options = array(
+				'' => '-  ' . JText::_('COM_COMPONENTBUILDER_SELECT_ADMIN_VIEW') . '  -'
+			);
+			// make sure we do not lose the key values in normal merge
+			$options = $options + $admin_views;
+		}
+
+		$form->setField(ComponentbuilderHelper::getFieldXML($attributes, $options),'filter');
+		$form->setValue(
+			'admin_view',
+			'filter',
+			$this->state->get("filter.admin_view")
+		);
+		array_push($this->filter_fields, 'admin_view');
+
+		return $form;
 	}
 
 	/**
@@ -311,6 +367,52 @@ class ComponentbuilderModelFields extends JModelList
 		$query->from($db->quoteName('#__componentbuilder_field', 'a'));
 		$query->join('LEFT', $db->quoteName('#__categories', 'c') . ' ON (' . $db->quoteName('a.catid') . ' = ' . $db->quoteName('c.id') . ')');
 
+		// do not use these filters in the export method
+		if (!isset($_export) || !$_export)
+		{
+			// Filtering "extension"
+			$filter_extension = $this->state->get("filter.extension");
+			$field_ids = array();
+			$get_ids = true;
+			if ($get_ids && $filter_extension !== null && !empty($filter_extension))
+			{
+				// column name, and id
+				$type_extension = explode('__', $filter_extension);
+				if (($ids = ComponentbuilderHelper::getAreaLinkedIDs($type_extension[1], $type_extension[0])) !== false)
+				{
+					$field_ids = $ids;
+				}
+				else
+				{
+					// there is none
+					$query->where($db->quoteName('a.id') . ' = ' . 0);
+					$get_ids = false;
+				}
+			}
+
+			// Filtering "admin_view"
+			$filter_admin_view = $this->state->get("filter.admin_view");
+			if ($get_ids && $filter_admin_view !== null && !empty($filter_admin_view))
+			{
+				if (($ids = ComponentbuilderHelper::getAreaLinkedIDs($filter_admin_view, 'admin_view')) !== false)
+				{
+					// view will return less fields, so we ignore the component
+					$field_ids = $ids;
+				}
+				else
+				{
+					// there is none
+					$query->where($db->quoteName('a.id') . ' = ' . 0);
+					$get_ids = false;
+				}
+			}
+			// now check if we have IDs
+			if ($get_ids && ComponentbuilderHelper::checkArray($field_ids))
+			{
+				$query->where($db->quoteName('a.id') . ' IN (' . implode(',', $field_ids) . ')');
+			}
+		}
+
 		// From the componentbuilder_fieldtype table.
 		$query->select($db->quoteName('g.name','fieldtype_name'));
 		$query->join('LEFT', $db->quoteName('#__componentbuilder_fieldtype', 'g') . ' ON (' . $db->quoteName('a.fieldtype') . ' = ' . $db->quoteName('g.id') . ')');
@@ -529,6 +631,52 @@ class ComponentbuilderModelFields extends JModelList
 			{
 				$query->where('a.id IN (' . implode(',',$pks) . ')');
 			}
+
+			// do not use these filters in the export method
+		if (!isset($_export) || !$_export)
+		{
+			// Filtering "extension"
+			$filter_extension = $this->state->get("filter.extension");
+			$field_ids = array();
+			$get_ids = true;
+			if ($get_ids && $filter_extension !== null && !empty($filter_extension))
+			{
+				// column name, and id
+				$type_extension = explode('__', $filter_extension);
+				if (($ids = ComponentbuilderHelper::getAreaLinkedIDs($type_extension[1], $type_extension[0])) !== false)
+				{
+					$field_ids = $ids;
+				}
+				else
+				{
+					// there is none
+					$query->where($db->quoteName('a.id') . ' = ' . 0);
+					$get_ids = false;
+				}
+			}
+
+			// Filtering "admin_view"
+			$filter_admin_view = $this->state->get("filter.admin_view");
+			if ($get_ids && $filter_admin_view !== null && !empty($filter_admin_view))
+			{
+				if (($ids = ComponentbuilderHelper::getAreaLinkedIDs($filter_admin_view, 'admin_view')) !== false)
+				{
+					// view will return less fields, so we ignore the component
+					$field_ids = $ids;
+				}
+				else
+				{
+					// there is none
+					$query->where($db->quoteName('a.id') . ' = ' . 0);
+					$get_ids = false;
+				}
+			}
+			// now check if we have IDs
+			if ($get_ids && ComponentbuilderHelper::checkArray($field_ids))
+			{
+				$query->where($db->quoteName('a.id') . ' IN (' . implode(',', $field_ids) . ')');
+			}
+		}
 			// Implement View Level Access
 			if (!$user->authorise('core.options', 'com_componentbuilder'))
 			{

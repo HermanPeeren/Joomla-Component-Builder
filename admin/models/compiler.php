@@ -5,7 +5,7 @@
  * @created    30th April, 2015
  * @author     Llewellyn van der Merwe <http://www.joomlacomponentbuilder.com>
  * @github     Joomla Component Builder <https://github.com/vdm-io/Joomla-Component-Builder>
- * @copyright  Copyright (C) 2015 - 2020 Vast Development Method. All rights reserved.
+ * @copyright  Copyright (C) 2015 Vast Development Method. All rights reserved.
  * @license    GNU General Public License version 2 or later; see LICENSE.txt
  */
 
@@ -100,7 +100,7 @@ class ComponentbuilderModelCompiler extends JModelList
 		{
 			// Load the JEvent Dispatcher
 			JPluginHelper::importPlugin('content');
-			$this->_dispatcher = JEventDispatcher::getInstance();
+			$this->_dispatcher = JFactory::getApplication();
 			foreach ($items as $nr => &$item)
 			{
 				// Always create a slug for sef URL's
@@ -111,7 +111,7 @@ class ComponentbuilderModelCompiler extends JModelList
 				$_copyright = new stdClass();
 				$_copyright->text =& $item->copyright; // value must be in text
 				// Since all values are now in text (Joomla Limitation), we also add the field name (copyright) to context
-				$this->_dispatcher->trigger("onContentPrepare", array('com_componentbuilder.compiler.copyright', &$_copyright, &$params, 0));
+				$this->_dispatcher->triggerEvent("onContentPrepare", array('com_componentbuilder.compiler.copyright', &$_copyright, &$params, 0));
 				// Checking if copyright has uikit components that must be loaded.
 				$this->uikitComp = ComponentbuilderHelper::getUikitComp($item->copyright,$this->uikitComp);
 			}
@@ -154,6 +154,51 @@ class ComponentbuilderModelCompiler extends JModelList
 		$db->setQuery($query);
 		// return the result
 		return $db->loadObjectList();
+	}	
+
+	public function getCompilerAnimations(&$errorMessage) 
+	{
+		// convert error message to array
+		$errorMessage = array();
+		$searchArray = array(
+			// add banners (width - height)
+			'banner' => array(
+					'728-90',
+					'160-600'
+				),
+			// The build-gif by size (width - height)
+			'builder-gif' => array(
+					'480-540'
+				)
+			);
+		// start search, and get
+		foreach ($searchArray as $type => $sizes)
+		{
+			// per size
+			foreach ($sizes as $size)
+			{
+				// get size
+				if (($set_size = ComponentbuilderHelper::getDynamicContentSize($type, $size)) !== 0)
+				{
+					// we loop over all type size artwork
+					for ($target = 1; $target <= $set_size; $target++)
+					{
+    						if (!ComponentbuilderHelper::getDynamicContent($type, $size, false, 0, $target))
+    						{
+    							$errorMessage[] = JText::sprintf('COM_COMPONENTBUILDER_S_S_NUMBER_BSB_COULD_NOT_BE_DOWNLOADED_SUCCESSFULLY_TO_THIS_JOOMLA_INSTALL', $type, $size, $target);
+    						}
+					}
+				}
+			}
+		}
+		// check if we had any errors
+		if (ComponentbuilderHelper::checkArray($errorMessage))
+		{
+			// flatten the error message array
+			$errorMessage = implode('<br />', $errorMessage);
+			return false;
+		}
+		return true;
 	}
 
 	public function builder($version, $id, $backup, $repo, $addPlaceholders, $debugLinenr, $minify) 

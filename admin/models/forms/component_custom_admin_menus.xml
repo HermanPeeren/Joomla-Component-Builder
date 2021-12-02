@@ -84,6 +84,14 @@
 			readonly="true"
 			filter="unset"
 		/>
+		<!-- Was added due to Permissions JS needing a Title field -->
+		<!-- Let us know at gh-629 should this change -->
+		<!-- https://github.com/vdm-io/Joomla-Component-Builder/issues/629#issuecomment-750117235 -->
+		<field
+			name="title"
+			type="hidden"
+			default="componentbuilder component_custom_admin_menus"
+		/>
 		<!-- Dynamic Fields. -->
 		<!-- Joomla_component Field. Type: Joomlacomponents. (custom) -->
 		<field
@@ -117,8 +125,6 @@
 					maxlength="150"
 					description="COM_COMPONENTBUILDER_COMPONENT_CUSTOM_ADMIN_MENUS_NAME_DESCRIPTION"
 					class="text_area"
-					readonly="false"
-					disabled="false"
 					required="true"
 					filter="STRING"
 					message="COM_COMPONENTBUILDER_COMPONENT_CUSTOM_ADMIN_MENUS_NAME_MESSAGE"

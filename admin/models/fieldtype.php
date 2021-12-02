@@ -5,7 +5,7 @@
  * @created    30th April, 2015
  * @author     Llewellyn van der Merwe <http://www.joomlacomponentbuilder.com>
  * @github     Joomla Component Builder <https://github.com/vdm-io/Joomla-Component-Builder>
- * @copyright  Copyright (C) 2015 - 2020 Vast Development Method. All rights reserved.
+ * @copyright  Copyright (C) 2015 Vast Development Method. All rights reserved.
  * @license    GNU General Public License version 2 or later; see LICENSE.txt
  */
 
@@ -232,12 +232,6 @@ class ComponentbuilderModelFieldtype extends JModelAdmin
 				$objectUpdate->properties = json_encode($bucket);
 				$this->db->updateObject('#__componentbuilder_fieldtype', $objectUpdate, 'id');
 			}
-			
-			if (!empty($item->id))
-			{
-				$item->tags = new JHelperTags;
-				$item->tags->getTagIds($item->id, 'com_componentbuilder.fieldtype');
-			}
 		}
 		$this->fieldtypevvvv = $item->id;
 
@@ -264,6 +258,52 @@ class ComponentbuilderModelFieldtype extends JModelAdmin
 		// From the componentbuilder_field table
 		$query->from($db->quoteName('#__componentbuilder_field', 'a'));
 		$query->join('LEFT', $db->quoteName('#__categories', 'c') . ' ON (' . $db->quoteName('a.catid') . ' = ' . $db->quoteName('c.id') . ')');
+
+		// do not use these filters in the export method
+		if (!isset($_export) || !$_export)
+		{
+			// Filtering "extension"
+			$filter_extension = $this->state->get("filter.extension");
+			$field_ids = array();
+			$get_ids = true;
+			if ($get_ids && $filter_extension !== null && !empty($filter_extension))
+			{
+				// column name, and id
+				$type_extension = explode('__', $filter_extension);
+				if (($ids = ComponentbuilderHelper::getAreaLinkedIDs($type_extension[1], $type_extension[0])) !== false)
+				{
+					$field_ids = $ids;
+				}
+				else
+				{
+					// there is none
+					$query->where($db->quoteName('a.id') . ' = ' . 0);
+					$get_ids = false;
+				}
+			}
+
+			// Filtering "admin_view"
+			$filter_admin_view = $this->state->get("filter.admin_view");
+			if ($get_ids && $filter_admin_view !== null && !empty($filter_admin_view))
+			{
+				if (($ids = ComponentbuilderHelper::getAreaLinkedIDs($filter_admin_view, 'admin_view')) !== false)
+				{
+					// view will return less fields, so we ignore the component
+					$field_ids = $ids;
+				}
+				else
+				{
+					// there is none
+					$query->where($db->quoteName('a.id') . ' = ' . 0);
+					$get_ids = false;
+				}
+			}
+			// now check if we have IDs
+			if ($get_ids && ComponentbuilderHelper::checkArray($field_ids))
+			{
+				$query->where($db->quoteName('a.id') . ' IN (' . implode(',', $field_ids) . ')');
+			}
+		}
 
 		// From the componentbuilder_fieldtype table.
 		$query->select($db->quoteName('g.name','fieldtype_name'));
@@ -568,7 +608,7 @@ class ComponentbuilderModelFieldtype extends JModelAdmin
 	 */
 	public function getScript()
 	{
-		return 'administrator/components/com_componentbuilder/models/forms/fieldtype.js';
+		return 'media/com_componentbuilder/js/fieldtype.js';
 	}
     
 	/**

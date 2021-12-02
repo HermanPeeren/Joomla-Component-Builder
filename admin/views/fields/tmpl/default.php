@@ -5,14 +5,13 @@
  * @created    30th April, 2015
  * @author     Llewellyn van der Merwe <http://www.joomlacomponentbuilder.com>
  * @github     Joomla Component Builder <https://github.com/vdm-io/Joomla-Component-Builder>
- * @copyright  Copyright (C) 2015 - 2020 Vast Development Method. All rights reserved.
+ * @copyright  Copyright (C) 2015 Vast Development Method. All rights reserved.
  * @license    GNU General Public License version 2 or later; see LICENSE.txt
  */
 
 // No direct access to this file
-defined('_JEXEC') or die('Restricted access'); 
+defined('_JEXEC') or die('Restricted access');
 
-JHtml::_('behavior.tooltip');
 JHtml::_('behavior.multiselect');
 JHtml::_('dropdown.init');
 JHtml::_('formbehavior.chosen', '.multipleCategories', null, array('placeholder_text_multiple' => '- ' . JText::_('COM_COMPONENTBUILDER_FILTER_SELECT_FIELDS_CATEGORIES') . ' -'));
@@ -34,6 +33,8 @@ if ($this->saveOrder)
 	<div id="j-main-container">
 <?php endif; ?>
 <?php
+	// Add the trash helper layout
+	echo JLayoutHelper::render('trashhelper', $this);
 	// Add the searchtools
 	echo JLayoutHelper::render('joomla.searchtools.default', array('view' => $this));
 ?>

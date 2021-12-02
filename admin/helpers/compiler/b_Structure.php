@@ -5,12 +5,15 @@
  * @created    30th April, 2015
  * @author     Llewellyn van der Merwe <http://www.joomlacomponentbuilder.com>
  * @github     Joomla Component Builder <https://github.com/vdm-io/Joomla-Component-Builder>
- * @copyright  Copyright (C) 2015 - 2020 Vast Development Method. All rights reserved.
+ * @copyright  Copyright (C) 2015 Vast Development Method. All rights reserved.
  * @license    GNU General Public License version 2 or later; see LICENSE.txt
  */
 
 // No direct access to this file
 defined('_JEXEC') or die('Restricted access');
+
+use Joomla\CMS\Filesystem\File;
+use Joomla\CMS\Filesystem\Folder;
 
 /**
  * Structure class
@@ -1403,12 +1406,12 @@ class Structure extends Get
 	private function createFolder($path)
 	{
 		// check if the path exist
-		if (!JFolder::exists(
+		if (!Folder::exists(
 			$path
 		))
 		{
 			// create the path
-			JFolder::create(
+			Folder::create(
 				$path
 			);
 			// count the folder created
@@ -1436,9 +1439,9 @@ class Structure extends Get
 				array(&$this->componentContext, &$this->libraries)
 			);
 			// creat the main component folder
-			if (!JFolder::exists($this->componentPath))
+			if (!Folder::exists($this->componentPath))
 			{
-				JFolder::create($this->componentPath);
+				Folder::create($this->componentPath);
 				// count the folder created
 				$this->folderCount++;
 				$this->indexHTML('');
@@ -1736,9 +1739,9 @@ class Structure extends Get
 		))
 		{
 			// creat the main component folder
-			if (!JFolder::exists($this->componentPath))
+			if (!Folder::exists($this->componentPath))
 			{
-				JFolder::create($this->componentPath);
+				Folder::create($this->componentPath);
 				// count the folder created
 				$this->folderCount++;
 				$this->indexHTML('');
@@ -1995,7 +1998,7 @@ class Structure extends Get
 				// now move the file
 				if ($details->type === 'file')
 				{
-					if (!JFile::exists($currentFullPath))
+					if (!File::exists($currentFullPath))
 					{
 						$this->app->enqueueMessage(
 							JText::_('<hr /><h3>File Path Error</h3>'), 'Error'
@@ -2014,12 +2017,12 @@ class Structure extends Get
 							basename($packageFullPath), '', $packageFullPath
 						);
 						// check if path exist, if not creat it
-						if (!JFolder::exists($packageFullPath0nly))
+						if (!Folder::exists($packageFullPath0nly))
 						{
-							JFolder::create($packageFullPath0nly);
+							Folder::create($packageFullPath0nly);
 						}
 						// move the file to its place
-						JFile::copy($currentFullPath, $packageFullPath);
+						File::copy($currentFullPath, $packageFullPath);
 						// count the file created
 						$this->fileCount++;
 						// store the new files
@@ -2054,7 +2057,7 @@ class Structure extends Get
 				}
 				elseif ($details->type === 'folder')
 				{
-					if (!JFolder::exists($currentFullPath))
+					if (!Folder::exists($currentFullPath))
 					{
 						$this->app->enqueueMessage(
 							JText::_('<hr /><h3>Folder Path Error</h3>'),
@@ -2070,7 +2073,7 @@ class Structure extends Get
 					else
 					{
 						// move the folder to its place
-						JFolder::copy(
+						Folder::copy(
 							$currentFullPath, $packageFullPath, '', true
 						);
 						// count the folder created
@@ -2096,12 +2099,12 @@ class Structure extends Get
 							// set message that this was done (will still add a tutorial link later)
 							$this->app->enqueueMessage(
 								JText::_(
-									'<hr /><h3>Dynamic folder/s were detected.</h3>'
+									'<hr /><h3>Dynamic folder(s) were detected.</h3>'
 								), 'Notice'
 							);
 							$this->app->enqueueMessage(
 								JText::sprintf(
-									'A method (setDynamicF0ld3rs) was added to the install <b>script.php</b> of this package to insure that the folder/s are copied into the correct place when this componet is installed!'
+									'A method (setDynamicF0ld3rs) was added to the install <b>script.php</b> of this package to insure that the folder(s) are copied into the correct place when this component is installed!'
 								), 'Notice'
 							);
 						}
@@ -2359,13 +2362,13 @@ class Structure extends Get
 				if (!isset($this->extentionTrackingFilesMoved[$check]))
 				{
 					// check files exist
-					if (JFile::exists(
+					if (File::exists(
 						$this->componentPath . '/admin/models/fields/'
 						. $field['type_name'] . '.php'
 					))
 					{
 						// copy the custom field
-						JFile::copy(
+						File::copy(
 							$this->componentPath . '/admin/models/fields/'
 							. $field['type_name'] . '.php',
 							$path . '/fields/' . $field['type_name'] . '.php'
@@ -2386,14 +2389,14 @@ class Structure extends Get
 				if (!isset($this->extentionTrackingFilesMoved[$check]))
 				{
 					// check files exist
-					if (JFile::exists(
+					if (File::exists(
 						$this->componentPath . '/admin/models/rules/'
 						. $this->validationLinkedFields[$field['field']]
 						. '.php'
 					))
 					{
 						// copy the custom field
-						JFile::copy(
+						File::copy(
 							$this->componentPath . '/admin/models/rules/'
 							. $this->validationLinkedFields[$field['field']]
 							. '.php', $path . '/rules/'
@@ -2651,9 +2654,9 @@ class Structure extends Get
 						}
 
 						// setup the folder
-						if (!JFolder::exists($path))
+						if (!Folder::exists($path))
 						{
-							JFolder::create($path);
+							Folder::create($path);
 							$this->indexHTML($zipPath);
 							// count the folder created
 							$this->folderCount++;
@@ -2683,10 +2686,10 @@ class Structure extends Get
 						{
 							$new = $item;
 						}
-						if (!JFile::exists($path . '/' . $new))
+						if (!File::exists($path . '/' . $new))
 						{
 							// move the file to its place
-							JFile::copy(
+							File::copy(
 								$this->templatePath . '/' . $item,
 								$path . '/' . $new
 							);
@@ -3043,7 +3046,7 @@ class Structure extends Get
 		// use path if exist
 		if (strlen($path) > 0)
 		{
-			JFile::copy(
+			File::copy(
 				$this->templatePath . '/index.html',
 				$root . $path . '/index.html'
 			);
@@ -3052,7 +3055,7 @@ class Structure extends Get
 		}
 		else
 		{
-			JFile::copy(
+			File::copy(
 				$this->templatePath . '/index.html', $root . '/index.html'
 			);
 			// count the file created

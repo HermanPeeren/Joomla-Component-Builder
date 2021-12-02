@@ -17,7 +17,10 @@ defined('_JEXEC') or die('Restricted access');
 // No direct access to this file
 defined('_JEXEC') or die('Restricted access');
 
-JHTML::_('behavior.modal');
+use Joomla\CMS\Filesystem\File;
+use Joomla\CMS\Filesystem\Folder;
+use Joomla\CMS\Installer\Adapter\ComponentAdapter;
+JHTML::_('bootstrap.renderModal');
 
 /**
  * Script File of ###Component### Component
@@ -29,23 +32,23 @@ class com_###component###InstallerScript
 	 *
 	 * @param   JAdapterInstance  $parent  The object responsible for running this script
 	 */
-	public function __construct(JAdapterInstance $parent) {}
+	public function __construct(ComponentAdapter $parent) {}
 
 	/**
 	 * Called on installation
 	 *
-	 * @param   JAdapterInstance  $parent  The object responsible for running this script
+	 * @param   ComponentAdapter  $parent  The object responsible for running this script
 	 *
 	 * @return  boolean  True on success
 	 */
-	public function install(JAdapterInstance $parent) {}
+	public function install(ComponentAdapter $parent) {}
 
 	/**
 	 * Called on uninstallation
 	 *
-	 * @param   JAdapterInstance  $parent  The object responsible for running this script
+	 * @param   ComponentAdapter  $parent  The object responsible for running this script
 	 */
-	public function uninstall(JAdapterInstance $parent)
+	public function uninstall(ComponentAdapter $parent)
 	{###UNINSTALLSCRIPT###
 		// little notice as after service, in case of bad experience with component.
 		echo '<h2>Did something go wrong? Are you disappointed?</h2>
@@ -58,21 +61,21 @@ class com_###component###InstallerScript
 	/**
 	 * Called on update
 	 *
-	 * @param   JAdapterInstance  $parent  The object responsible for running this script
+	 * @param   ComponentAdapter  $parent  The object responsible for running this script
 	 *
 	 * @return  boolean  True on success
 	 */
-	public function update(JAdapterInstance $parent){}
+	public function update(ComponentAdapter $parent){}
 
 	/**
 	 * Called before any type of action
 	 *
 	 * @param   string  $type  Which action is happening (install|uninstall|discover_install|update)
-	 * @param   JAdapterInstance  $parent  The object responsible for running this script
+	 * @param   ComponentAdapter  $parent  The object responsible for running this script
 	 *
 	 * @return  boolean  True on success
 	 */
-	public function preflight($type, JAdapterInstance $parent)
+	public function preflight($type, ComponentAdapter $parent)
 	{
 		// get application
 		$app = JFactory::getApplication();
@@ -97,12 +100,12 @@ class com_###component###InstallerScript
 		{###PREINSTALLSCRIPT###
 		}
 		// check if the PHPExcel stuff is still around
-		if (JFile::exists(JPATH_ADMINISTRATOR . '/components/com_###component###/helpers/PHPExcel.php'))
+		if (File::exists(JPATH_ADMINISTRATOR . '/components/com_###component###/helpers/PHPExcel.php'))
 		{
 			// We need to remove this old PHPExcel folder
 			$this->removeFolder(JPATH_ADMINISTRATOR . '/components/com_###component###/helpers/PHPExcel');
 			// We need to remove this old PHPExcel file
-			JFile::delete(JPATH_ADMINISTRATOR . '/components/com_###component###/helpers/PHPExcel.php');
+			File::delete(JPATH_ADMINISTRATOR . '/components/com_###component###/helpers/PHPExcel.php');
 		}
 		return true;
 	}
@@ -111,11 +114,11 @@ class com_###component###InstallerScript
 	 * Called after any type of action
 	 *
 	 * @param   string  $type  Which action is happening (install|uninstall|discover_install|update)
-	 * @param   JAdapterInstance  $parent  The object responsible for running this script
+	 * @param   ComponentAdapter  $parent  The object responsible for running this script
 	 *
 	 * @return  boolean  True on success
 	 */
-	public function postflight($type, JAdapterInstance $parent)
+	public function postflight($type, ComponentAdapter $parent)
 	{
 		// get application
 		$app = JFactory::getApplication();###MOVEFOLDERSSCRIPT###
@@ -141,7 +144,7 @@ class com_###component###InstallerScript
 	 */
 	protected function removeFolder($dir, $ignore = false)
 	{
-		if (JFolder::exists($dir))
+		if (Folder::exists($dir))
 		{
 			$it = new RecursiveDirectoryIterator($dir);
 			$it = new RecursiveIteratorIterator($it, RecursiveIteratorIterator::CHILD_FIRST);
@@ -171,7 +174,7 @@ class com_###component###InstallerScript
 					{
 						continue;
 					}
-					JFolder::delete($file_dir);
+					Folder::delete($file_dir);
 				}
 				else
 				{
@@ -190,13 +193,13 @@ class com_###component###InstallerScript
 					{
 						continue;
 					}
-					JFile::delete($file_dir);
+					File::delete($file_dir);
 				}
 			}
 			// delete the root folder if not ignore found
 			if (!$this->checkArray($ignore))
 			{
-				return JFolder::delete($dir);
+				return Folder::delete($dir);
 			}
 			return true;
 		}
