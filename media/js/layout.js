@@ -2,24 +2,24 @@
  * @package    Joomla.Component.Builder
  *
  * @created    30th April, 2015
- * @author     Llewellyn van der Merwe <http://www.joomlacomponentbuilder.com>
- * @github     Joomla Component Builder <https://github.com/vdm-io/Joomla-Component-Builder>
+ * @author     Llewellyn van der Merwe <https://dev.vdm.io>
+ * @git        Joomla Component Builder <https://git.vdm.dev/joomla/Component-Builder>
  * @copyright  Copyright (C) 2015 Vast Development Method. All rights reserved.
  * @license    GNU General Public License version 2 or later; see LICENSE.txt
  */
 
 // Initial Script
-jQuery(document).ready(function()
+document.addEventListener('DOMContentLoaded', function()
 {
-	var add_php_view_vvvvwaz = jQuery("#jform_add_php_view input[type='radio']:checked").val();
-	vvvvwaz(add_php_view_vvvvwaz);
+	var add_php_view_vvvvvzd = jQuery("#jform_add_php_view input[type='radio']:checked").val();
+	vvvvvzd(add_php_view_vvvvvzd);
 });
 
-// the vvvvwaz function
-function vvvvwaz(add_php_view_vvvvwaz)
+// the vvvvvzd function
+function vvvvvzd(add_php_view_vvvvvzd)
 {
 	// set the function logic
-	if (add_php_view_vvvvwaz == 1)
+	if (add_php_view_vvvvvzd == 1)
 	{
 		jQuery('#jform_php_view-lbl').closest('.control-group').show();
 	}
@@ -39,68 +39,105 @@ function isSet(val)
 }
 
 
-jQuery(document).ready(function($)
-{
+document.addEventListener("DOMContentLoaded", function() {
 	// check and load all the custom code edit buttons
 	getEditCustomCodeButtons();
 });
 
-function getCodeFrom_server(id, type, type_name, callingName){
-	var getUrl = JRouter("index.php?option=com_componentbuilder&task=ajax." + callingName + "&format=json&raw=true&vdm="+vastDevMod);
-	if(token.length > 0 && id > 0 && type.length > 0) {
-		var request = token + '=1&' + type_name + '=' + type + '&id=' + id;
+function getCodeFrom_server(id, type, type_name, callingName) {
+	var url = "index.php?option=com_componentbuilder&task=ajax." + callingName + "&format=json&raw=true&vdm="+vastDevMod;
+	if (token.length > 0 && getCodeFrom_isValidId(id) && type.length > 0) {
+		url += '&' + token + '=1&' + type_name + '=' + type + '&id=' + id;
+	} else {
+		console.error('There was a issue with the values passed to the [getCodeFrom_server] method and we could not make the Ajax call.');
+		return;
 	}
-	return jQuery.ajax({
-		type: 'GET',
-		url: getUrl,
-		dataType: 'json',
-		data: request,
-		jsonp: false
+	var getUrl = JRouter(url);
+	return fetch(getUrl, {
+		method: 'GET',
+		headers: {
+			'Content-Type': 'application/json'
+		}
+	}).then(function(response) {
+		if (response.ok) {
+			return response.json();
+		} else {
+			throw new Error('Network response was not ok');
+		}
+	}).then(function(data) {
+		return data;
+	}).catch(function(error) {
+		console.error('There was a problem with the fetch operation:', error);
 	});
 }
+function getCodeFrom_isValidId(id) {
+    if (typeof id === 'number') {
+        // Check if it's a positive integer
+        return Number.isInteger(id) && id > 0;
+    } else if (typeof id === 'string') {
+        // Check if it's a string of length > 30
+        return id.length > 30;
+    }
+    // If neither a number nor a string, return false
+    return false;
+}
 
-
-function getEditCustomCodeButtons_server(id){
+function getEditCustomCodeButtons_server(id) {
 	var getUrl = JRouter("index.php?option=com_componentbuilder&task=ajax.getEditCustomCodeButtons&format=json&raw=true&vdm="+vastDevMod);
-	if(token.length > 0 && id > 0){
-		var request = token+'=1&id='+id+'&return_here='+return_here;
+	let requestParams = '';
+	if (token.length > 0 && id > 0) {
+		requestParams = token+'=1&id='+id+'&return_here='+return_here;
 	}
-	return jQuery.ajax({
-		type: 'GET',
-		url: getUrl,
-		dataType: 'json',
-		data: request,
-		jsonp: false
+	// Construct URL with parameters for GET request
+	const urlWithParams = getUrl + '&' + requestParams;
+
+	// Using the Fetch API for the GET request
+	return fetch(urlWithParams, {
+		method: 'GET',
+		headers: {
+			'Content-Type': 'application/json'
+		}
+	}).then(response => {
+		if (!response.ok) {
+			throw new Error('Network response was not ok');
+		}
+		return response.json();
 	});
 }
 
-function getEditCustomCodeButtons(){
-	// get the id
-	id = jQuery("#jform_id").val();
-	getEditCustomCodeButtons_server(id).done(function(result) {
-		if(isObject(result)){
-			jQuery.each(result, function( field, buttons ) {
-				jQuery('<div class="control-group"><div class="control-label"><label>Add/Edit Customcode</label></div><div class="controls control-customcode-buttons-'+field+'"></div></div>').insertBefore(".control-wrapper-"+ field);
-				jQuery.each(buttons, function( name, button ) {
-					jQuery(".control-customcode-buttons-"+field).append(button);
+function getEditCustomCodeButtons() {
+	// Get the id using pure JavaScript
+	const id = document.querySelector("#jform_id").value;
+	getEditCustomCodeButtons_server(id).then(function(result) {
+		if (typeof result === 'object') {
+			Object.entries(result).forEach(([field, buttons]) => {
+				// Creating the div element for buttons
+				const div = document.createElement('div');
+				div.className = 'control-group';
+				div.innerHTML = '<div class="control-label"><label>Add/Edit Customcode</label></div><div class="controls control-customcode-buttons-'+field+'"></div>';
+
+				// Insert the div before .control-wrapper-{field}
+				const insertBeforeElement = document.querySelector(".control-wrapper-"+field);
+				if (insertBeforeElement) {
+					insertBeforeElement.parentNode.insertBefore(div, insertBeforeElement);
+				}
+
+				// Adding buttons to the div
+				Object.entries(buttons).forEach(([name, button]) => {
+					const controlsDiv = document.querySelector(".control-customcode-buttons-"+field);
+					if (controlsDiv) {
+						controlsDiv.innerHTML += button;
+					}
 				});
 			});
 		}
-	})
-}
-
-// check object is not empty
-function isObject(obj) {
-	for(var prop in obj) {
-		if (Object.prototype.hasOwnProperty.call(obj, prop)) {
-			return true;
-		}
-	}
-	return false;
+	}).catch(error => {
+		console.error('Error:', error);
+	});
 }
 
 function getSnippetDetails(id){
-	getCodeFrom_server(id, '_type', '_type', 'snippetDetails').done(function(result) {
+	getCodeFrom_server(id, '_type', '_type', 'snippetDetails').then(function(result) {
 		if(result.snippet){
 			var description = '';
 			if (result.description.length > 0) {
@@ -134,58 +171,84 @@ function getSnippetDetails(id){
 	})
 }
 
-function getDynamicValues_server(dynamicId){
-	var getUrl = JRouter("index.php?option=com_componentbuilder&task=ajax.getDynamicValues&format=json");
-	if(token.length > 0 && dynamicId > 0){
-		var request = token+'=1&view=layout&id='+dynamicId;
-	}
-	return jQuery.ajax({
-		type: 'GET',
-		url: getUrl,
-		dataType: 'jsonp',
-		data: request,
-		jsonp: 'callback'
-	});
+function getDynamicValuesServer(dynamicId) {
+    var getUrl = 'index.php?option=com_componentbuilder&task=ajax.getDynamicValues&raw=true&format=json';
+    if (token.length > 0 && (dynamicId > 0 || dynamicId.length > 0)) {
+        var request = token + '=1&view=layout&id=' + dynamicId;
+    }
+
+    return fetch(getUrl + '&' + request, {
+        method: 'GET',
+        headers: {
+            'Content-Type': 'application/json',
+        }
+    })
+    .then(response => response.json());
 }
 
-function getDynamicValues(id){
-	getDynamicValues_server(id).done(function(result) {
-		if(result){
-			jQuery('#dynamic_values').remove();
-			jQuery('.dynamic_values').append('<div id="dynamic_values">'+result+'</div>');
-			// make sure the code bocks are active
-			jQuery("code").click(function() {
-				jQuery(this).selText().addClass("selected");
-			});
-		}
-	})
+function getDynamicValues(id) {
+    getDynamicValuesServer(id).then(function(result) {
+        if (result) {
+            var dynamicValuesElement = document.getElementById('dynamic_values');
+            if (dynamicValuesElement) {
+                dynamicValuesElement.remove();
+            }
+            document.querySelector('.dynamic_values').insertAdjacentHTML('beforeend', '<div id="dynamic_values">' + result + '</div>');
+
+            // Event listener for code blocks
+            document.querySelectorAll("code").forEach(function(codeBlock) {
+                codeBlock.addEventListener("click", function() {
+                    codeBlock.selText(); // Call the custom selText function
+                    codeBlock.classList.add("selected");  // Add the "selected" class
+                });
+            });
+        }
+    }).catch(function(error) {
+        console.error('Error fetching dynamic values:', error);
+    });
 }
 
-function getLayoutDetails_server(id){
-	var getUrl = JRouter("index.php?option=com_componentbuilder&task=ajax.getLayoutDetails&format=json&vdm="+vastDevMod);
-	if(token.length > 0 && id > 0){
-		var request = token+'=1&id='+id;
-	}
-	return jQuery.ajax({
-		type: 'GET',
-		url: getUrl,
-		dataType: 'jsonp',
-		data: request,
-		jsonp: 'callback'
-	});
+function getLayoutDetails_server(id) {
+    var getUrl = JRouter("index.php?option=com_componentbuilder&task=ajax.getLayoutDetails&format=json&raw=true&vdm=" + vastDevMod);
+    var request = '';
+
+    // Ensure token and id are present
+    if (token.length > 0 && id > 0) {
+        request = token + '=1&id=' + id;
+    }
+
+    // Return a fetch promise (fetch does not support JSONP, so I assume the server can return JSON)
+    return fetch(getUrl + '&' + request, {
+        method: 'GET'
+    })
+    .then(function(response) {
+        if (!response.ok) {
+            throw new Error("Network response was not ok");
+        }
+        return response.json();  // Assuming the server returns JSON
+    });
 }
 
-function getLayoutDetails(id){
-	getLayoutDetails_server(id).done(function(result) {
-		if(result){
-			jQuery('#details').append(result);
-			// make sure the code bocks are active
-			jQuery("code").click(function() {
-				jQuery(this).selText().addClass("selected");
-			});
-		}
-	})
+function getLayoutDetails(id) {
+    getLayoutDetails_server(id)
+        .then(function(result) {
+            if (result) {
+                document.querySelector('#details').insertAdjacentHTML('beforeend', result);
+
+                // Re-enable code block text selection functionality
+                document.querySelectorAll("code").forEach(function(codeBlock) {
+                    codeBlock.addEventListener("click", function() {
+                        codeBlock.selText();
+                        codeBlock.classList.add("selected");
+                    });
+                });
+            }
+        })
+        .catch(function(error) {
+            console.error('There was a problem with the fetch operation:', error);
+        });
 }
+
 
 // set snippets that are on the page
 var snippetIds = [];
@@ -212,7 +275,7 @@ function getSnippets(){
 	// get libraries value if set
 	var libraries = jQuery("#jform_libraries").val();
 	if (libraries) {
-		getCodeFrom_server(1, JSON.stringify(libraries), 'libraries', 'getSnippets').done(function(result) {
+		getCodeFrom_server(1, JSON.stringify(libraries), 'libraries', 'getSnippets').then(function(result) {
 			setSnippets(result);
 			jQuery("#loading").hide();
 			if (typeof snippetButton !== 'undefined') {
@@ -244,4 +307,4 @@ function setSnippets(array){
 		jQuery('#jform_snippet').append('<option value="">'+create_a_snippet+'</option>');
 	}
 	jQuery('#jform_snippet').trigger('liszt:updated');
-} 
+}

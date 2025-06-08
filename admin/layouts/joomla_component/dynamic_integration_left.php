@@ -3,14 +3,14 @@
  * @package    Joomla.Component.Builder
  *
  * @created    30th April, 2015
- * @author     Llewellyn van der Merwe <http://www.joomlacomponentbuilder.com>
- * @github     Joomla Component Builder <https://github.com/vdm-io/Joomla-Component-Builder>
+ * @author     Llewellyn van der Merwe <https://dev.vdm.io>
+ * @git        Joomla Component Builder <https://git.vdm.dev/joomla/Component-Builder>
  * @copyright  Copyright (C) 2015 Vast Development Method. All rights reserved.
  * @license    GNU General Public License version 2 or later; see LICENSE.txt
  */
 
 // No direct access to this file
-defined('_JEXEC') or die('Restricted access');
+defined('_JEXEC') or die;
 
 // get the form
 $form = $displayData->getForm();
@@ -34,10 +34,18 @@ $fields = $displayData->get($fields_tab_layout) ?: array(
 	'note_update_server_note_other',
 	'update_server',
 	'add_sales_server',
-	'sales_server'
+	'sales_server',
+	'add_backup_folder_path',
+	'note_backup_folder_path',
+	'backup_folder_path',
+	'add_git_folder_path',
+	'note_git_folder_path',
+	'git_folder_path',
+	'add_jcb_powers_path',
+	'jcb_powers_path'
 );
 
-$hiddenFields = $displayData->get('hidden_fields') ?: array();
+$hiddenFields = $displayData->get('hidden_fields') ?: [];
 
 ?>
 <?php if ($fields && count((array) $fields)) :?>

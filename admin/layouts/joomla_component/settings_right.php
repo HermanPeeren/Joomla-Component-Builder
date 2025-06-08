@@ -3,14 +3,14 @@
  * @package    Joomla.Component.Builder
  *
  * @created    30th April, 2015
- * @author     Llewellyn van der Merwe <http://www.joomlacomponentbuilder.com>
- * @github     Joomla Component Builder <https://github.com/vdm-io/Joomla-Component-Builder>
+ * @author     Llewellyn van der Merwe <https://dev.vdm.io>
+ * @git        Joomla Component Builder <https://git.vdm.dev/joomla/Component-Builder>
  * @copyright  Copyright (C) 2015 Vast Development Method. All rights reserved.
  * @license    GNU General Public License version 2 or later; see LICENSE.txt
  */
 
 // No direct access to this file
-defined('_JEXEC') or die('Restricted access');
+defined('_JEXEC') or die;
 
 // get the form
 $form = $displayData->getForm();
@@ -27,20 +27,23 @@ $fields_tab_layout = 'fields_' . $layout_path_array[1];
 // get the fields
 $fields = $displayData->get($fields_tab_layout) ?: array(
 	'note_component_files_folders',
-	'spacer_hr_four',
+	'spacer_hr_4',
+	'add_namespace_prefix',
+	'namespace_prefix',
+	'spacer_hr_5',
 	'add_menu_prefix',
 	'menu_prefix',
-	'spacer_hr_five',
+	'spacer_hr_6',
 	'to_ignore_note',
 	'toignore',
-	'spacer_hr_six',
+	'spacer_hr_7',
 	'jcb_export_package_note',
 	'export_key',
 	'joomla_source_link',
 	'export_buy_link'
 );
 
-$hiddenFields = $displayData->get('hidden_fields') ?: array();
+$hiddenFields = $displayData->get('hidden_fields') ?: [];
 
 ?>
 <?php if ($fields && count((array) $fields)) :?>

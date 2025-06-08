@@ -1,18 +1,15 @@
 
-# Joomla Component Builder ([JCB](http://joomlacomponentbuilder.com))
-[![GitHub release](https://img.shields.io/github/release/vdm-io/Joomla-Component-Builder.svg)](https://github.com/vdm-io/Joomla-Component-Builder/releases)
-[![Total Downloads](https://img.shields.io/github/downloads/vdm-io/Joomla-Component-Builder/total.svg)](https://github.com/vdm-io/Joomla-Component-Builder/releases)
-[![JCB Pro Members](https://opencollective.com/joomla-component-builder/tiers/jcb-pro/badge.svg?label=JCB+Pro&color=brightgreen)](#sponsors)
+# Joomla Component Builder ([JCB](https://www.joomlacomponentbuilder.com))
 
-This is a [Joomla 3.x](https://extensions.joomla.org/extension/component-builder/) component. [__See In Action__](https://www.youtube.com/watch?v=IQfsLYIeblk&list=PLQRGFI8XZ_wtGvPQZWBfDzzlERLQgpMRE&index=45)
+This is a [Joomla 5.x](https://extensions.joomla.org/extension/component-builder/) component. [__See In Action__](https://www.youtube.com/watch?v=IQfsLYIeblk&list=PLQRGFI8XZ_wtGvPQZWBfDzzlERLQgpMRE&index=45)
 
- ![Component Builder image](https://raw.githubusercontent.com/vdm-io/Joomla-Component-Builder/master/admin/assets/images/vdm-component.jpg "The Component Builder")
+ ![Component Builder image](https://git.vdm.dev/joomla/Component-Builder/raw/branch/5.x/admin/assets/images/jcb-banner.jpg "The Component Builder")
 
 The Component Builder for [Joomla](https://extensions.joomla.org/extension/component-builder/) is highly advanced tool that is truly able to build extremely complex components in a fraction of the time.
 
 Whether you're a seasoned [Joomla](https://extensions.joomla.org/extension/component-builder/) developer, or have just started, Component Builder will save you lots of time and money. A real must have!
 
-You can install it quite easily and with no limitations. On [github](https://github.com/vdm-io/Joomla-Component-Builder/releases) is the latest release (2.12.14) with **ALL** its features and **ALL** concepts totally open-source and free! 
+You can install it quite easily and with no limitations. On [gitea](https://git.vdm.dev/joomla/Component-Builder/tags) is the latest release (5.1.1-alpha5) with **ALL** its features and **ALL** concepts totally open-source and free! 
 
 > Watch Quick Build of a Hello World component in [JCB on Youtube](https://www.youtube.com/watch?v=IQfsLYIeblk&list=PLQRGFI8XZ_wtGvPQZWBfDzzlERLQgpMRE&index=45)
 
@@ -26,8 +23,8 @@ Some of the Features
 + Add you [own dashboard](https://www.youtube.com/watch?v=tU7TeYn1Djo&list=PLQRGFI8XZ_wtGvPQZWBfDzzlERLQgpMRE&index=60) in the back-end.
 + [Dynamic File and Folder](https://www.youtube.com/watch?v=_c7wzW075lA&list=PLQRGFI8XZ_wtGvPQZWBfDzzlERLQgpMRE&t=0s&index=56) Inclusion concept.
 + [Easy Translation](https://www.youtube.com/watch?v=q5NwKGnOHoQ&list=PLQRGFI8XZ_wtGvPQZWBfDzzlERLQgpMRE&t=0s&index=51) via excel.
-+ Adding your [own rule validation](https://www.youtube.com/watch?v=Z6-ggKtX35o&list=PLQRGFI8XZ_wtGvPQZWBfDzzlERLQgpMRE&t=0s&index=46) to a field in [JCB](http://joomlacomponentbuilder.com)
-+ [Automated backup system](https://www.youtube.com/watch?v=GUWZaODo_IM&list=PLQRGFI8XZ_wtGvPQZWBfDzzlERLQgpMRE&t=0s&index=40) in [JCB](http://joomlacomponentbuilder.com).
++ Adding your [own rule validation](https://www.youtube.com/watch?v=Z6-ggKtX35o&list=PLQRGFI8XZ_wtGvPQZWBfDzzlERLQgpMRE&t=0s&index=46) to a field in [JCB](https://www.joomlacomponentbuilder.com)
++ [Automated backup system](https://www.youtube.com/watch?v=GUWZaODo_IM&list=PLQRGFI8XZ_wtGvPQZWBfDzzlERLQgpMRE&t=0s&index=40) in [JCB](https://www.joomlacomponentbuilder.com).
 + Adding mySQL Dump to any View/Table.
 + Grab existing Table data and build a dynamic dump.
 + Unlimited [Joomla](https://extensions.joomla.org/extension/component-builder/) Components.
@@ -86,13 +83,13 @@ You are in Control
 + You can dynamically add internal help structures to all component.
 + There is no limitations on how big or how much you want to build (server limitation only).
 + This is a complete factory kind of component that functions like a deployment hub.
-+ Export any component completely mapped in [JCB](http://joomlacomponentbuilder.com) and import into another [JCB](http://joomlacomponentbuilder.com).
++ Export any component completely mapped in [JCB](https://www.joomlacomponentbuilder.com) and import into another [JCB](https://www.joomlacomponentbuilder.com).
 + This and much much more are all possible with this component builder!
 
 Get More Demo Content
 ====================
 
-> You can now get access to the WOW factor, [JCB](http://joomlacomponentbuilder.com) fully mapped can now be yours! Including many other [JCB](http://joomlacomponentbuilder.com) mapped components.
+> You can now get access to the WOW factor, [JCB](https://www.joomlacomponentbuilder.com) fully mapped can now be yours! Including many other [JCB](https://www.joomlacomponentbuilder.com) mapped components.
 
 ### All you need to do is [explained here](https://vdm.bz/how-to-get-free-vdm-package-keys)!
 
@@ -102,20 +99,24 @@ To install these packages [watch this tutorial](https://vdm.bz/how-to-install-jc
 Where can you get support and help?
 ====================
 
-+ [The JCB Tutorials](https://www.youtube.com/playlist?list=PLQRGFI8XZ_wtGvPQZWBfDzzlERLQgpMRE)
-+ [German Basic Introduction](https://www.youtube.com/playlist?list=PLQRGFI8XZ_wu0tDFxJtZFwW7AxA4JHQV7)
-+ [Hello World Tutorial](https://www.youtube.com/watch?v=IQfsLYIeblk&list=PLQRGFI8XZ_wtGvPQZWBfDzzlERLQgpMRE&index=45)
-+ [The JCB! Wiki](https://github.com/vdm-io/Joomla-Component-Builder/wiki)
-+ [Forum](https://vdm.bz/jcb-forum)
-+ [Report a Security Issue](http://joomlacomponentbuilder.com/report-security-issues)
-+ [Community Complaint](http://joomlacomponentbuilder.com/community-complaint)
-+ [Open Issue On Github](https://github.com/vdm-io/Joomla-Component-Builder/issues) ^^
+- [Package](https://git.vdm.dev/joomla/pkg-component-builder).
+- [Download](https://git.vdm.dev/joomla/pkg-component-builder/archive/master.zip).
+- [Tutorials](https://www.youtube.com/playlist?list=PLQRGFI8XZ_wtGvPQZWBfDzzlERLQgpMRE).
+- [German](https://www.youtube.com/playlist?list=PLQRGFI8XZ_wu0tDFxJtZFwW7AxA4JHQV7).
+- [Hello World](https://www.youtube.com/watch?v=IQfsLYIeblk&list=PLQRGFI8XZ_wtGvPQZWBfDzzlERLQgpMRE&index=45).
+- [Discussions](https://github.com/vdm-io/Joomla-Component-Builder/discussions).
+- [Wiki](https://git.vdm.dev/joomla/Component-Builder/wiki).
+- [Issues](https://git.vdm.dev/joomla/Component-Builder/issues). ^^
+- [Issues Stream](https://t.me/jcb_issues).
+- [Updates](https://t.me/jcb_updates).
+- [User Group](https://t.me/jcb_group).
+- [Announcement](https://t.me/Joomla_component_builder).
+- [Beta](https://git.vdm.dev/joomla-beta/pkg-component-builder).
+- [Nightly Build](https://git.vdm.dev/joomla-beta/pkg-component-builder/archive/master.zip).
+- [Community Complaint](https://www.joomlacomponentbuilder.com/community-complaint).
+- [Security](https://www.vdm.io/report-security-issues).
 
-Since [JCB](http://joomlacomponentbuilder.com) has [become a community](https://github.com/vdm-io/Joomla-Component-Builder/blob/staging/.github/SUPPORT.md) project [VDM.io](https://www.vdm.io/) is **no longer solely responsible** for support.
-
-We have started a [**JCB forum**](https://vdm.bz/jcb-forum) where you can post questions, about how things work, or if you need some kind of help in relation to your development of your components.
-
-^^ Then if you run into any issues, related to the [JCB](http://joomlacomponentbuilder.com) code, like bugs, **start by searching** the (*open & closed*) issues over on Github, and if the issue has not been mentioned before, **then only** open a new issue, following the [community guidelines](https://github.com/vdm-io/Joomla-Component-Builder/blob/master/.github/CONTRIBUTING.md).
+^^ Then if you run into any issues, related to the [JCB](https://git.vdm.dev/joomla/Component-Builder/issues) code, like bugs, **start by searching** the (*open & closed*) issues over on [Gitea](https://git.vdm.dev/joomla/Component-Builder/issues), and if the issue has not been mentioned before, **then only** open a new issue, following the [community guidelines](https://git.vdm.dev/joomla/Component-Builder/src/branch/master/.github/CONTRIBUTING.md).
 
 WHY GIVE IT AWAY LIKE THIS?
 ====================
@@ -128,32 +129,32 @@ Our idea was to almost let this tool serve as a cheat sheet to how things can be
 MAKING IT BETTER!
 ====================
 
-Get involved on the forums, and the GitHub issues, and you can even help us develop/improve the pipeline of [JCB](http://joomlacomponentbuilder.com) for continues delivery. We really want to see [JCB](http://joomlacomponentbuilder.com) remain the tool of choice for all [Joomla Component Development](https://extensions.joomla.org/extension/component-builder/) needs and ideas.
+Get involved on the forums, and the Gitea issues, and you can even help us develop/improve the pipeline of [JCB](https://www.joomlacomponentbuilder.com) for continues delivery. We really want to see [JCB](https://www.joomlacomponentbuilder.com) remain the tool of choice for all [Joomla Component Development](https://extensions.joomla.org/extension/component-builder/) needs and ideas.
 
 TODO
 ======
 
-- Add automatic unit testing. To nurture pipeline integration for all components build with [JCB](http://joomlacomponentbuilder.com).
-- Team collaborative development across [JCB](http://joomlacomponentbuilder.com) installations offline and online.
-- Documentation (maintained by the community) for [JCB](http://joomlacomponentbuilder.com). (help us select the best system for this)
+- Add automatic unit testing. To nurture pipeline integration for all components build with [JCB](https://www.joomlacomponentbuilder.com).
+- Team collaborative development across [JCB](https://www.joomlacomponentbuilder.com) installations offline and online.
+- Documentation (maintained by the community) for [JCB](https://www.joomlacomponentbuilder.com). (help us select the best system for this)
 
 # Build Details
 
-+ *Community*: [Joomla Component Builder](http://www.joomlacomponentbuilder.com)
-+ *Author*: [Llewellyn van der Merwe](mailto:llewellyn@joomlacomponentbuilder.com)
-+ *Name*: [Component Builder](https://github.com/vdm-io/Joomla-Component-Builder)
++ *Community*: [Vast Development Method](https://dev.vdm.io)
++ *Author*: [Llewellyn van der Merwe](mailto:joomla@vdm.io)
++ *Name*: [Component Builder](https://git.vdm.dev/joomla/Component-Builder)
 + *First Build*: 30th April, 2015
-+ *Last Build*: 19th October, 2021
-+ *Version*: 2.12.14
++ *Last Build*: 13th May, 2025
++ *Version*: 5.1.1-alpha5
 + *Copyright*: Copyright (C) 2015 Vast Development Method. All rights reserved.
 + *License*: GNU General Public License version 2 or later; see LICENSE.txt
-+ *Line count*: **283806**
-+ *Field count*: **1541**
-+ *File count*: **1817**
-+ *Folder count*: **256**
++ *Line count*: **1032893**
++ *Field count*: **2099**
++ *File count*: **7002**
++ *Folder count*: **678**
 
-> This **component** was build with a [Joomla](https://extensions.joomla.org/extension/component-builder/) [Automated Component Builder](http://joomlacomponentbuilder.com).
-> Developed by [Llewellyn van der Merwe](mailto:llewellyn@joomlacomponentbuilder.com)
+> This **component** was build with a [Joomla](https://extensions.joomla.org/extension/component-builder/) [Automated Component Builder](https://www.joomlacomponentbuilder.com).
+> Developed by [Llewellyn van der Merwe](mailto:joomla@vdm.io)
 
 
 ## Contributors

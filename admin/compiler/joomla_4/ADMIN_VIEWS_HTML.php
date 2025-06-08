@@ -1,0 +1,275 @@
+<?php
+/**
+ * @package    Joomla.Component.Builder
+ *
+ * @created    4th September 2022
+ * @author     Llewellyn van der Merwe <https://dev.vdm.io>
+ * @git        Joomla Component Builder <https://git.vdm.dev/joomla/Component-Builder>
+ * @copyright  Copyright (C) 2015 Vast Development Method. All rights reserved.
+ * @license    GNU General Public License version 2 or later; see LICENSE.txt
+ */
+
+// No direct access to this JCB template file (EVER)
+defined('_JCB_TEMPLATE') or die;
+?>
+###BOM###
+namespace ###NAMESPACEPREFIX###\Component\###ComponentNamespace###\Administrator\View\###Views###;
+
+###ADMIN_VIEWS_HTML_HEADER###
+
+// No direct access to this file
+\defined('_JEXEC') or die;###LICENSE_LOCKED_DEFINED###
+
+/**
+ * ###Component### Html View class for the ###Views###
+ *
+ * @since  1.6
+ */
+#[\AllowDynamicProperties]
+class HtmlView extends BaseHtmlView
+{
+	/**
+	 * The items from the model
+	 *
+	 * @var    mixed
+	 * @since  3.10.11
+	 */
+	public mixed $items;
+
+	/**
+	 * The state object
+	 *
+	 * @var    mixed
+	 * @since  3.10.11
+	 */
+	public mixed $state;
+
+	/**
+	 * The styles url array
+	 *
+	 * @var    array
+	 * @since  5.0.0
+	 */
+	protected array $styles;
+
+	/**
+	 * The scripts url array
+	 *
+	 * @var    array
+	 * @since  5.0.0
+	 */
+	protected array $scripts;
+
+	/**
+	 * The actions object
+	 *
+	 * @var    object
+	 * @since  3.10.11
+	 */
+	public object $canDo;
+
+	/**
+	 * The return here base64 url
+	 *
+	 * @var    string
+	 * @since  3.10.11
+	 */
+	public string $return_here;
+
+	/**
+	 * The title key used in modal
+	 *
+	 * @var    string
+	 * @since  5.2.1
+	 */
+	public string $modalTitleKey;
+
+	/**
+	 * The modal state
+	 *
+	 * @var    bool
+	 * @since  5.2.1
+	 */
+	public bool $isModal;
+
+	/**
+	 * The user object.
+	 *
+	 * @var    Joomla___effdaf6d_2275_425d_9f52_d4952e564d34___Power
+	 * @since  3.10.11
+	 */
+	public Joomla___effdaf6d_2275_425d_9f52_d4952e564d34___Power $user;
+
+	/**
+	 * ###Views### view display method
+	 *
+	 * @param   string  $tpl  The name of the template file to parse; automatically searches through the template paths.
+	 *
+	 * @return  void
+	 * @throws \Exception
+	 * @since  1.6
+	 */
+	public function display($tpl = null): void
+	{
+		// Assign data to the view
+		$this->items = $this->get('Items');
+		$this->pagination = $this->get('Pagination');
+		$this->state = $this->get('State');
+		$this->styles = $this->get('Styles');
+		$this->scripts = $this->get('Scripts');
+		$this->user ??= $this->getCurrentUser();###ADMIN_DIPLAY_METHOD###
+		$this->saveOrder = $this->listOrder == 'a.ordering';
+		// set the return here value
+		$this->return_here = urlencode(base64_encode((string) Joomla___eecc143e_b5cf_4c33_ba4d_97da1df61422___Power::getInstance()));
+		// get global action permissions
+		$this->canDo = ###Component###Helper::getActions('###view###');###JVIEWLISTCANDO###
+
+		// If we don't have items we load the empty state
+		if (is_array($this->items) && !count((array) $this->items) && $this->isEmptyState = $this->get('IsEmptyState'))
+		{
+			$this->setLayout('emptystate');
+		}
+
+		// We don't need toolbar in the modal window.
+		$this->isModal = true;
+		if ($this->getLayout() !== 'modal')
+		{
+			$this->isModal = false;
+			$this->addToolbar();
+		}
+
+		// Check for errors.
+		if (count($errors = $this->get('Errors')))
+		{
+			throw new \Exception(implode("\n", $errors), 500);
+		}
+
+		// Set the html view document stuff
+		$this->_prepareDocument();
+
+		// Display the template
+		parent::display($tpl);
+	}
+
+	/**
+	 * Add the page title and toolbar.
+	 *
+	 * @return  void
+	 * @since   1.6
+	 */
+	protected function addToolbar(): void
+	{
+		Joomla___0c1a176a_304f_433a_8233_37d01ff87815___Power::title(Joomla___ba6326ef_cb79_4348_80f4_ab086082e3c5___Power::_('COM_###COMPONENT###_###VIEWS###'), '###ICOMOON###');
+
+		if ($this->canCreate)
+		{
+			Joomla___0c1a176a_304f_433a_8233_37d01ff87815___Power::addNew('###view###.add');
+		}
+
+		// Only load if there are items
+		if (Super___0a59c65c_9daf_4bc9_baf4_e063ff9e6a8a___Power::check($this->items))
+		{
+			if ($this->canEdit)
+			{
+				Joomla___0c1a176a_304f_433a_8233_37d01ff87815___Power::editList('###view###.edit');
+			}
+
+			if ($this->canState)
+			{
+				Joomla___0c1a176a_304f_433a_8233_37d01ff87815___Power::publishList('###views###.publish');
+				Joomla___0c1a176a_304f_433a_8233_37d01ff87815___Power::unpublishList('###views###.unpublish');
+				Joomla___0c1a176a_304f_433a_8233_37d01ff87815___Power::archiveList('###views###.archive');
+
+				if ($this->canDo->get('core.admin'))
+				{
+					Joomla___0c1a176a_304f_433a_8233_37d01ff87815___Power::checkin('###views###.checkin');
+				}
+			}###CUSTOM_ADMIN_DYNAMIC_BUTTONS######ADMIN_CUSTOM_BUTTONS_LIST###
+
+			if ($this->state->get('filter.published') == -2 && ($this->canState && $this->canDelete))
+			{
+				Joomla___0c1a176a_304f_433a_8233_37d01ff87815___Power::deleteList('', '###views###.delete', 'JTOOLBAR_EMPTY_TRASH');
+			}
+			elseif ($this->canState && $this->canDelete)
+			{
+				Joomla___0c1a176a_304f_433a_8233_37d01ff87815___Power::trash('###views###.trash');
+			}###EXPORTBUTTON###
+		}###ADMIN_CUSTOM_FUNCTION_ONLY_BUTTONS_LIST######IMPORTBUTTON###
+
+		// set help url for this view if found
+		$this->help_url = ###Component###Helper::getHelpUrl('###views###');
+		if (Super___1f28cb53_60d9_4db1_b517_3c7dc6b429ef___Power::check($this->help_url))
+		{
+			Joomla___0c1a176a_304f_433a_8233_37d01ff87815___Power::help('COM_###COMPONENT###_HELP_MANAGER', false, $this->help_url);
+		}
+
+		// add the options comp button
+		if ($this->canDo->get('core.admin') || $this->canDo->get('core.options'))
+		{
+			Joomla___0c1a176a_304f_433a_8233_37d01ff87815___Power::preferences('com_###component###');
+		}###FILTERFIELDDISPLAYHELPER######BATCHDISPLAYHELPER###
+	}
+
+	/**
+	 * Prepare some document related stuff.
+	 *
+	 * @return  void
+	 * @since   1.6
+	 */
+	protected function _prepareDocument(): void
+	{###JQUERY###
+		$this->getDocument()->setTitle(Joomla___ba6326ef_cb79_4348_80f4_ab086082e3c5___Power::_('COM_###COMPONENT###_###VIEWS###'));
+		// add styles
+		foreach ($this->styles as $style)
+		{
+			Joomla___34690c75_1090_47eb_8c06_7228dc7eedd6___Power::_('stylesheet', $style, ['version' => 'auto']);
+		}
+		// add scripts
+		foreach ($this->scripts as $script)
+		{
+			Joomla___34690c75_1090_47eb_8c06_7228dc7eedd6___Power::_('script', $script, ['version' => 'auto']);
+		}###ADMIN_ADD_JAVASCRIPT_FILE###
+	}
+
+	/**
+	 * Escapes a value for output in a view script.
+	 *
+	 * @param   mixed  $var     The output to escape.
+	 * @param   bool   $shorten The switch to shorten.
+	 * @param   int    $length  The shorting length.
+	 *
+	 * @return  mixed  The escaped value.
+	 * @since   1.6
+	 */
+	public function escape($var, bool $shorten = true, int $length = 50)
+	{
+		if (!is_string($var))
+		{
+			return $var;
+		}
+
+		return Super___1f28cb53_60d9_4db1_b517_3c7dc6b429ef___Power::html($var, $this->_charset ?? 'UTF-8', $shorten, $length);
+	}
+
+	/**
+	 * Get the modal data/title key
+	 *
+	 * @return  string  The key value.
+	 * @since   5.2.1
+	 */
+	public function getModalTitleKey(): string
+	{
+		return $this->modalTitleKey ?? 'id';
+	}
+
+	/**
+	 * Returns an array of fields the table can be sorted by
+	 *
+	 * @return  array   containing the field name to sort by as the key and display text as value
+	 * @since   1.6
+	 */
+	protected function getSortFields()
+	{
+		###SORTFIELDS###
+	}###FILTERFUNCTIONS###
+}

@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <config>
 	<fieldset
-		addrulepath="/administrator/components/com_componentbuilder/models/rules"
-		addfieldpath="/administrator/components/com_componentbuilder/models/fields"
+		addruleprefix="VDM\Component\Componentbuilder\Administrator\Rule"
+		addfieldprefix="VDM\Component\Componentbuilder\Administrator\Field"
 		name="global_config"
 		label="COM_COMPONENTBUILDER_CONFIG_GLOBAL_LABEL"
 		description="COM_COMPONENTBUILDER_CONFIG_GLOBAL_DESC">
@@ -57,7 +57,7 @@
 			buttons="add,remove,move"
 			description="COM_COMPONENTBUILDER_CONFIG_SUBFORM_LAYOUTS_DESCRIPTION"
 			icon="list"
-			max="9"
+			max="10"
 			min="1">
 			<form hidden="true" name="list_subform_layouts_modal" repeat="true">
 				<!-- View_field Field. Type: List. (joomla) -->
@@ -73,6 +73,8 @@
 					<!-- Option Set. -->
 					<option value="default">
 						COM_COMPONENTBUILDER_CONFIG_DEFAULT</option>
+					<option value="admin_view.ajax_input">
+						COM_COMPONENTBUILDER_CONFIG_ADMIN_VIEWS_AJAX_INPUT</option>
 					<option value="admin_custom_tabs.tabs">
 						COM_COMPONENTBUILDER_CONFIG_ADMIN_CUSTOM_TABS_TABS</option>
 					<option value="admin_fields.addfields">
@@ -81,16 +83,32 @@
 						COM_COMPONENTBUILDER_CONFIG_ADMIN_FIELDS_CONDITIONS_ADDCONDITIONS</option>
 					<option value="admin_fields_relations.addrelations">
 						COM_COMPONENTBUILDER_CONFIG_ADMIN_FIELDS_RELATIONS_ADDRELATIONS</option>
+					<option value="component_dashboard.dashboard_tab">
+						COM_COMPONENTBUILDER_CONFIG_COMPONENT_DASHBOARD_DASHBOARD_TAB</option>
+					<option value="component_updates.version_update">
+						COM_COMPONENTBUILDER_CONFIG_COMPONENT_UPDATES_VERSION_UPDATE</option>
 					<option value="component_admin_views.addadmin_views">
 						COM_COMPONENTBUILDER_CONFIG_COMPONENT_ADMIN_VIEWS_ADDADMIN_VIEWS</option>
 					<option value="component_custom_admin_views.addcustom_admin_views">
 						COM_COMPONENTBUILDER_CONFIG_COMPONENT_CUSTOM_ADMIN_VIEWS_ADDCUSTOM_ADMIN_VIEWS</option>
+					<option value="component_custom_admin_menus.addcustommenus">
+						COM_COMPONENTBUILDER_CONFIG_COMPONENT_CUSTOM_ADMIN_MENUS_ADDCUSTOMMENUS</option>
 					<option value="component_site_views.addsite_views">
 						COM_COMPONENTBUILDER_CONFIG_COMPONENT_SITE_VIEWS_ADDSITE_VIEWS</option>
+					<option value="custom_admin_view.ajax_input">
+						COM_COMPONENTBUILDER_CONFIG_CUSTOM_ADMIN_VIEWS_AJAX_INPUT</option>
 					<option value="dynamic_get.join_db_table">
 						COM_COMPONENTBUILDER_CONFIG_DYNAMIC_GET_JOIN_DB_TABLE</option>
 					<option value="dynamic_get.join_view_table">
 						COM_COMPONENTBUILDER_CONFIG_DYNAMIC_GET_JOIN_VIEW_TABLE</option>
+					<option value="fieldtype.properties">
+						COM_COMPONENTBUILDER_CONFIG_FIELDTYPE_PROPERTIES</option>
+					<option value="joomla_module_updates.version_update">
+						COM_COMPONENTBUILDER_CONFIG_JOOMLA_MODULE_UPDATES_VERSION_UPDATE</option>
+					<option value="joomla_plugin_updates.version_update">
+						COM_COMPONENTBUILDER_CONFIG_JOOMLA_PLUGIN_UPDATES_VERSION_UPDATE</option>
+					<option value="site_view.ajax_input">
+						COM_COMPONENTBUILDER_CONFIG_SITE_VIEWS_AJAX_INPUT</option>
 				</field>
 				<!-- Layout Field. Type: List. (joomla) -->
 				<field
@@ -101,13 +119,13 @@
 					multiple="false"
 					filter="CMD"
 					required="true"
-					default="joomla.form.field.subform.repeatable-table">
+					default="repeatablejcbjfive">
 					<!-- Option Set. -->
 					<option value="joomla.form.field.subform.repeatable-table">
 						COM_COMPONENTBUILDER_CONFIG_REPEATABLETABLE_JOOMLA</option>
 					<option value="joomla.form.field.subform.repeatable">
 						COM_COMPONENTBUILDER_CONFIG_REPEATABLE_JOOMLA</option>
-					<option value="repeatablejcb">
+					<option value="repeatablejcbjfive">
 						COM_COMPONENTBUILDER_CONFIG_REPEATABLE_UIKIT</option>
 				</field>
 			</form>
@@ -122,23 +140,50 @@
 			folder="editors"
 			filter="cmd"
 		/>
-		<!-- Github_access_token Field. Type: Text. (joomla) -->
+		<!-- Gitea_username Field. Type: Text. (joomla) -->
 		<field
 			type="text"
+			name="gitea_username"
+			label="COM_COMPONENTBUILDER_CONFIG_GITEA_USERNAME_LABEL"
+			size="128"
+			maxlength="50"
+			description="COM_COMPONENTBUILDER_CONFIG_GITEA_USERNAME_DESCRIPTION"
+			class="text_area"
+			filter="STRING"
+			message="COM_COMPONENTBUILDER_CONFIG_GITEA_USERNAME_MESSAGE"
+			hint="COM_COMPONENTBUILDER_CONFIG_GITEA_USERNAME_HINT"
+		/>
+		<!-- Gitea_token Field. Type: Password. (joomla) -->
+		<field
+			type="password"
+			name="gitea_token"
+			label="COM_COMPONENTBUILDER_CONFIG_GITEA_TOKEN_LABEL"
+			size="128"
+			description="COM_COMPONENTBUILDER_CONFIG_GITEA_TOKEN_DESCRIPTION"
+			message="Error! Please add token here."
+			class="text_area"
+			readonly="false"
+			disabled="false"
+			required="false"
+			filter="STRING"
+			hint="COM_COMPONENTBUILDER_CONFIG_GITEA_TOKEN_HINT"
+			autocomplete="off"
+		/>
+		<!-- Github_access_token Field. Type: Password. (joomla) -->
+		<field
+			type="password"
 			name="github_access_token"
 			label="COM_COMPONENTBUILDER_CONFIG_GITHUB_ACCESS_TOKEN_LABEL"
 			size="128"
-			maxlength="128"
 			description="COM_COMPONENTBUILDER_CONFIG_GITHUB_ACCESS_TOKEN_DESCRIPTION"
-			class="text_area full-width"
-			required="false"
+			message="Error! Please add token here."
+			class="text_area"
 			filter="STRING"
-			message="COM_COMPONENTBUILDER_CONFIG_GITHUB_ACCESS_TOKEN_MESSAGE"
 			hint="COM_COMPONENTBUILDER_CONFIG_GITHUB_ACCESS_TOKEN_HINT"
 			autocomplete="off"
 		/>
-		<!-- Spacer_hr_one Field. Type: Spacer. A None Database Field. (joomla) -->
-		<field type="spacer" name="spacer_hr_one" hr="true" class="spacer_hr_one" />
+		<!-- Spacer_hr_1 Field. Type: Spacer. A None Database Field. (joomla) -->
+		<field type="spacer" name="spacer_hr_1" hr="true" class="spacer_hr_1" />
 		<!-- Manage_jcb_package_directories Field. Type: Radio. (joomla) -->
 		<field
 			type="radio"
@@ -163,6 +208,7 @@
 			label="COM_COMPONENTBUILDER_CONFIG_JCB_PACKAGE_DIRECTORIES_LABEL"
 			description="COM_COMPONENTBUILDER_CONFIG_JCB_PACKAGE_DIRECTORIES_DESCRIPTION"
 			class="list_class"
+			layout="joomla.form.field.list-fancy-select"
 			multiple="true"
 			default=""
 			showon="manage_jcb_package_directories:1">
@@ -172,8 +218,8 @@
 			<option value="jcb">
 				COM_COMPONENTBUILDER_CONFIG_JCB_COMMUNITY_PACKAGES</option>
 		</field>
-		<!-- Spacer_hr_two Field. Type: Spacer. A None Database Field. (joomla) -->
-		<field type="spacer" name="spacer_hr_two" hr="true" class="spacer_hr_two" />
+		<!-- Spacer_hr_2 Field. Type: Spacer. A None Database Field. (joomla) -->
+		<field type="spacer" name="spacer_hr_2" hr="true" class="spacer_hr_2" />
 		<!-- Set_browser_storage Field. Type: Radio. (joomla) -->
 		<field
 			type="radio"
@@ -196,6 +242,7 @@
 			label="COM_COMPONENTBUILDER_CONFIG_STORAGE_TIME_TO_LIVE_LABEL"
 			description="COM_COMPONENTBUILDER_CONFIG_STORAGE_TIME_TO_LIVE_DESCRIPTION"
 			class="list_class"
+			layout="joomla.form.field.list-fancy-select"
 			multiple="false"
 			default="global"
 			showon="set_browser_storage:1">
@@ -203,21 +250,21 @@
 			<option value="global">
 				COM_COMPONENTBUILDER_CONFIG_EVERY_SESSION</option>
 			<option value="30">
-				COM_COMPONENTBUILDER_CONFIG_EVERY_THIRTY_SECONDS</option>
+				COM_COMPONENTBUILDER_CONFIG_EVERY_30_SECONDS</option>
 			<option value="60">
 				COM_COMPONENTBUILDER_CONFIG_EVERY_MINUTE</option>
 			<option value="300">
-				COM_COMPONENTBUILDER_CONFIG_EVERY_FIVE_MINUTES</option>
+				COM_COMPONENTBUILDER_CONFIG_EVERY_5_MINUTES</option>
 			<option value="900">
-				COM_COMPONENTBUILDER_CONFIG_EVERY_FIFTEEN_MINUTES</option>
+				COM_COMPONENTBUILDER_CONFIG_EVERY_15_MINUTES</option>
 			<option value="1800">
-				COM_COMPONENTBUILDER_CONFIG_EVERY_THIRTY_MINUTES</option>
+				COM_COMPONENTBUILDER_CONFIG_EVERY_30_MINUTES</option>
 			<option value="3600">
 				COM_COMPONENTBUILDER_CONFIG_EVERY_HOUR</option>
 			<option value="18000">
-				COM_COMPONENTBUILDER_CONFIG_EVERY_FIVE_HOURS</option>
+				COM_COMPONENTBUILDER_CONFIG_EVERY_5_HOURS</option>
 			<option value="36000">
-				COM_COMPONENTBUILDER_CONFIG_EVERY_TEN_HOURS</option>
+				COM_COMPONENTBUILDER_CONFIG_EVERY_10_HOURS</option>
 			<option value="86400">
 				COM_COMPONENTBUILDER_CONFIG_EVERY_DAY</option>
 			<option value="604800">
@@ -225,8 +272,8 @@
 			<option value="0">
 				COM_COMPONENTBUILDER_CONFIG_NEVER_UPDATE</option>
 		</field>
-		<!-- Spacer_hr_three Field. Type: Spacer. A None Database Field. (joomla) -->
-		<field type="spacer" name="spacer_hr_three" hr="true" class="spacer_hr_three" />
+		<!-- Spacer_hr_3 Field. Type: Spacer. A None Database Field. (joomla) -->
+		<field type="spacer" name="spacer_hr_3" hr="true" class="spacer_hr_3" />
 		<!-- Api Field. Type: User. (joomla) -->
 		<field
 			type="user"
@@ -234,8 +281,8 @@
 			label="COM_COMPONENTBUILDER_CONFIG_API_LABEL"
 			description="COM_COMPONENTBUILDER_CONFIG_API_DESCRIPTION"
 		/>
-		<!-- Spacer_hr_four Field. Type: Spacer. A None Database Field. (joomla) -->
-		<field type="spacer" name="spacer_hr_four" hr="true" class="spacer_hr_four" />
+		<!-- Spacer_hr_4 Field. Type: Spacer. A None Database Field. (joomla) -->
+		<field type="spacer" name="spacer_hr_4" hr="true" class="spacer_hr_4" />
 		<field name="autorTitle"
 			type="spacer"
 			label="COM_COMPONENTBUILDER_CONFIG_AUTHOR"
@@ -254,7 +301,7 @@
 			label="COM_COMPONENTBUILDER_CONFIG_AUTHOR_EMAIL_LABEL"
 			description="COM_COMPONENTBUILDER_CONFIG_AUTHOR_EMAIL_DESC"
 			size="60"
-			default="llewellyn@joomlacomponentbuilder.com"
+			default="joomla@vdm.io"
 			readonly="true"
 			class="readonly"
 		/>
@@ -263,6 +310,18 @@
 		name="uikit_config"
 		label="COM_COMPONENTBUILDER_CONFIG_UIKIT_LABEL"
 		description="COM_COMPONENTBUILDER_CONFIG_UIKIT_DESC">
+		<field name="add_jquery_framework"
+			type="radio"
+			label="COM_COMPONENTBUILDER_CONFIG_JQUERY_LOAD_LABEL"
+			description="COM_COMPONENTBUILDER_CONFIG_JQUERY_LOAD_DESC"
+			class="btn-group btn-group-yesno"
+			default="">
+			<!-- Option Set. -->
+			<option value="0">
+				COM_COMPONENTBUILDER_CONFIG_JQUERY_REMOVE</option>"
+			<option value="1">
+				COM_COMPONENTBUILDER_CONFIG_JQUERY_LOAD</option>"
+		</field>
 		<field name="uikit_load"
 			type="radio"
 			label="COM_COMPONENTBUILDER_CONFIG_UIKIT_LOAD_LABEL"
@@ -654,6 +713,80 @@
 		/>
 	</fieldset>
 	<fieldset
+		name="super_power_custom_config"
+		label="COM_COMPONENTBUILDER_CONFIG_SUPER_POWER">
+
+		<!-- Super_powers_documentation Field. Type: Radio. (joomla) -->
+		<field
+			type="radio"
+			name="super_powers_documentation"
+			label="COM_COMPONENTBUILDER_CONFIG_SUPER_POWERS_DOCUMENTATION_LABEL"
+			description="COM_COMPONENTBUILDER_CONFIG_SUPER_POWERS_DOCUMENTATION_DESCRIPTION"
+			class="btn-group btn-group-yesno"
+			default="0">
+			<!-- Option Set. -->
+			<option value="1">
+				COM_COMPONENTBUILDER_CONFIG_SHOW</option>
+			<option value="0">
+				COM_COMPONENTBUILDER_CONFIG_HIDE</option>
+		</field>
+		<!-- Note_super_powers Field. Type: Note. A None Database Field. (joomla) -->
+		<field type="note" name="note_super_powers" label="COM_COMPONENTBUILDER_CONFIG_NOTE_SUPER_POWERS_LABEL" description="COM_COMPONENTBUILDER_CONFIG_NOTE_SUPER_POWERS_DESCRIPTION" heading="h4" class="alert alert-info note_super_powers" showon="super_powers_documentation:1" />
+		<!-- Powers_repository Field. Type: Radio. (joomla) -->
+		<field
+			type="radio"
+			name="powers_repository"
+			label="COM_COMPONENTBUILDER_CONFIG_POWERS_REPOSITORY_LABEL"
+			description="COM_COMPONENTBUILDER_CONFIG_POWERS_REPOSITORY_DESCRIPTION"
+			class="btn-group btn-group-yesno"
+			default="0"
+			required="true">
+			<!-- Option Set. -->
+			<option value="1">
+				COM_COMPONENTBUILDER_CONFIG_YES</option>
+			<option value="0">
+				COM_COMPONENTBUILDER_CONFIG_NO</option>
+		</field>
+		<!-- Super_powers_repositories Field. Type: Radio. (joomla) -->
+		<field
+			type="radio"
+			name="super_powers_repositories"
+			label="COM_COMPONENTBUILDER_CONFIG_SUPER_POWERS_REPOSITORIES_LABEL"
+			description="COM_COMPONENTBUILDER_CONFIG_SUPER_POWERS_REPOSITORIES_DESCRIPTION"
+			class="btn-group btn-group-yesno"
+			default="0"
+			required="true"
+			showon="powers_repository:1">
+			<!-- Option Set. -->
+			<option value="1">
+				COM_COMPONENTBUILDER_CONFIG_YES</option>
+			<option value="0">
+				COM_COMPONENTBUILDER_CONFIG_NO</option>
+		</field>
+		<!-- Note_super_powers_repositories Field. Type: Note. A None Database Field. (joomla) -->
+		<field type="note" name="note_super_powers_repositories" label="COM_COMPONENTBUILDER_CONFIG_NOTE_SUPER_POWERS_REPOSITORIES_LABEL" description="COM_COMPONENTBUILDER_CONFIG_NOTE_SUPER_POWERS_REPOSITORIES_DESCRIPTION" heading="h4" class="alert alert-error note_super_powers_repositories" showon="powers_repository:1[AND]super_powers_repositories:1" />
+		<!-- Note_powers_repository_path Field. Type: Note. A None Database Field. (joomla) -->
+		<field type="note" name="note_powers_repository_path" label="COM_COMPONENTBUILDER_CONFIG_NOTE_POWERS_REPOSITORY_PATH_LABEL" description="COM_COMPONENTBUILDER_CONFIG_NOTE_POWERS_REPOSITORY_PATH_DESCRIPTION" heading="h4" class="alert alert-info note_powers_repository_path" showon="powers_repository:1" />
+		<!-- Local_powers_repository_path Field. Type: Text. (joomla) -->
+		<field
+			type="text"
+			name="local_powers_repository_path"
+			label="COM_COMPONENTBUILDER_CONFIG_LOCAL_POWERS_REPOSITORY_PATH_LABEL"
+			size="70"
+			maxlength="150"
+			description="COM_COMPONENTBUILDER_CONFIG_LOCAL_POWERS_REPOSITORY_PATH_DESCRIPTION"
+			class="text_area"
+			readonly="false"
+			disabled="false"
+			required="false"
+			filter="PATH"
+			message="COM_COMPONENTBUILDER_CONFIG_LOCAL_POWERS_REPOSITORY_PATH_MESSAGE"
+			hint="COM_COMPONENTBUILDER_CONFIG_LOCAL_POWERS_REPOSITORY_PATH_HINT"
+			autocomplete="on"
+			showon="powers_repository:1"
+		/>
+	</fieldset>
+	<fieldset
 		name="compiler_custom_config"
 		label="COM_COMPONENTBUILDER_CONFIG_COMPILER">
 
@@ -664,6 +797,7 @@
 			label="COM_COMPONENTBUILDER_CONFIG_BUILDER_GIF_SIZE_LABEL"
 			description="COM_COMPONENTBUILDER_CONFIG_BUILDER_GIF_SIZE_DESCRIPTION"
 			class="list_class"
+			layout="joomla.form.field.list-fancy-select"
 			multiple="false"
 			required="true"
 			default="480-272">
@@ -673,8 +807,8 @@
 			<option value="480-540">
 				COM_COMPONENTBUILDER_CONFIG_THREED_PARTICLE_EXPLORATIONS</option>
 		</field>
-		<!-- Spacer_hr_five Field. Type: Spacer. A None Database Field. (joomla) -->
-		<field type="spacer" name="spacer_hr_five" hr="true" class="spacer_hr_five" />
+		<!-- Spacer_hr_5 Field. Type: Spacer. A None Database Field. (joomla) -->
+		<field type="spacer" name="spacer_hr_5" hr="true" class="spacer_hr_5" />
 		<!-- Compiler_plugin Field. Type: Plugins. (joomla) -->
 		<field
 			type="plugins"
@@ -685,8 +819,8 @@
 			folder="extension"
 			filter="cmd"
 		/>
-		<!-- Spacer_hr_six Field. Type: Spacer. A None Database Field. (joomla) -->
-		<field type="spacer" name="spacer_hr_six" hr="true" class="spacer_hr_six" />
+		<!-- Spacer_hr_6 Field. Type: Spacer. A None Database Field. (joomla) -->
+		<field type="spacer" name="spacer_hr_6" hr="true" class="spacer_hr_6" />
 		<!-- Add_menu_prefix Field. Type: Radio. (joomla) -->
 		<field
 			type="radio"
@@ -717,8 +851,26 @@
 			autocomplete="on"
 			showon="add_menu_prefix:1"
 		/>
-		<!-- Spacer_hr_seven Field. Type: Spacer. A None Database Field. (joomla) -->
-		<field type="spacer" name="spacer_hr_seven" hr="true" class="spacer_hr_seven" />
+		<!-- Spacer_hr_7 Field. Type: Spacer. A None Database Field. (joomla) -->
+		<field type="spacer" name="spacer_hr_7" hr="true" class="spacer_hr_7" />
+		<!-- Namespace_prefix Field. Type: Text. (joomla) -->
+		<field
+			type="text"
+			name="namespace_prefix"
+			label="COM_COMPONENTBUILDER_CONFIG_NAMESPACE_PREFIX_LABEL"
+			size="250"
+			maxlength="250"
+			default="JCB"
+			description="COM_COMPONENTBUILDER_CONFIG_NAMESPACE_PREFIX_DESCRIPTION"
+			class="text_area"
+			required="true"
+			filter="WORD"
+			message="COM_COMPONENTBUILDER_CONFIG_NAMESPACE_PREFIX_MESSAGE"
+			hint="COM_COMPONENTBUILDER_CONFIG_NAMESPACE_PREFIX_HINT"
+			autocomplete="on"
+		/>
+		<!-- Spacer_hr_8 Field. Type: Spacer. A None Database Field. (joomla) -->
+		<field type="spacer" name="spacer_hr_8" hr="true" class="spacer_hr_8" />
 		<!-- Minify Field. Type: Radio. (joomla) -->
 		<field
 			type="radio"
@@ -733,8 +885,8 @@
 			<option value="0">
 				COM_COMPONENTBUILDER_CONFIG_NO</option>
 		</field>
-		<!-- Spacer_hr_eight Field. Type: Spacer. A None Database Field. (joomla) -->
-		<field type="spacer" name="spacer_hr_eight" hr="true" class="spacer_hr_eight" />
+		<!-- Spacer_hr_9 Field. Type: Spacer. A None Database Field. (joomla) -->
+		<field type="spacer" name="spacer_hr_9" hr="true" class="spacer_hr_9" />
 		<!-- Note_language_global Field. Type: Note. A None Database Field. (joomla) -->
 		<field type="note" name="note_language_global" label="COM_COMPONENTBUILDER_CONFIG_NOTE_LANGUAGE_GLOBAL_LABEL" description="COM_COMPONENTBUILDER_CONFIG_NOTE_LANGUAGE_GLOBAL_DESCRIPTION" heading="h4" class="alert alert-info note_language_global" />
 		<!-- Language Field. Type: Lang. (custom) -->
@@ -743,6 +895,7 @@
 			name="language"
 			label="COM_COMPONENTBUILDER_CONFIG_LANGUAGE_LABEL"
 			class="list_class"
+			layout="joomla.form.field.list-fancy-select"
 			multiple="false"
 			default="en-GB"
 			required="true"
@@ -761,8 +914,8 @@
 			max="100"
 			step="10"
 		/>
-		<!-- Spacer_hr_nine Field. Type: Spacer. A None Database Field. (joomla) -->
-		<field type="spacer" name="spacer_hr_nine" hr="true" class="spacer_hr_nine" />
+		<!-- Spacer_hr_10 Field. Type: Spacer. A None Database Field. (joomla) -->
+		<field type="spacer" name="spacer_hr_10" hr="true" class="spacer_hr_10" />
 		<!-- Assets_table_fix Field. Type: List. (joomla) -->
 		<field
 			type="list"
@@ -770,6 +923,7 @@
 			label="COM_COMPONENTBUILDER_CONFIG_ASSETS_TABLE_FIX_LABEL"
 			description="COM_COMPONENTBUILDER_CONFIG_ASSETS_TABLE_FIX_DESCRIPTION"
 			class="list_class"
+			layout="joomla.form.field.list-fancy-select"
 			multiple="false"
 			default="2">
 			<!-- Option Set. -->
@@ -787,6 +941,7 @@
 			label="COM_COMPONENTBUILDER_CONFIG_COMPILER_FIELD_BUILDER_TYPE_LABEL"
 			description="COM_COMPONENTBUILDER_CONFIG_COMPILER_FIELD_BUILDER_TYPE_DESCRIPTION"
 			class="list_class"
+			layout="joomla.form.field.list-fancy-select"
 			filter="INT"
 			required="true"
 			default="2">
@@ -803,7 +958,7 @@
 			label="COM_COMPONENTBUILDER_CONFIG_FIELD_NAME_BUILDER_LABEL"
 			description="COM_COMPONENTBUILDER_CONFIG_FIELD_NAME_BUILDER_DESCRIPTION"
 			class="btn-group btn-group-yesno"
-			default="1">
+			default="2">
 			<!-- Option Set. -->
 			<option value="1">
 				COM_COMPONENTBUILDER_CONFIG_DEFAULT</option>
@@ -817,7 +972,7 @@
 			label="COM_COMPONENTBUILDER_CONFIG_TYPE_NAME_BUILDER_LABEL"
 			description="COM_COMPONENTBUILDER_CONFIG_TYPE_NAME_BUILDER_DESCRIPTION"
 			class="btn-group btn-group-yesno"
-			default="1">
+			default="2">
 			<!-- Option Set. -->
 			<option value="1">
 				COM_COMPONENTBUILDER_CONFIG_DEFAULT</option>
@@ -859,115 +1014,6 @@
 		</field>
 	</fieldset>
 	<fieldset
-		name="development_method_custom_config"
-		label="COM_COMPONENTBUILDER_CONFIG_DEVELOPMENT_METHOD">
-
-		<!-- Development_method Field. Type: Radio. (joomla) -->
-		<field
-			type="radio"
-			name="development_method"
-			label="COM_COMPONENTBUILDER_CONFIG_DEVELOPMENT_METHOD_LABEL"
-			description="COM_COMPONENTBUILDER_CONFIG_DEVELOPMENT_METHOD_DESCRIPTION"
-			class="btn-group btn-group-yesno"
-			default="1"
-			required="true">
-			<!-- Option Set. -->
-			<option value="1">
-				COM_COMPONENTBUILDER_CONFIG_DEFAULT</option>
-			<option value="2">
-				COM_COMPONENTBUILDER_CONFIG_EXPANSION</option>
-		</field>
-		<!-- Note_development_method_default Field. Type: Note. A None Database Field. (joomla) -->
-		<field type="note" name="note_development_method_default" label="COM_COMPONENTBUILDER_CONFIG_NOTE_DEVELOPMENT_METHOD_DEFAULT_LABEL" description="COM_COMPONENTBUILDER_CONFIG_NOTE_DEVELOPMENT_METHOD_DEFAULT_DESCRIPTION" heading="h2" class="alert alert-info note_development_method_default" showon="development_method:1" />
-		<!-- Note_development_method_expansion Field. Type: Note. A None Database Field. (joomla) -->
-		<field type="note" name="note_development_method_expansion" label="COM_COMPONENTBUILDER_CONFIG_NOTE_DEVELOPMENT_METHOD_EXPANSION_LABEL" description="COM_COMPONENTBUILDER_CONFIG_NOTE_DEVELOPMENT_METHOD_EXPANSION_DESCRIPTION" heading="h2" class="alert alert-info note_development_method_expansion" showon="development_method:2" />
-		<!-- Expansion Field. Type: Subform. (joomla) -->
-		<field
-			type="subform"
-			name="expansion"
-			label="COM_COMPONENTBUILDER_CONFIG_EXPANSION_LABEL"
-			layout="joomla.form.field.subform.repeatable-table"
-			multiple="true"
-			description="COM_COMPONENTBUILDER_CONFIG_EXPANSION_DESCRIPTION"
-			icon="list"
-			max="50"
-			min="1"
-			showon="development_method:2">
-			<form hidden="true" name="list_expansion_modal" repeat="true">
-				<!-- Component Field. Type: Joomlacomponent. (custom) -->
-				<field
-					type="joomlacomponent"
-					name="component"
-					label="COM_COMPONENTBUILDER_CONFIG_COMPONENT_LABEL"
-					class="list_class"
-					multiple="false"
-					default="0"
-					button="false"
-				/>
-				<!-- Install Field. Type: List. (joomla) -->
-				<field
-					type="list"
-					name="install"
-					label="COM_COMPONENTBUILDER_CONFIG_INSTALL_LABEL"
-					description="COM_COMPONENTBUILDER_CONFIG_INSTALL_DESCRIPTION"
-					class="list_class"
-					multiple="false"
-					default="1">
-					<!-- Option Set. -->
-					<option value="1">
-						COM_COMPONENTBUILDER_CONFIG_TRUE</option>
-					<option value="2">
-						COM_COMPONENTBUILDER_CONFIG_FALSE</option>
-				</field>
-				<!-- Backup Field. Type: Checkbox. (joomla) -->
-				<field
-					type="checkbox"
-					name="backup"
-					label="COM_COMPONENTBUILDER_CONFIG_BACKUP_LABEL"
-					value="1"
-					description="COM_COMPONENTBUILDER_CONFIG_BACKUP_DESCRIPTION"
-					class="inputbox"
-				/>
-				<!-- Repository Field. Type: Checkbox. (joomla) -->
-				<field
-					type="checkbox"
-					name="repository"
-					label="COM_COMPONENTBUILDER_CONFIG_REPOSITORY_LABEL"
-					value="1"
-					description="COM_COMPONENTBUILDER_CONFIG_REPOSITORY_DESCRIPTION"
-					class="inputbox"
-				/>
-				<!-- Placeholders Field. Type: Checkbox. (joomla) -->
-				<field
-					type="checkbox"
-					name="placeholders"
-					label="COM_COMPONENTBUILDER_CONFIG_PLACEHOLDERS_LABEL"
-					value="1"
-					default=""
-					description="COM_COMPONENTBUILDER_CONFIG_PLACEHOLDERS_DESCRIPTION"
-					class="inputbox"
-				/>
-			</form>
-		</field>
-		<!-- Return_options_build Field. Type: Radio. (joomla) -->
-		<field
-			type="radio"
-			name="return_options_build"
-			label="COM_COMPONENTBUILDER_CONFIG_RETURN_OPTIONS_BUILD_LABEL"
-			description="COM_COMPONENTBUILDER_CONFIG_RETURN_OPTIONS_BUILD_DESCRIPTION"
-			class="btn-group btn-group-yesno"
-			default="2"
-			showon="development_method:2">
-			<!-- Option Set. -->
-			<option value="1">
-				COM_COMPONENTBUILDER_CONFIG_DISPLAY_MESSAGE</option>
-			<option value="2">
-				COM_COMPONENTBUILDER_CONFIG_ONLY_BOOLEAN</option>
-		</field>
-		<!-- Expansioncronjob_note Field. Type: Note. A None Database Field. (joomla) -->
-		<field type="note" name="expansioncronjob_note" label="COM_COMPONENTBUILDER_CONFIG_EXPANSIONCRONJOB_NOTE_LABEL" description="COM_COMPONENTBUILDER_CONFIG_EXPANSIONCRONJOB_NOTE_DESCRIPTION" heading="h4" class="expansioncronjob_note" showon="development_method:2" />
-	</fieldset>
-	<fieldset
 		name="auto_backup_custom_config"
 		label="COM_COMPONENTBUILDER_CONFIG_AUTO_BACKUP">
 
@@ -987,13 +1033,14 @@
 			<option value="2">
 				COM_COMPONENTBUILDER_CONFIG_REMOTE_SERVER</option>
 		</field>
-		<!-- Cronjob_backup_server Field. Type: Servers. (custom) -->
+		<!-- Cronjob_backup_server Field. Type: Cron_servers. (custom) -->
 		<field
-			type="servers"
+			type="cron_servers"
 			name="cronjob_backup_server"
 			label="COM_COMPONENTBUILDER_CONFIG_CRONJOB_BACKUP_SERVER_LABEL"
 			description="COM_COMPONENTBUILDER_CONFIG_CRONJOB_BACKUP_SERVER_DESCRIPTION"
 			class="list_class"
+			layout="joomla.form.field.list-fancy-select"
 			multiple="false"
 			default="0"
 			showon="cronjob_backup_type:2"
@@ -1006,7 +1053,6 @@
 			label="COM_COMPONENTBUILDER_CONFIG_CRONJOB_BACKUP_FOLDER_PATH_LABEL"
 			size="70"
 			maxlength="150"
-			default=""
 			description="COM_COMPONENTBUILDER_CONFIG_CRONJOB_BACKUP_FOLDER_PATH_DESCRIPTION"
 			class="text_area"
 			readonly="false"
@@ -1015,6 +1061,7 @@
 			filter="PATH"
 			message="COM_COMPONENTBUILDER_CONFIG_CRONJOB_BACKUP_FOLDER_PATH_MESSAGE"
 			hint="COM_COMPONENTBUILDER_CONFIG_CRONJOB_BACKUP_FOLDER_PATH_HINT"
+			autocomplete="on"
 			showon="cronjob_backup_type:1"
 		/>
 		<!-- Backup_email Field. Type: Text. (joomla) -->
@@ -1054,6 +1101,20 @@
 		name="folder_paths_custom_config"
 		label="COM_COMPONENTBUILDER_CONFIG_FOLDER_PATHS">
 
+		<!-- Jcb_powers_path Field. Type: Text. (joomla) -->
+		<field
+			type="text"
+			name="jcb_powers_path"
+			label="COM_COMPONENTBUILDER_CONFIG_JCB_POWERS_PATH_LABEL"
+			size="70"
+			maxlength="150"
+			description="COM_COMPONENTBUILDER_CONFIG_JCB_POWERS_PATH_DESCRIPTION"
+			class="text_area"
+			filter="PATH"
+			message="COM_COMPONENTBUILDER_CONFIG_JCB_POWERS_PATH_MESSAGE"
+			hint="COM_COMPONENTBUILDER_CONFIG_JCB_POWERS_PATH_HINT"
+			autocomplete="on"
+		/>
 		<!-- Note_compiler_folder_path Field. Type: Note. A None Database Field. (joomla) -->
 		<field type="note" name="note_compiler_folder_path" label="COM_COMPONENTBUILDER_CONFIG_NOTE_COMPILER_FOLDER_PATH_LABEL" description="COM_COMPONENTBUILDER_CONFIG_NOTE_COMPILER_FOLDER_PATH_DESCRIPTION" heading="h4" class="alert alert-info note_compiler_folder_path" />
 		<!-- Compiler_folder_path Field. Type: Text. (joomla) -->
@@ -1063,7 +1124,6 @@
 			label="COM_COMPONENTBUILDER_CONFIG_COMPILER_FOLDER_PATH_LABEL"
 			size="70"
 			maxlength="150"
-			default=""
 			description="COM_COMPONENTBUILDER_CONFIG_COMPILER_FOLDER_PATH_DESCRIPTION"
 			class="text_area"
 			readonly="false"
@@ -1072,6 +1132,7 @@
 			filter="PATH"
 			message="COM_COMPONENTBUILDER_CONFIG_COMPILER_FOLDER_PATH_MESSAGE"
 			hint="COM_COMPONENTBUILDER_CONFIG_COMPILER_FOLDER_PATH_HINT"
+			autocomplete="on"
 		/>
 		<!-- Note_custom_folder_path Field. Type: Note. A None Database Field. (joomla) -->
 		<field type="note" name="note_custom_folder_path" label="COM_COMPONENTBUILDER_CONFIG_NOTE_CUSTOM_FOLDER_PATH_LABEL" description="COM_COMPONENTBUILDER_CONFIG_NOTE_CUSTOM_FOLDER_PATH_DESCRIPTION" heading="h4" class="alert alert-info note_custom_folder_path" />
@@ -1082,7 +1143,6 @@
 			label="COM_COMPONENTBUILDER_CONFIG_CUSTOM_FOLDER_PATH_LABEL"
 			size="70"
 			maxlength="150"
-			default=""
 			description="COM_COMPONENTBUILDER_CONFIG_CUSTOM_FOLDER_PATH_DESCRIPTION"
 			class="text_area"
 			readonly="false"
@@ -1091,6 +1151,7 @@
 			filter="PATH"
 			message="COM_COMPONENTBUILDER_CONFIG_CUSTOM_FOLDER_PATH_MESSAGE"
 			hint="COM_COMPONENTBUILDER_CONFIG_CUSTOM_FOLDER_PATH_HINT"
+			autocomplete="on"
 		/>
 		<!-- Note_backup_folder_path Field. Type: Note. A None Database Field. (joomla) -->
 		<field type="note" name="note_backup_folder_path" label="COM_COMPONENTBUILDER_CONFIG_NOTE_BACKUP_FOLDER_PATH_LABEL" description="COM_COMPONENTBUILDER_CONFIG_NOTE_BACKUP_FOLDER_PATH_DESCRIPTION" heading="h4" class="alert alert-info note_backup_folder_path" />
@@ -1101,7 +1162,6 @@
 			label="COM_COMPONENTBUILDER_CONFIG_BACKUP_FOLDER_PATH_LABEL"
 			size="70"
 			maxlength="150"
-			default=""
 			description="COM_COMPONENTBUILDER_CONFIG_BACKUP_FOLDER_PATH_DESCRIPTION"
 			class="text_area"
 			readonly="false"
@@ -1110,6 +1170,7 @@
 			filter="PATH"
 			message="COM_COMPONENTBUILDER_CONFIG_BACKUP_FOLDER_PATH_MESSAGE"
 			hint="COM_COMPONENTBUILDER_CONFIG_BACKUP_FOLDER_PATH_HINT"
+			autocomplete="on"
 		/>
 		<!-- Note_git_folder_path Field. Type: Note. A None Database Field. (joomla) -->
 		<field type="note" name="note_git_folder_path" label="COM_COMPONENTBUILDER_CONFIG_NOTE_GIT_FOLDER_PATH_LABEL" description="COM_COMPONENTBUILDER_CONFIG_NOTE_GIT_FOLDER_PATH_DESCRIPTION" heading="h4" class="alert alert-info note_git_folder_path" />
@@ -1120,7 +1181,6 @@
 			label="COM_COMPONENTBUILDER_CONFIG_GIT_FOLDER_PATH_LABEL"
 			size="70"
 			maxlength="150"
-			default=""
 			description="COM_COMPONENTBUILDER_CONFIG_GIT_FOLDER_PATH_DESCRIPTION"
 			class="text_area"
 			readonly="false"
@@ -1129,6 +1189,7 @@
 			filter="PATH"
 			message="COM_COMPONENTBUILDER_CONFIG_GIT_FOLDER_PATH_MESSAGE"
 			hint="COM_COMPONENTBUILDER_CONFIG_GIT_FOLDER_PATH_HINT"
+			autocomplete="on"
 		/>
 	</fieldset>
 	<fieldset
@@ -1142,14 +1203,14 @@
 			label="COM_COMPONENTBUILDER_CONFIG_EXPORT_COMPANY_LABEL"
 			size="40"
 			maxlength="150"
+			default="Vast Development Method"
 			description="COM_COMPONENTBUILDER_CONFIG_EXPORT_COMPANY_DESCRIPTION"
 			class="text_area"
-			readonly="false"
-			disabled="false"
 			required="true"
 			filter="STRING"
 			message="COM_COMPONENTBUILDER_CONFIG_EXPORT_COMPANY_MESSAGE"
 			hint="COM_COMPONENTBUILDER_CONFIG_EXPORT_COMPANY_HINT"
+			autocomplete="on"
 		/>
 		<!-- Export_owner Field. Type: Text. (joomla) -->
 		<field
@@ -1158,14 +1219,14 @@
 			label="COM_COMPONENTBUILDER_CONFIG_EXPORT_OWNER_LABEL"
 			size="10"
 			maxlength="120"
+			default="Llewellyn van der Merwe"
 			description="COM_COMPONENTBUILDER_CONFIG_EXPORT_OWNER_DESCRIPTION"
 			class="text_area"
-			readonly="false"
-			disabled="false"
 			required="true"
 			filter="HTML"
 			message="COM_COMPONENTBUILDER_CONFIG_EXPORT_OWNER_MESSAGE"
 			hint="COM_COMPONENTBUILDER_CONFIG_EXPORT_OWNER_HINT"
+			autocomplete="on"
 		/>
 		<!-- Export_email Field. Type: Text. (joomla) -->
 		<field
@@ -1174,6 +1235,7 @@
 			label="COM_COMPONENTBUILDER_CONFIG_EXPORT_EMAIL_LABEL"
 			size="40"
 			maxlength="150"
+			default="joomla@vdm.io"
 			description="COM_COMPONENTBUILDER_CONFIG_EXPORT_EMAIL_DESCRIPTION"
 			class="text_area"
 			required="true"
@@ -1181,6 +1243,7 @@
 			validate="email"
 			message="COM_COMPONENTBUILDER_CONFIG_EXPORT_EMAIL_MESSAGE"
 			hint="COM_COMPONENTBUILDER_CONFIG_EXPORT_EMAIL_HINT"
+			autocomplete="on"
 		/>
 		<!-- Export_website Field. Type: Url. (joomla) -->
 		<field
@@ -1189,7 +1252,7 @@
 			label="COM_COMPONENTBUILDER_CONFIG_EXPORT_WEBSITE_LABEL"
 			size="60"
 			maxlength="150"
-			default=""
+			default="https://dev.vdm.io/"
 			description="COM_COMPONENTBUILDER_CONFIG_EXPORT_WEBSITE_DESCRIPTION"
 			class="text_area"
 			required="true"
@@ -1197,6 +1260,7 @@
 			validated="url"
 			message="COM_COMPONENTBUILDER_CONFIG_EXPORT_WEBSITE_MESSAGE"
 			hint="COM_COMPONENTBUILDER_CONFIG_EXPORT_WEBSITE_HINT"
+			autocomplete="on"
 		/>
 		<!-- Export_license Field. Type: Textarea. (joomla) -->
 		<field

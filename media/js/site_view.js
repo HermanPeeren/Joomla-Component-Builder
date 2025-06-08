@@ -2,54 +2,54 @@
  * @package    Joomla.Component.Builder
  *
  * @created    30th April, 2015
- * @author     Llewellyn van der Merwe <http://www.joomlacomponentbuilder.com>
- * @github     Joomla Component Builder <https://github.com/vdm-io/Joomla-Component-Builder>
+ * @author     Llewellyn van der Merwe <https://dev.vdm.io>
+ * @git        Joomla Component Builder <https://git.vdm.dev/joomla/Component-Builder>
  * @copyright  Copyright (C) 2015 Vast Development Method. All rights reserved.
  * @license    GNU General Public License version 2 or later; see LICENSE.txt
  */
 
 // Initial Script
-jQuery(document).ready(function()
+document.addEventListener('DOMContentLoaded', function()
 {
-	var add_php_view_vvvvwan = jQuery("#jform_add_php_view input[type='radio']:checked").val();
-	vvvvwan(add_php_view_vvvvwan);
+	var add_php_view_vvvvvyr = jQuery("#jform_add_php_view input[type='radio']:checked").val();
+	vvvvvyr(add_php_view_vvvvvyr);
 
-	var add_php_jview_display_vvvvwao = jQuery("#jform_add_php_jview_display input[type='radio']:checked").val();
-	vvvvwao(add_php_jview_display_vvvvwao);
+	var add_php_jview_display_vvvvvys = jQuery("#jform_add_php_jview_display input[type='radio']:checked").val();
+	vvvvvys(add_php_jview_display_vvvvvys);
 
-	var add_php_jview_vvvvwap = jQuery("#jform_add_php_jview input[type='radio']:checked").val();
-	vvvvwap(add_php_jview_vvvvwap);
+	var add_php_jview_vvvvvyt = jQuery("#jform_add_php_jview input[type='radio']:checked").val();
+	vvvvvyt(add_php_jview_vvvvvyt);
 
-	var add_php_document_vvvvwaq = jQuery("#jform_add_php_document input[type='radio']:checked").val();
-	vvvvwaq(add_php_document_vvvvwaq);
+	var add_php_document_vvvvvyu = jQuery("#jform_add_php_document input[type='radio']:checked").val();
+	vvvvvyu(add_php_document_vvvvvyu);
 
-	var add_css_document_vvvvwar = jQuery("#jform_add_css_document input[type='radio']:checked").val();
-	vvvvwar(add_css_document_vvvvwar);
+	var add_css_document_vvvvvyv = jQuery("#jform_add_css_document input[type='radio']:checked").val();
+	vvvvvyv(add_css_document_vvvvvyv);
 
-	var add_javascript_file_vvvvwas = jQuery("#jform_add_javascript_file input[type='radio']:checked").val();
-	vvvvwas(add_javascript_file_vvvvwas);
+	var add_javascript_file_vvvvvyw = jQuery("#jform_add_javascript_file input[type='radio']:checked").val();
+	vvvvvyw(add_javascript_file_vvvvvyw);
 
-	var add_js_document_vvvvwat = jQuery("#jform_add_js_document input[type='radio']:checked").val();
-	vvvvwat(add_js_document_vvvvwat);
+	var add_js_document_vvvvvyx = jQuery("#jform_add_js_document input[type='radio']:checked").val();
+	vvvvvyx(add_js_document_vvvvvyx);
 
-	var add_css_vvvvwau = jQuery("#jform_add_css input[type='radio']:checked").val();
-	vvvvwau(add_css_vvvvwau);
+	var add_css_vvvvvyy = jQuery("#jform_add_css input[type='radio']:checked").val();
+	vvvvvyy(add_css_vvvvvyy);
 
-	var add_php_ajax_vvvvwav = jQuery("#jform_add_php_ajax input[type='radio']:checked").val();
-	vvvvwav(add_php_ajax_vvvvwav);
+	var add_php_ajax_vvvvvyz = jQuery("#jform_add_php_ajax input[type='radio']:checked").val();
+	vvvvvyz(add_php_ajax_vvvvvyz);
 
-	var add_custom_button_vvvvwaw = jQuery("#jform_add_custom_button input[type='radio']:checked").val();
-	vvvvwaw(add_custom_button_vvvvwaw);
+	var add_custom_button_vvvvvza = jQuery("#jform_add_custom_button input[type='radio']:checked").val();
+	vvvvvza(add_custom_button_vvvvvza);
 
-	var button_position_vvvvwax = jQuery("#jform_button_position").val();
-	vvvvwax(button_position_vvvvwax);
+	var button_position_vvvvvzb = jQuery("#jform_button_position").val();
+	vvvvvzb(button_position_vvvvvzb);
 });
 
-// the vvvvwan function
-function vvvvwan(add_php_view_vvvvwan)
+// the vvvvvyr function
+function vvvvvyr(add_php_view_vvvvvyr)
 {
 	// set the function logic
-	if (add_php_view_vvvvwan == 1)
+	if (add_php_view_vvvvvyr == 1)
 	{
 		jQuery('#jform_php_view-lbl').closest('.control-group').show();
 	}
@@ -59,11 +59,11 @@ function vvvvwan(add_php_view_vvvvwan)
 	}
 }
 
-// the vvvvwao function
-function vvvvwao(add_php_jview_display_vvvvwao)
+// the vvvvvys function
+function vvvvvys(add_php_jview_display_vvvvvys)
 {
 	// set the function logic
-	if (add_php_jview_display_vvvvwao == 1)
+	if (add_php_jview_display_vvvvvys == 1)
 	{
 		jQuery('#jform_php_jview_display-lbl').closest('.control-group').show();
 	}
@@ -73,11 +73,11 @@ function vvvvwao(add_php_jview_display_vvvvwao)
 	}
 }
 
-// the vvvvwap function
-function vvvvwap(add_php_jview_vvvvwap)
+// the vvvvvyt function
+function vvvvvyt(add_php_jview_vvvvvyt)
 {
 	// set the function logic
-	if (add_php_jview_vvvvwap == 1)
+	if (add_php_jview_vvvvvyt == 1)
 	{
 		jQuery('#jform_php_jview-lbl').closest('.control-group').show();
 	}
@@ -87,11 +87,11 @@ function vvvvwap(add_php_jview_vvvvwap)
 	}
 }
 
-// the vvvvwaq function
-function vvvvwaq(add_php_document_vvvvwaq)
+// the vvvvvyu function
+function vvvvvyu(add_php_document_vvvvvyu)
 {
 	// set the function logic
-	if (add_php_document_vvvvwaq == 1)
+	if (add_php_document_vvvvvyu == 1)
 	{
 		jQuery('#jform_php_document-lbl').closest('.control-group').show();
 	}
@@ -101,11 +101,11 @@ function vvvvwaq(add_php_document_vvvvwaq)
 	}
 }
 
-// the vvvvwar function
-function vvvvwar(add_css_document_vvvvwar)
+// the vvvvvyv function
+function vvvvvyv(add_css_document_vvvvvyv)
 {
 	// set the function logic
-	if (add_css_document_vvvvwar == 1)
+	if (add_css_document_vvvvvyv == 1)
 	{
 		jQuery('#jform_css_document-lbl').closest('.control-group').show();
 	}
@@ -115,11 +115,11 @@ function vvvvwar(add_css_document_vvvvwar)
 	}
 }
 
-// the vvvvwas function
-function vvvvwas(add_javascript_file_vvvvwas)
+// the vvvvvyw function
+function vvvvvyw(add_javascript_file_vvvvvyw)
 {
 	// set the function logic
-	if (add_javascript_file_vvvvwas == 1)
+	if (add_javascript_file_vvvvvyw == 1)
 	{
 		jQuery('#jform_javascript_file-lbl').closest('.control-group').show();
 	}
@@ -129,11 +129,11 @@ function vvvvwas(add_javascript_file_vvvvwas)
 	}
 }
 
-// the vvvvwat function
-function vvvvwat(add_js_document_vvvvwat)
+// the vvvvvyx function
+function vvvvvyx(add_js_document_vvvvvyx)
 {
 	// set the function logic
-	if (add_js_document_vvvvwat == 1)
+	if (add_js_document_vvvvvyx == 1)
 	{
 		jQuery('#jform_js_document-lbl').closest('.control-group').show();
 	}
@@ -143,11 +143,11 @@ function vvvvwat(add_js_document_vvvvwat)
 	}
 }
 
-// the vvvvwau function
-function vvvvwau(add_css_vvvvwau)
+// the vvvvvyy function
+function vvvvvyy(add_css_vvvvvyy)
 {
 	// set the function logic
-	if (add_css_vvvvwau == 1)
+	if (add_css_vvvvvyy == 1)
 	{
 		jQuery('#jform_css-lbl').closest('.control-group').show();
 	}
@@ -157,11 +157,11 @@ function vvvvwau(add_css_vvvvwau)
 	}
 }
 
-// the vvvvwav function
-function vvvvwav(add_php_ajax_vvvvwav)
+// the vvvvvyz function
+function vvvvvyz(add_php_ajax_vvvvvyz)
 {
 	// set the function logic
-	if (add_php_ajax_vvvvwav == 1)
+	if (add_php_ajax_vvvvvyz == 1)
 	{
 		jQuery('#jform_ajax_input-lbl').closest('.control-group').show();
 		jQuery('#jform_php_ajaxmethod-lbl').closest('.control-group').show();
@@ -173,11 +173,11 @@ function vvvvwav(add_php_ajax_vvvvwav)
 	}
 }
 
-// the vvvvwaw function
-function vvvvwaw(add_custom_button_vvvvwaw)
+// the vvvvvza function
+function vvvvvza(add_custom_button_vvvvvza)
 {
 	// set the function logic
-	if (add_custom_button_vvvvwaw == 1)
+	if (add_custom_button_vvvvvza == 1)
 	{
 		jQuery('#jform_custom_button-lbl').closest('.control-group').show();
 		jQuery('#jform_php_controller-lbl').closest('.control-group').show();
@@ -191,20 +191,20 @@ function vvvvwaw(add_custom_button_vvvvwaw)
 	}
 }
 
-// the vvvvwax function
-function vvvvwax(button_position_vvvvwax)
+// the vvvvvzb function
+function vvvvvzb(button_position_vvvvvzb)
 {
-	if (isSet(button_position_vvvvwax) && button_position_vvvvwax.constructor !== Array)
+	if (isSet(button_position_vvvvvzb) && button_position_vvvvvzb.constructor !== Array)
 	{
-		var temp_vvvvwax = button_position_vvvvwax;
-		var button_position_vvvvwax = [];
-		button_position_vvvvwax.push(temp_vvvvwax);
+		var temp_vvvvvzb = button_position_vvvvvzb;
+		var button_position_vvvvvzb = [];
+		button_position_vvvvvzb.push(temp_vvvvvzb);
 	}
-	else if (!isSet(button_position_vvvvwax))
+	else if (!isSet(button_position_vvvvvzb))
 	{
-		var button_position_vvvvwax = [];
+		var button_position_vvvvvzb = [];
 	}
-	var button_position = button_position_vvvvwax.some(button_position_vvvvwax_SomeFunc);
+	var button_position = button_position_vvvvvzb.some(button_position_vvvvvzb_SomeFunc);
 
 
 	// set this function logic
@@ -218,11 +218,11 @@ function vvvvwax(button_position_vvvvwax)
 	}
 }
 
-// the vvvvwax Some function
-function button_position_vvvvwax_SomeFunc(button_position_vvvvwax)
+// the vvvvvzb Some function
+function button_position_vvvvvzb_SomeFunc(button_position_vvvvvzb)
 {
 	// set the function logic
-	if (button_position_vvvvwax == 5)
+	if (button_position_vvvvvzb == 5)
 	{
 		return true;
 	}
@@ -247,31 +247,56 @@ jQuery(document).ready(function()
 	getEditCustomCodeButtons();
 });
 
-function getCodeFrom_server(id, type, type_name, callingName){
-	var getUrl = JRouter("index.php?option=com_componentbuilder&task=ajax." + callingName + "&format=json&raw=true&vdm="+vastDevMod);
-	if(token.length > 0 && id > 0 && type.length > 0) {
-		var request = token + '=1&' + type_name + '=' + type + '&id=' + id;
+function getCodeFrom_server(id, type, type_name, callingName) {
+	var url = "index.php?option=com_componentbuilder&task=ajax." + callingName + "&format=json&raw=true&vdm="+vastDevMod;
+	if (token.length > 0 && getCodeFrom_isValidId(id) && type.length > 0) {
+		url += '&' + token + '=1&' + type_name + '=' + type + '&id=' + id;
+	} else {
+		console.error('There was a issue with the values passed to the [getCodeFrom_server] method and we could not make the Ajax call.');
+		return;
 	}
-	return jQuery.ajax({
-		type: 'GET',
-		url: getUrl,
-		dataType: 'json',
-		data: request,
-		jsonp: false
+	var getUrl = JRouter(url);
+	return fetch(getUrl, {
+		method: 'GET',
+		headers: {
+			'Content-Type': 'application/json'
+		}
+	}).then(function(response) {
+		if (response.ok) {
+			return response.json();
+		} else {
+			throw new Error('Network response was not ok');
+		}
+	}).then(function(data) {
+		return data;
+	}).catch(function(error) {
+		console.error('There was a problem with the fetch operation:', error);
 	});
 }
+function getCodeFrom_isValidId(id) {
+    if (typeof id === 'number') {
+        // Check if it's a positive integer
+        return Number.isInteger(id) && id > 0;
+    } else if (typeof id === 'string') {
+        // Check if it's a string of length > 30
+        return id.length > 30;
+    }
+    // If neither a number nor a string, return false
+    return false;
+}
 
-
-function getLinked(){
-	getCodeFrom_server(1, 'type', 'type', 'getLinked').done(function(result) {
-		if(result){
-			jQuery('#display_linked_to').html(result);
+function getLinked() {
+	getCodeFrom_server(1, 'type', 'type', 'getLinked').then(function(result) {
+		if (result.error) {
+			console.error(result.error);
+		} else if (result) {
+			document.getElementById('display_linked_to').innerHTML = result;
 		}
 	});
 }
 
 function getSnippetDetails(id){
-	getCodeFrom_server(id, '_type', '_type', 'snippetDetails').done(function(result) {
+	getCodeFrom_server(id, '_type', '_type', 'snippetDetails').then(function(result) {
 		if(result.snippet){
 			var description = '';
 			if (result.description.length > 0) {
@@ -305,69 +330,99 @@ function getSnippetDetails(id){
 	})
 }
 
-function getDynamicValues_server(dynamicId){
-	var getUrl = JRouter("index.php?option=com_componentbuilder&task=ajax.getDynamicValues&format=json");
-	if(token.length > 0 && dynamicId > 0){
-		var request = token+'=1&view=site_view&id='+dynamicId;
-	}
-	return jQuery.ajax({
-		type: 'GET',
-		url: getUrl,
-		dataType: 'jsonp',
-		data: request,
-		jsonp: 'callback'
-	});
+function getDynamicValuesServer(dynamicId) {
+    var getUrl = 'index.php?option=com_componentbuilder&task=ajax.getDynamicValues&raw=true&format=json';
+    if (token.length > 0 && (dynamicId > 0 || dynamicId.length > 0)) {
+        var request = token + '=1&view=site_view&id=' + dynamicId;
+    }
+
+    return fetch(getUrl + '&' + request, {
+        method: 'GET',
+        headers: {
+            'Content-Type': 'application/json',
+        }
+    })
+    .then(response => response.json());
 }
 
-function getDynamicValues(id){
-	getDynamicValues_server(id).done(function(result) {
-		if(result){
-			jQuery('#dynamic_values').remove();
-			jQuery('.dynamic_values').append('<div id="dynamic_values">'+result+'</div>');
-			// make sure the code bocks are active
-			jQuery("code").click(function() {
-				jQuery(this).selText().addClass("selected");
-			});
-		}
-	})
+function getDynamicValues(id) {
+    getDynamicValuesServer(id).then(function(result) {
+        if (result) {
+            var dynamicValuesElement = document.getElementById('dynamic_values');
+            if (dynamicValuesElement) {
+                dynamicValuesElement.remove();
+            }
+            document.querySelector('.dynamic_values').insertAdjacentHTML('beforeend', '<div id="dynamic_values">' + result + '</div>');
+
+            // Event listener for code blocks
+            document.querySelectorAll("code").forEach(function(codeBlock) {
+                codeBlock.addEventListener("click", function() {
+                    codeBlock.selText(); // Call the custom selText function
+                    codeBlock.classList.add("selected");  // Add the "selected" class
+                });
+            });
+        }
+    }).catch(function(error) {
+        console.error('Error fetching dynamic values:', error);
+    });
 }
 
-function getLayoutDetails_server(id){
-	var getUrl = JRouter("index.php?option=com_componentbuilder&task=ajax.getLayoutDetails&format=json&vdm="+vastDevMod);
-	if(token.length > 0 && id > 0){
-		var request = token+'=1&id='+id;
-	}
-	return jQuery.ajax({
-		type: 'GET',
-		url: getUrl,
-		dataType: 'jsonp',
-		data: request,
-		jsonp: 'callback'
-	});
+function getLayoutDetails_server(id) {
+    var getUrl = JRouter("index.php?option=com_componentbuilder&task=ajax.getLayoutDetails&format=json&raw=true&vdm=" + vastDevMod);
+    var request = '';
+
+    // Ensure token and id are present
+    if (token.length > 0 && id > 0) {
+        request = token + '=1&id=' + id;
+    }
+
+    // Return a fetch promise (fetch does not support JSONP, so I assume the server can return JSON)
+    return fetch(getUrl + '&' + request, {
+        method: 'GET'
+    })
+    .then(function(response) {
+        if (!response.ok) {
+            throw new Error("Network response was not ok");
+        }
+        return response.json();  // Assuming the server returns JSON
+    });
 }
 
-function getLayoutDetails(id){
-	getLayoutDetails_server(id).done(function(result) {
-		if(result){
-			jQuery('#details').append(result);
-			// make sure the code bocks are active
-			jQuery("code").click(function() {
-				jQuery(this).selText().addClass("selected");
-			});
-		}
-	})
+function getLayoutDetails(id) {
+    getLayoutDetails_server(id)
+        .then(function(result) {
+            if (result) {
+                document.querySelector('#details').insertAdjacentHTML('beforeend', result);
+
+                // Re-enable code block text selection functionality
+                document.querySelectorAll("code").forEach(function(codeBlock) {
+                    codeBlock.addEventListener("click", function() {
+                        codeBlock.selText();
+                        codeBlock.classList.add("selected");
+                    });
+                });
+            }
+        })
+        .catch(function(error) {
+            console.error('There was a problem with the fetch operation:', error);
+        });
 }
 
-function getTemplateDetails(id){
-	getCodeFrom_server(id, 'type', 'type', 'templateDetails').done(function(result) {
-		if(result){
-			jQuery('#details').append(result);
-			// make sure the code bocks are active
-			jQuery("code").click(function() {
-				jQuery(this).selText().addClass("selected");
-			});
-		}
-	})
+
+function getTemplateDetails(id) {
+    getCodeFrom_server(id, 'type', 'type', 'templateDetails').then(function(result) {
+        if (result) {
+            document.querySelector('#details').insertAdjacentHTML('beforeend', result);
+
+            // Re-enable code block text selection functionality
+            document.querySelectorAll("code").forEach(function(codeBlock) {
+                codeBlock.addEventListener("click", function() {
+                    codeBlock.selText();
+                    codeBlock.classList.add("selected");
+                });
+            });
+        }
+    });
 }
 
 // set snippets that are on the page
@@ -395,7 +450,7 @@ function getSnippets(){
 	// get libraries value if set
 	var libraries = jQuery("#jform_libraries").val();
 	if (libraries) {
-		getCodeFrom_server(1, JSON.stringify(libraries), 'libraries', 'getSnippets').done(function(result) {
+		getCodeFrom_server(1, JSON.stringify(libraries), 'libraries', 'getSnippets').then(function(result) {
 			setSnippets(result);
 			jQuery("#loading").hide();
 			if (typeof snippetButton !== 'undefined') {
@@ -429,41 +484,56 @@ function setSnippets(array){
 	jQuery('#jform_snippet').trigger('liszt:updated');
 }
 
-function getEditCustomCodeButtons_server(id){
+function getEditCustomCodeButtons_server(id) {
 	var getUrl = JRouter("index.php?option=com_componentbuilder&task=ajax.getEditCustomCodeButtons&format=json&raw=true&vdm="+vastDevMod);
-	if(token.length > 0 && id > 0){
-		var request = token+'=1&id='+id+'&return_here='+return_here;
+	let requestParams = '';
+	if (token.length > 0 && id > 0) {
+		requestParams = token+'=1&id='+id+'&return_here='+return_here;
 	}
-	return jQuery.ajax({
-		type: 'GET',
-		url: getUrl,
-		dataType: 'json',
-		data: request,
-		jsonp: false
+	// Construct URL with parameters for GET request
+	const urlWithParams = getUrl + '&' + requestParams;
+
+	// Using the Fetch API for the GET request
+	return fetch(urlWithParams, {
+		method: 'GET',
+		headers: {
+			'Content-Type': 'application/json'
+		}
+	}).then(response => {
+		if (!response.ok) {
+			throw new Error('Network response was not ok');
+		}
+		return response.json();
 	});
 }
 
-function getEditCustomCodeButtons(){
-	// get the id
-	id = jQuery("#jform_id").val();
-	getEditCustomCodeButtons_server(id).done(function(result) {
-		if(isObject(result)){
-			jQuery.each(result, function( field, buttons ) {
-				jQuery('<div class="control-group"><div class="control-label"><label>Add/Edit Customcode</label></div><div class="controls control-customcode-buttons-'+field+'"></div></div>').insertBefore(".control-wrapper-"+ field);
-				jQuery.each(buttons, function( name, button ) {
-					jQuery(".control-customcode-buttons-"+field).append(button);
+function getEditCustomCodeButtons() {
+	// Get the id using pure JavaScript
+	const id = document.querySelector("#jform_id").value;
+	getEditCustomCodeButtons_server(id).then(function(result) {
+		if (typeof result === 'object') {
+			Object.entries(result).forEach(([field, buttons]) => {
+				// Creating the div element for buttons
+				const div = document.createElement('div');
+				div.className = 'control-group';
+				div.innerHTML = '<div class="control-label"><label>Add/Edit Customcode</label></div><div class="controls control-customcode-buttons-'+field+'"></div>';
+
+				// Insert the div before .control-wrapper-{field}
+				const insertBeforeElement = document.querySelector(".control-wrapper-"+field);
+				if (insertBeforeElement) {
+					insertBeforeElement.parentNode.insertBefore(div, insertBeforeElement);
+				}
+
+				// Adding buttons to the div
+				Object.entries(buttons).forEach(([name, button]) => {
+					const controlsDiv = document.querySelector(".control-customcode-buttons-"+field);
+					if (controlsDiv) {
+						controlsDiv.innerHTML += button;
+					}
 				});
 			});
 		}
-	})
+	}).catch(error => {
+		console.error('Error:', error);
+	});
 }
-
-// check object is not empty
-function isObject(obj) {
-	for(var prop in obj) {
-		if (Object.prototype.hasOwnProperty.call(obj, prop)) {
-			return true;
-		}
-	}
-	return false;
-} 

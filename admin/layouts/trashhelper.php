@@ -3,14 +3,22 @@
  * @package    Joomla.Component.Builder
  *
  * @created    30th April, 2015
- * @author     Llewellyn van der Merwe <http://www.joomlacomponentbuilder.com>
- * @github     Joomla Component Builder <https://github.com/vdm-io/Joomla-Component-Builder>
+ * @author     Llewellyn van der Merwe <https://dev.vdm.io>
+ * @git        Joomla Component Builder <https://git.vdm.dev/joomla/Component-Builder>
  * @copyright  Copyright (C) 2015 Vast Development Method. All rights reserved.
  * @license    GNU General Public License version 2 or later; see LICENSE.txt
  */
 
+
+
+use Joomla\CMS\Factory;
+use Joomla\CMS\Language\Text;
+use Joomla\CMS\HTML\HTMLHelper as Html;
+use Joomla\CMS\Layout\LayoutHelper;
+use VDM\Component\Componentbuilder\Administrator\Helper\ComponentbuilderHelper;
+
 // No direct access to this file
-defined('JPATH_BASE') or die('Restricted access');
+defined('JPATH_BASE') or die;
 
 
 
@@ -26,16 +34,16 @@ defined('JPATH_BASE') or die('Restricted access');
 				document.adminForm.elements['checkall-toggle'].checked=1;
 				Joomla.checkAll(document.adminForm.elements['checkall-toggle']);
 				// check to confirm the deletion
-				if(confirm('<?= JText::_("COM_COMPONENTBUILDER_ARE_YOU_SURE_YOU_WANT_TO_DELETE_CONFIRMING_WILL_PERMANENTLY_DELETE_THE_SELECTED_ITEMS") ?>')) {
-					Joomla.submitbutton('<?= $displayData->get("name") ?>.delete');
+				if(confirm('<?php echo Text::_("COM_COMPONENTBUILDER_ARE_YOU_SURE_YOU_WANT_TO_DELETE_CONFIRMING_WILL_PERMANENTLY_DELETE_THE_SELECTED_ITEMS") ?>')) {
+					Joomla.submitbutton('<?php echo $displayData->getName(); ?>.delete');
 				} else {
 					document.adminForm.elements['checkall-toggle'].checked=0;
 					Joomla.checkAll(document.adminForm.elements['checkall-toggle']);
 				}
 			} else {
 				// confirm deletion of those selected
-				if (confirm('<?= JText::_("COM_COMPONENTBUILDER_ARE_YOU_SURE_YOU_WANT_TO_DELETE_CONFIRMING_WILL_PERMANENTLY_DELETE_THE_SELECTED_ITEMS") ?>')) {
-					Joomla.submitbutton('<?= $displayData->get("name") ?>.delete');
+				if (confirm('<?php echo Text::_("COM_COMPONENTBUILDER_ARE_YOU_SURE_YOU_WANT_TO_DELETE_CONFIRMING_WILL_PERMANENTLY_DELETE_THE_SELECTED_ITEMS") ?>')) {
+					Joomla.submitbutton('<?php echo $displayData->getName(); ?>.delete');
 				};
 			}
 			return false;
@@ -51,23 +59,23 @@ defined('JPATH_BASE') or die('Restricted access');
 		<?php if (empty($displayData->items)): ?>
 			<h4 class="alert-heading">
 				<span class="icon-trash"></span>
-				<?= JText::_("COM_COMPONENTBUILDER_TRASH_AREA") ?>
+				<?php echo Text::_("COM_COMPONENTBUILDER_TRASH_AREA") ?>
 			</h4>
-			<p><?= JText::_("COM_COMPONENTBUILDER_YOU_ARE_CURRENTLY_VIEWING_THE_TRASH_AREA_AND_YOU_DONT_HAVE_ANY_ITEMS_IN_TRASH_AT_THE_MOMENT") ?></p>
+			<p><?php echo Text::_("COM_COMPONENTBUILDER_YOU_ARE_CURRENTLY_VIEWING_THE_TRASH_AREA_AND_YOU_DONT_HAVE_ANY_ITEMS_IN_TRASH_AT_THE_MOMENT") ?></p>
 		<?php else: ?>
 			<h4 class="alert-heading">
 				<span class="icon-trash"></span>
-				<?= JText::_("COM_COMPONENTBUILDER_TRASHED_ITEMS") ?>
+				<?php echo Text::_("COM_COMPONENTBUILDER_TRASHED_ITEMS") ?>
 			</h4>
-			<p><?= JText::_("COM_COMPONENTBUILDER_YOU_ARE_CURRENTLY_VIEWING_THE_TRASHED_ITEMS") ?></p>
+			<p><?php echo Text::_("COM_COMPONENTBUILDER_YOU_ARE_CURRENTLY_VIEWING_THE_TRASHED_ITEMS") ?></p>
 			<button onclick="emptyTrash();" class="btn btn-small btn-danger">
 				<span class="icon-delete" aria-hidden="true"></span>
-				<?= JText::_("COM_COMPONENTBUILDER_EMPTY_TRASH") ?>
+				<?php echo Text::_("COM_COMPONENTBUILDER_EMPTY_TRASH") ?>
 			</button>
 		<?php endif; ?>
 		<button onclick="exitTrash();" class="btn btn-small">
 			<span class="icon-back" aria-hidden="true"></span>
-			<?= JText::_("COM_COMPONENTBUILDER_EXIT_TRASH") ?>
+			<?php echo Text::_("COM_COMPONENTBUILDER_EXIT_TRASH") ?>
 		</button>
 	</div>
 <?php endif; ?>

@@ -2,36 +2,36 @@
  * @package    Joomla.Component.Builder
  *
  * @created    30th April, 2015
- * @author     Llewellyn van der Merwe <http://www.joomlacomponentbuilder.com>
- * @github     Joomla Component Builder <https://github.com/vdm-io/Joomla-Component-Builder>
+ * @author     Llewellyn van der Merwe <https://dev.vdm.io>
+ * @git        Joomla Component Builder <https://git.vdm.dev/joomla/Component-Builder>
  * @copyright  Copyright (C) 2015 Vast Development Method. All rights reserved.
  * @license    GNU General Public License version 2 or later; see LICENSE.txt
  */
 
 // Some Global Values
-jform_vvvvwcgvxk_required = false;
+jform_vvvvwakvwt_required = false;
 
 // Initial Script
-jQuery(document).ready(function()
+document.addEventListener('DOMContentLoaded', function()
 {
-	var extension_type_vvvvwcg = jQuery("#jform_extension_type").val();
-	vvvvwcg(extension_type_vvvvwcg);
+	var extension_type_vvvvwak = jQuery("#jform_extension_type").val();
+	vvvvwak(extension_type_vvvvwak);
 });
 
-// the vvvvwcg function
-function vvvvwcg(extension_type_vvvvwcg)
+// the vvvvwak function
+function vvvvwak(extension_type_vvvvwak)
 {
-	if (isSet(extension_type_vvvvwcg) && extension_type_vvvvwcg.constructor !== Array)
+	if (isSet(extension_type_vvvvwak) && extension_type_vvvvwak.constructor !== Array)
 	{
-		var temp_vvvvwcg = extension_type_vvvvwcg;
-		var extension_type_vvvvwcg = [];
-		extension_type_vvvvwcg.push(temp_vvvvwcg);
+		var temp_vvvvwak = extension_type_vvvvwak;
+		var extension_type_vvvvwak = [];
+		extension_type_vvvvwak.push(temp_vvvvwak);
 	}
-	else if (!isSet(extension_type_vvvvwcg))
+	else if (!isSet(extension_type_vvvvwak))
 	{
-		var extension_type_vvvvwcg = [];
+		var extension_type_vvvvwak = [];
 	}
-	var extension_type = extension_type_vvvvwcg.some(extension_type_vvvvwcg_SomeFunc);
+	var extension_type = extension_type_vvvvwak.some(extension_type_vvvvwak_SomeFunc);
 
 
 	// set this function logic
@@ -39,35 +39,35 @@ function vvvvwcg(extension_type_vvvvwcg)
 	{
 		jQuery('#jform_joomla_plugin_group').closest('.control-group').show();
 		// add required attribute to joomla_plugin_group field
-		if (jform_vvvvwcgvxk_required)
+		if (jform_vvvvwakvwt_required)
 		{
 			updateFieldRequired('joomla_plugin_group',0);
 			jQuery('#jform_joomla_plugin_group').prop('required','required');
 			jQuery('#jform_joomla_plugin_group').attr('aria-required',true);
 			jQuery('#jform_joomla_plugin_group').addClass('required');
-			jform_vvvvwcgvxk_required = false;
+			jform_vvvvwakvwt_required = false;
 		}
 	}
 	else
 	{
 		jQuery('#jform_joomla_plugin_group').closest('.control-group').hide();
 		// remove required attribute from joomla_plugin_group field
-		if (!jform_vvvvwcgvxk_required)
+		if (!jform_vvvvwakvwt_required)
 		{
 			updateFieldRequired('joomla_plugin_group',1);
 			jQuery('#jform_joomla_plugin_group').removeAttr('required');
 			jQuery('#jform_joomla_plugin_group').removeAttr('aria-required');
 			jQuery('#jform_joomla_plugin_group').removeClass('required');
-			jform_vvvvwcgvxk_required = true;
+			jform_vvvvwakvwt_required = true;
 		}
 	}
 }
 
-// the vvvvwcg Some function
-function extension_type_vvvvwcg_SomeFunc(extension_type_vvvvwcg)
+// the vvvvwak Some function
+function extension_type_vvvvwak_SomeFunc(extension_type_vvvvwak)
 {
 	// set the function logic
-	if (extension_type_vvvvwcg == 'plugins' || extension_type_vvvvwcg == 'plugin')
+	if (extension_type_vvvvwak == 'plugins' || extension_type_vvvvwak == 'plugin')
 	{
 		return true;
 	}
@@ -77,7 +77,7 @@ function extension_type_vvvvwcg_SomeFunc(extension_type_vvvvwcg)
 // update fields required
 function updateFieldRequired(name, status) {
 	// check if not_required exist
-	if (jQuery('#jform_not_required').length > 0) {
+	if (document.getElementById('jform_not_required')) {
 		var not_required = jQuery('#jform_not_required').val().split(",");
 
 		if(status == 1)
@@ -134,41 +134,56 @@ jQuery(document).ready(function()
 	setTimeout(getEditCustomCodeButtons, 300);
 });
 
-function getEditCustomCodeButtons_server(id){
+function getEditCustomCodeButtons_server(id) {
 	var getUrl = JRouter("index.php?option=com_componentbuilder&task=ajax.getEditCustomCodeButtons&format=json&raw=true&vdm="+vastDevMod);
-	if(token.length > 0 && id > 0){
-		var request = token+'=1&id='+id+'&return_here='+return_here;
+	let requestParams = '';
+	if (token.length > 0 && id > 0) {
+		requestParams = token+'=1&id='+id+'&return_here='+return_here;
 	}
-	return jQuery.ajax({
-		type: 'GET',
-		url: getUrl,
-		dataType: 'json',
-		data: request,
-		jsonp: false
+	// Construct URL with parameters for GET request
+	const urlWithParams = getUrl + '&' + requestParams;
+
+	// Using the Fetch API for the GET request
+	return fetch(urlWithParams, {
+		method: 'GET',
+		headers: {
+			'Content-Type': 'application/json'
+		}
+	}).then(response => {
+		if (!response.ok) {
+			throw new Error('Network response was not ok');
+		}
+		return response.json();
 	});
 }
 
-function getEditCustomCodeButtons(){
-	// get the id
-	id = jQuery("#jform_id").val();
-	getEditCustomCodeButtons_server(id).done(function(result) {
-		if(isObject(result)){
-			jQuery.each(result, function( field, buttons ) {
-				jQuery('<div class="control-group"><div class="control-label"><label>Add/Edit Customcode</label></div><div class="controls control-customcode-buttons-'+field+'"></div></div>').insertBefore(".control-wrapper-"+ field);
-				jQuery.each(buttons, function( name, button ) {
-					jQuery(".control-customcode-buttons-"+field).append(button);
+function getEditCustomCodeButtons() {
+	// Get the id using pure JavaScript
+	const id = document.querySelector("#jform_id").value;
+	getEditCustomCodeButtons_server(id).then(function(result) {
+		if (typeof result === 'object') {
+			Object.entries(result).forEach(([field, buttons]) => {
+				// Creating the div element for buttons
+				const div = document.createElement('div');
+				div.className = 'control-group';
+				div.innerHTML = '<div class="control-label"><label>Add/Edit Customcode</label></div><div class="controls control-customcode-buttons-'+field+'"></div>';
+
+				// Insert the div before .control-wrapper-{field}
+				const insertBeforeElement = document.querySelector(".control-wrapper-"+field);
+				if (insertBeforeElement) {
+					insertBeforeElement.parentNode.insertBefore(div, insertBeforeElement);
+				}
+
+				// Adding buttons to the div
+				Object.entries(buttons).forEach(([name, button]) => {
+					const controlsDiv = document.querySelector(".control-customcode-buttons-"+field);
+					if (controlsDiv) {
+						controlsDiv.innerHTML += button;
+					}
 				});
 			});
 		}
-	})
+	}).catch(error => {
+		console.error('Error:', error);
+	});
 }
-
-// check object is not empty
-function isObject(obj) {
-	for(var prop in obj) {
-		if (Object.prototype.hasOwnProperty.call(obj, prop)) {
-			return true;
-		}
-	}
-	return false;
-} 

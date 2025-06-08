@@ -1,0 +1,40 @@
+/**
+ * @package    Joomla.Component.Builder
+ *
+ * @created    30th April, 2015
+ * @author     Llewellyn van der Merwe <https://dev.vdm.io>
+ * @git        Joomla Component Builder <https://git.vdm.dev/joomla/Component-Builder>
+ * @copyright  Copyright (C) 2015 Vast Development Method. All rights reserved.
+ * @license    GNU General Public License version 2 or later; see LICENSE.txt
+ */
+
+/* CSS Document */
+
+.selected {
+	background-color:#d7d8db !important
+}
+tr.selected td {
+	background-color:#d7d8db !important
+}
+#search_settings_block .controls {
+	margin-left: 1px !important;
+}
+tr {
+	cursor:pointer
+}
+.found_code {
+	color: #46a546;
+	font-weight: bolder;
+}
+.search_details_title {
+	font-size: large;
+	font-weight: bolder;
+}
+.small_column {
+	padding: 2px;
+	text-align: center;
+}
+th.small_column {
+	padding: 2px !important;
+	text-align: center !important;
+}
